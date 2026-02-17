@@ -2,7 +2,7 @@
 name: orshot
 description: Generate images, PDFs, and videos programmatically using the Orshot API. Use when building visual content automation, marketing image generation, certificate/invoice PDFs, social media carousels, or video generation from templates.
 metadata:
-  author: daskrad
+  author: Rishi Mohan
   version: "1.0.0"
 ---
 

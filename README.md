@@ -5,7 +5,7 @@ Agent skills for [Orshot](https://orshot.com) – the automated visual content g
 ## Installation
 
 ```bash
-npx skills add daskrad/orshot-skills
+npx skills add orshot-hq/orshot-skills
 ```
 
 ## Available Skills
