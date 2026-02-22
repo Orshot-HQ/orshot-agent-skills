@@ -5,7 +5,7 @@ Agent skills for [Orshot](https://orshot.com) – the automated visual content g
 ## Installation
 
 ```bash
-npx skills add orshot-hq/orshot-skills
+npx skills add orshot-hq/orshot-agent-skills
 ```
 
 ## Available Skills
@@ -28,7 +28,6 @@ Comprehensive skill for integrating with the Orshot API. Covers image/PDF/video 
 
 - [Orshot Documentation](https://orshot.com/docs)
 - [API Reference](https://orshot.com/docs/api-reference)
-- [Orshot Studio](https://orshot.com/studio)
 - [Pricing](https://orshot.com/pricing)
 
 ## License
