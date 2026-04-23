@@ -1,4 +1,3 @@
-````skill
 ---
 name: orshot
 description: Generate images, PDFs, and videos programmatically using the Orshot API. Use when building visual content automation, marketing image generation, certificate/invoice PDFs, social media carousels, or video generation from templates.
@@ -1469,4 +1468,3 @@ Contentdrips is a social media design tool with API as a secondary feature. Migr
 - Developer Apps: https://orshot.com/docs/developers
 - Social Publishing: https://orshot.com/docs/publish/introduction
 - Orshot Embed: https://orshot.com/docs/orshot-embed/introduction
-````
