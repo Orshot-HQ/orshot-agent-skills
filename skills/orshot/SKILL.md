@@ -1,9 +1,9 @@
 ---
 name: orshot
-description: Generate images, PDFs, and videos programmatically using the Orshot API. Use when building visual content automation, marketing image generation, certificate/invoice PDFs, social media carousels, or video generation from templates.
+description: Generate images, PDFs, and videos from templates with Orshot — via the REST API, SDKs (Node/Python/PHP/Ruby), the remote MCP server, or no-code tools (Zapier, Make, n8n, Airtable). Use whenever the user mentions Orshot, connects Orshot to an AI agent or MCP client, or needs to programmatically produce marketing visuals, OG images, social carousels, certificates/invoices/tickets as PDF, or video from templates — including when migrating from Bannerbear, Placid, Creatomate, RenderForm, Abyssale, or similar. Always load this skill for Orshot tasks, even simple ones, because it carries gotchas (modifications key by parameterId, multi-page needs a page1@ prefix, video output needs video elements in the template) that otherwise cause failed renders. Not for generating standalone AI images with no template or Orshot involved.
 metadata:
   author: Rishi Mohan
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Orshot – Automated Visual Content Generation
@@ -15,16 +15,19 @@ metadata:
 
 ## When to Use This Skill
 
-Use this skill when:
+Use this skill whenever the user mentions **Orshot**, or when the task is:
 
 - Generating images, PDFs, or videos programmatically from templates
-- Building automated marketing visual pipelines
-- Creating dynamic social media content (carousels, posts, stories)
+- Building automated marketing visual pipelines (OG images, ad creatives, thumbnails)
+- Creating dynamic social media content (carousels, posts, stories) and publishing it
 - Generating certificates, invoices, tickets, or reports as PDFs
-- Building image generation APIs for SaaS products
-- Automating visual content with Zapier, Make, n8n, or Airtable
-- Embedding a design editor into an application
-- Working with Orshot API, SDKs, or integrations
+- Building image/PDF/video generation into a product
+- Automating visuals with Zapier, Make, n8n, Airtable, or the CLI
+- Connecting Orshot to an AI agent or MCP client (Claude, Cursor, Codex, Windsurf, ChatGPT)
+- Embedding a white-label design editor into an app
+- Migrating from Bannerbear, Placid, Creatomate, RenderForm, Abyssale, DynaPictures, or Contentdrips
+
+**Don't use this skill** for generating standalone AI images with no template or Orshot involved (a one-off "make me an image" request) — that isn't what Orshot does.
 
 ## Accessing Detailed Documentation
 
@@ -76,6 +79,17 @@ Authorization: Bearer <ORSHOT_API_KEY>
 
 [Get your API key](https://orshot.com/docs/quick-start/get-api-key) from **Workspace Settings → API Keys** in the Orshot dashboard.
 
+### Remote MCP Server
+
+Orshot runs a hosted MCP server so agents (Claude, Cursor, Codex, Windsurf, ChatGPT, etc.) can use Orshot as tools — no local install.
+
+- **URL:** `https://mcp.orshot.com/mcp` (transport: `streamable-http`)
+- **Auth:** OAuth 2.0 (the client walks you through it), or send an Orshot API key as a Bearer token
+- **Claude Code:** `claude mcp add --transport http orshot https://mcp.orshot.com/mcp`
+- **Cursor / Windsurf / VS Code / ChatGPT / Codex:** add the URL as a remote/HTTP MCP server
+
+It exposes tools for rendering, studio + library templates, brand assets, workflows, social accounts, and workspace/logs. Full discovery doc: `https://orshot.com/.well-known/mcp.json`. Setup guide: `https://orshot.com/docs/integrations/mcp-server.md`.
+
 ### SDKs
 
 #### Node.js
@@ -126,8 +140,25 @@ response = os.render_from_template({
 
 #### Other SDKs
 
-- **PHP:** `composer require nicholasgriffintn/orshot-php`
+- **PHP:** `composer require rishimohan/orshot`
 - **Ruby:** `gem install orshot`
+
+## Common Gotchas (read before rendering)
+
+The mistakes that most often make Orshot calls fail or return the wrong output:
+
+1. **Modifications key by `parameterId`, not layer name.** `modifications: { "headline": "..." }` targets the element whose `parameterId` is `headline`. If a value is ignored, the key is wrong — fetch the template's modifications (`GET /v1/studio/templates/:id`) to see the real keys instead of guessing.
+2. **Multi-page templates need a `pageN@` prefix.** Use `"page1@title"`, `"page2@title"`. A bare `"title"` only affects page 1.
+3. **Studio `templateId` is an integer; utility `templateId` is a string.** `/v1/studio/render` takes an integer ID; `/v1/generate/:renderType` takes a string slug like `"website-screenshot"`.
+4. **Video output requires video elements in the template.** Requesting `format: "mp4"` on an image-only template fails — the template must contain at least one video element.
+5. **Image/video URLs in modifications must be publicly reachable.** The renderer fetches them server-side, so `localhost`, expired signed URLs, or auth-gated URLs won't load.
+6. **Style overrides use dot notation on the parameterId** — `"title.fontSize": "48px"`, not a nested object.
+7. **Response shape differs by page count:** single page → `data` is an object (read `data.content`); multi-page/carousel → `data` is an array of `{ page, content }`. Handle both.
+8. **`base64` and `binary` response types don't combine** — `binary` returns one raw file stream.
+9. **Credits vs AI Credits are separate** — normal renders spend credits; `.prompt` (AI) modifications additionally spend AI Credits.
+10. **On `429`, back off** using the `Retry-After` response header.
+
+When unsure about a template's parameters, always fetch its modifications first.
 
 ## Template Architecture
 
@@ -698,23 +729,39 @@ Returns the template metadata including available `modifications`.
 
 **POST** `https://api.orshot.com/v1/studio/templates/:templateId/duplicate`
 
-### 8. Get Workspace Profile
+### 8. Get Profile & Workspaces
 
-**GET** `https://api.orshot.com/v1/profile/workspace`
+**GET** `https://api.orshot.com/v1/me`
 
-Returns workspace details, plan info, and render usage.
+Returns your profile and the workspaces your API key or OAuth token can access, including plan info and credit usage.
 
 ### 9. Brand Assets API
 
-#### Upload Brand Asset
-**POST** `https://api.orshot.com/v1/brand-assets/upload`
-Upload as `multipart/form-data` with a `file` field. Max 5MB, supports PNG, JPG, JPEG, SVG, WEBP, GIF.
+Brand assets are grouped by type — **images**, **colors**, **fonts**, **videos**, **audio** — each with its own routes under `/v1/brand-assets/{type}/…`.
 
-#### Get Brand Assets
-**GET** `https://api.orshot.com/v1/brand-assets`
+#### Images
+- **Get:** `GET https://api.orshot.com/v1/brand-assets/images/get`
+- **Upload:** `POST https://api.orshot.com/v1/brand-assets/images/add` — `multipart/form-data` with a `file` field
+- **Update tags:** `PATCH https://api.orshot.com/v1/brand-assets/images/update/:id`
+- **Delete:** `DELETE https://api.orshot.com/v1/brand-assets/images/delete/:id`
 
-#### Delete Brand Asset
-**DELETE** `https://api.orshot.com/v1/brand-assets/:assetId`
+#### Colors
+- **Get:** `GET https://api.orshot.com/v1/brand-assets/colors/get`
+- **Add:** `POST https://api.orshot.com/v1/brand-assets/colors/add` — body `{ type: "hex" | "gradient", value, tags? }`
+- **Update tags:** `PATCH https://api.orshot.com/v1/brand-assets/colors/update/:id`
+- **Delete:** `DELETE https://api.orshot.com/v1/brand-assets/colors/delete/:id`
+
+#### Fonts / Videos / Audio
+Same shape — swap the type segment (`fonts`, `videos`, `audio`):
+- **Get:** `GET /v1/brand-assets/{type}/get`
+- **Upload:** `POST /v1/brand-assets/{type}/add` (`multipart/form-data`, `file` field)
+- **Update tags:** `PATCH /v1/brand-assets/{type}/update/:id`
+- **Delete:** `DELETE /v1/brand-assets/{type}/delete/:id`
+
+#### Search
+- **Search assets:** `GET https://api.orshot.com/v1/brand-assets/search`
+
+Use an uploaded asset in a render by passing its hosted URL as an image/video modification value.
 
 ### 10. Enterprise API Endpoints
 
@@ -757,6 +804,34 @@ Generate images directly from URL parameters:
 https://api.orshot.com/v1/studio/dynamic-url/my-image?title=Hello%20World&title.fontSize=48px&title.color=%23ff0000
 ```
 URL-encode special characters (e.g., `#` → `%23`).
+
+### 12. Template Folders & Sharing
+
+Organize studio templates into folders and share them:
+
+- **List folders:** `GET https://api.orshot.com/v1/studio/folders`
+- **Create folder:** `POST https://api.orshot.com/v1/studio/folders`
+- **Update folder:** `PATCH https://api.orshot.com/v1/studio/folders/:folderId`
+- **Delete folder:** `DELETE https://api.orshot.com/v1/studio/folders/:folderId`
+- **Move template into folder:** `PATCH https://api.orshot.com/v1/studio/templates/:templateId/folder`
+- **Get template sharing:** `GET https://api.orshot.com/v1/studio/templates/:templateId/share`
+- **Update template sharing:** `POST https://api.orshot.com/v1/studio/templates/:templateId/share`
+
+### 13. Workflows API
+
+Workflows automate multi-step pipelines (trigger → fetch data → render → publish/deliver). Available to first-party clients (like the Orshot MCP server) and Enterprise workspaces.
+
+- **List workflows:** `GET https://api.orshot.com/v1/workflows`
+- **Create workflow:** `POST https://api.orshot.com/v1/workflows`
+- **Get workflow:** `GET https://api.orshot.com/v1/workflows/:id`
+- **Update workflow:** `PATCH https://api.orshot.com/v1/workflows/:id`
+- **Delete workflow:** `DELETE https://api.orshot.com/v1/workflows/:id`
+- **Run workflow:** `POST https://api.orshot.com/v1/workflows/:id/run`
+- **List runs:** `GET https://api.orshot.com/v1/workflows/:id/runs`
+- **Get a run:** `GET https://api.orshot.com/v1/workflows/:id/runs/:runId`
+- **Validate a workflow:** `POST https://api.orshot.com/v1/workflows/validate`
+- **List available nodes:** `GET https://api.orshot.com/v1/workflows/nodes`
+- **Get/update sharing:** `GET` / `POST https://api.orshot.com/v1/workflows/:id/share`
 
 ## Render Configuration
 
@@ -816,8 +891,7 @@ Generate text or images using AI:
   }
 }
 ```
-- Text elements use `openai/gpt-5-nano`
-- Image elements use `google/nano-banana`
+- `.prompt` on a text element generates copy; on an image element it generates imagery. The underlying AI models are managed by Orshot and may change over time — don't hardcode a specific model. AI modifications consume AI Credits.
 
 #### Interactive Links (.href)
 
@@ -882,6 +956,28 @@ await fetch("https://api.orshot.com/v1/studio/render", {
 });
 ```
 
+### Smart Resize (one design → any size)
+
+Render a template at a **different canvas size without redesigning it** — the layout is deterministically re-solved to fit (elements re-anchor, backgrounds stretch, groups move together). Set these on the `response` object:
+
+- **`size`** — *replace* the render size. A preset slug (`"instagram-story"`, `"og-image"`, `"youtube-thumbnail"`, …), a `"WIDTHxHEIGHT"` string (`"1080x1920"`), or use `width` + `height` (10–5000px each).
+- **`extraSizes`** — *add* the same design at extra sizes in one call. An array (`["1080x1920", "1080x1080"]`) or a named object (`{ story: "1080x1920", square: "1080x1080" }`). Each output gains a nested `extraSizes` array of `{ size, width, height, content }`.
+
+```json
+{
+  "templateId": 123,
+  "modifications": { "title": "Launch Day" },
+  "response": {
+    "type": "url",
+    "format": "png",
+    "size": "1200x630",
+    "extraSizes": ["1080x1920", "1080x1080"]
+  }
+}
+```
+
+Image formats only (`png`/`jpg`/`webp`/`avif`), up to 50 extra outputs per call. Each extra output is billed like a page (1 credit). Saved sizes from the Studio Smart Resize panel reproduce their approved preview exactly.
+
 ### Response Types
 
 | Type     | Description                                     |
@@ -897,20 +993,81 @@ await fetch("https://api.orshot.com/v1/studio/render", {
 | `png`  | Image | Best quality, larger size                  |
 | `webp` | Image | Smaller size, good quality                 |
 | `jpg`  | Image | Compressed, no transparency                |
+| `avif` | Image | Smallest size, modern browsers             |
 | `pdf`  | Doc   | Supports multi-page, clickable links, CMYK |
 | `mp4`  | Video | H.264, requires video elements in template |
 | `webm` | Video | VP9, web-optimized                         |
+| `mov`  | Video | QuickTime container                        |
+| `mkv`  | Video | Matroska container                         |
 | `gif`  | Video | Animated, no audio support                 |
 
 ### Render Usage & Costs
 
-| Output               | Cost                 |
-| -------------------- | -------------------- |
-| Image (PNG/JPG/WebP) | 2 renders per image  |
-| PDF                  | 2 renders per page   |
-| Video (MP4/WebM/GIF) | 2 renders per second |
+Usage is measured in **credits**. 1 credit = 1 image, 1 PDF page, or 1 second of video.
 
-Multi-page templates: each page counts separately.
+| Output               | Cost                     |
+| -------------------- | ------------------------ |
+| Image (PNG/JPG/WebP/AVIF) | 1 credit per image  |
+| PDF                  | 1 credit per page        |
+| Video (MP4/WebM/MOV/MKV/GIF) | 1 credit per second |
+
+Multi-page templates and Smart Resize extra sizes: each output page/size counts as its own credit. AI modifications (`.prompt`) additionally consume AI Credits.
+
+## Common Recipes
+
+End-to-end patterns for the jobs people most often automate with Orshot.
+
+### OG image on every deploy
+Render a studio template to a stable hosted URL and drop it into your `<meta>` tags.
+```js
+const { data } = await fetch("https://api.orshot.com/v1/studio/render", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", Authorization: "Bearer <KEY>" },
+  body: JSON.stringify({
+    templateId: 123,
+    modifications: { title: post.title, author: post.author },
+    response: { type: "url", format: "png", size: "og-image" },
+  }),
+}).then((r) => r.json());
+// <meta property="og:image" content={data.content} />
+```
+
+### Bulk-generate from a CSV (certificates, badges, invoices)
+Loop rows and render one PDF each. Describe image layers with `.alt` for accessible PDFs.
+```js
+for (const row of rows) {
+  await fetch("https://api.orshot.com/v1/studio/render", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: "Bearer <KEY>" },
+    body: JSON.stringify({
+      templateId: 456,
+      modifications: { name: row.name, course: row.course, date: row.date },
+      response: { type: "url", format: "pdf" },
+      pdfOptions: { title: `${row.name} — Certificate` },
+    }),
+  });
+}
+```
+
+### Render and auto-post to social in one call
+Add a `publish` object (see Social Publishing) — no second request.
+```js
+body: JSON.stringify({
+  templateId: 123,
+  modifications: { title: "Launch day!" },
+  response: { type: "url", format: "png" },
+  publish: { accounts: [1, 2], content: "We just shipped 🚀" },
+});
+```
+
+### One design, every social size (Smart Resize)
+```js
+response: { type: "url", format: "png", extraSizes: ["1080x1920", "1080x1080", "1200x630"] }
+// each output gains a nested extraSizes[] of { size, width, height, content }
+```
+
+### Automate a recurring pipeline (Workflows)
+Create a workflow (trigger → fetch data → render → publish/deliver) with `POST /v1/workflows`, then trigger it with `POST /v1/workflows/:id/run`. Inspect results via `GET /v1/workflows/:id/runs`. Best driven through the MCP server or the Workflows API on Enterprise/first-party clients.
 
 ## Integrations & Helps
 
@@ -1024,14 +1181,14 @@ GET https://orshot.com/oauth/authorize?
   response_type=code&
   client_id=YOUR_CLIENT_ID&
   redirect_uri=https://yourapp.com/callback&
-  scope=templates:read templates:write renders:write
+  scope=workspace:templates:read workspace:templates:write render:generate
 ```
 
 **Device Flow** (CLI/headless):
 ```
 POST https://orshot.com/oauth/device/code
   client_id=YOUR_CLIENT_ID&
-  scope=templates:read renders:write
+  scope=workspace:templates:read render:generate
 ```
 
 ### Token Exchange
@@ -1049,14 +1206,12 @@ POST https://orshot.com/oauth/token
 
 | Scope | Description |
 |-------|-------------|
-| `templates:read` | List and get templates |
-| `templates:write` | Create, update, delete, duplicate templates |
-| `renders:write` | Generate renders (images, PDFs, videos) |
-| `brand:read` | Read brand assets (images, colors, fonts, videos) |
-| `brand:write` | Upload, update, delete brand assets |
-| `social:read` | List connected social accounts |
-| `social:write` | Publish to social accounts |
-| `workspace:read` | Read workspace profile and settings |
+| `workspace:read` | List and read workspace details |
+| `workspace:templates:read` | List and read templates |
+| `workspace:templates:write` | Update template modifications via API |
+| `render:generate` | Generate images, PDFs, and videos |
+| `mcp:access` | Access via Model Context Protocol |
+| `offline_access` | Long-lived refresh tokens |
 
 For endpoint details: fetch `https://orshot.com/docs/developers/oauth-endpoints.md`
 
@@ -1126,9 +1281,17 @@ For webhook setup: fetch `https://orshot.com/docs/orshot-embed/webhooks.md`
 
 ## Migrating from Other Platforms
 
-This section provides accurate API mapping tables for migrating from competing image generation platforms to Orshot. Each subsection covers authentication, endpoint mapping, and request format translation.
+This section maps authentication, endpoints, and request formats for migrating from competing platforms. For detailed comparison articles, fetch the corresponding blog post URL.
 
-For detailed comparison articles, fetch the corresponding blog post URL.
+### Migration Playbook (any platform)
+
+The API-call swap is the easy part (mapped per-platform below). The real work is recreating the design, because you can't import another platform's template JSON:
+
+1. **Recreate the template in Orshot Studio** (or via `POST /v1/studio/templates/create`). Rebuild the layout, then mark every dynamic layer parameterizable with a clear `parameterId`.
+2. **Map old field names → Orshot `parameterId`s.** Other platforms key by layer name, `image_url`, `payload`, etc.; Orshot keys by `parameterId`. Keep a lookup from old names to new ones.
+3. **Swap the API call** using the tables below — almost always `Authorization: Bearer` + `POST /v1/studio/render`.
+4. **Handle sync vs async.** Most platforms are async (submit → poll/webhook); Orshot renders **synchronously**, so delete the polling/webhook code and read `data.content` from the response.
+5. **Verify the response shape** — single page is an object, multi-page is an array (Common Gotchas #7) — before cutting traffic over.
 
 ### Migrating from BannerBear
 
@@ -1245,8 +1408,8 @@ Placid uses a `layers` **object** with type-specific properties:
 - Placid uses `text_color`, Orshot uses dot notation `parameterId.color`
 - Placid uses `image` key for image URLs, Orshot uses the parameter ID directly
 - Placid requires polling or webhooks, Orshot returns synchronously
-- Placid renders auto-delete after 30 days, Orshot renders persist
-- Placid credits vary by resolution, Orshot flat 2 renders per image regardless of size
+- Placid renders can expire, Orshot renders persist
+- Placid credits vary by resolution, Orshot is a flat 1 credit per image regardless of size
 
 ### Migrating from Creatomate
 
@@ -1297,9 +1460,9 @@ Creatomate uses a flat `modifications` object (closest to Orshot's format):
 - Creatomate element names are display names (e.g., "Title", "Image-1"), Orshot uses snake_case parameterIds
 - Creatomate has `output_format` at root level, Orshot uses `response.format`
 - Creatomate requires polling/webhooks, Orshot returns synchronously
-- Creatomate renders auto-delete after 7 days, Orshot renders persist
+- Creatomate renders can expire, Orshot renders persist
 - Orshot supports style overrides via dot notation — Creatomate requires modifying the template source JSON
-- Creatomate's preview SDK requires Growth plan ($109/month), Orshot embed is on all paid plans ($30/month)
+- Creatomate gates its preview SDK to a higher tier; Orshot's embed is available on all paid plans
 
 ### Migrating from RenderForm
 
@@ -1351,9 +1514,8 @@ RenderForm uses dot notation in a `data` object (similar to Orshot's style overr
 - RenderForm uses `X-API-KEY` header, Orshot uses `Authorization: Bearer`
 - RenderForm uses `data` with `componentId.property` dot notation for everything, Orshot uses `modifications` with parameter IDs for content and dot notation only for style overrides
 - RenderForm `template` is a string ID, Orshot `templateId` is an integer
-- RenderForm images expire after 14 days, Orshot renders persist
-- RenderForm free tier includes watermarks, Orshot free tier has no watermarks
-- RenderForm charges in EUR pay-as-you-go, Orshot has flat monthly pricing
+- RenderForm images can expire, Orshot renders persist
+- Orshot's free tier has no watermarks
 
 ### Migrating from Abyssale
 
@@ -1405,9 +1567,8 @@ Abyssale uses an `elements` object with `payload` for text:
 - Abyssale uses `image_url` for images, Orshot uses the parameter ID with URL value
 - Abyssale supports multi-format in single call via `template_format_names`, Orshot requires separate calls or Variant Generation API
 - Abyssale is async-only (polling/webhook), Orshot returns synchronously
-- Abyssale rate limit is 5 req/s, Orshot is more generous
-- Abyssale charges per-seat ($12/seat/month), Orshot has unlimited team members on all plans
-- Abyssale results retained for 7 days, Orshot renders persist
+- Abyssale charges per-seat, Orshot has unlimited team members on all plans
+- Abyssale results can expire, Orshot renders persist
 
 ### Migrating from DynaPictures
 
@@ -1440,7 +1601,7 @@ Contentdrips is a social media design tool with API as a secondary feature. Migr
 - Contentdrips API is bolted-on, Orshot is API-first
 - Contentdrips has limited dynamic parameter capabilities
 - No white-label editor, no MCP server, no CLI
-- Per-seat pricing vs. Orshot's render-based pricing
+- Per-seat pricing vs. Orshot's credit-based pricing
 
 ### Quick Migration Reference
 
@@ -1450,11 +1611,11 @@ Contentdrips is a social media design tool with API as a secondary feature. Migr
 | **Modifications format** | Array of objects | `layers` object | Flat object | `data` with dot notation | `elements` with `payload` | Flat object |
 | **Template ID type** | UID string | UUID string | UUID string | String | UUID string | Integer (studio) |
 | **Response model** | Async (poll) | Async (poll) | Async (poll) | Sync | Async (poll) | Sync |
-| **Render persistence** | Permanent | 30 days | 7 days | 14 days | 7 days | Permanent |
+| **Render persistence** | Permanent | Can expire | Can expire | Can expire | Can expire | Permanent |
 | **Style overrides** | No | Limited | Via source JSON | Dot notation | No | Dot notation |
 | **Multi-page** | No | No | No | No | No | Yes |
-| **Video support** | Yes (extra cost) | Yes (5x cost) | Yes | No | Animated only | Yes (2 renders/sec) |
-| **White-label editor** | No | No | $109/mo+ | No | No | All paid plans ($30/mo) |
+| **Video support** | Yes (extra cost) | Yes (extra cost) | Yes | No | Animated only | Yes (1 credit/sec) |
+| **White-label editor** | No | No | Higher tier | No | No | All paid plans |
 | **Social publishing** | No | No | No | No | No | 13+ platforms |
 
 ### Links
