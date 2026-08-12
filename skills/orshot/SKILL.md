@@ -1,6 +1,6 @@
 ---
 name: orshot
-description: Generate images, PDFs, and videos from templates with Orshot — via the REST API, SDKs (Node/Python/PHP/Ruby), the remote MCP server, or no-code tools (Zapier, Make, n8n, Airtable), and wire those renders into a recurring automation. Use whenever the user mentions Orshot, connects Orshot to an AI agent or MCP client, wants a render to run unattended on a schedule or trigger, or needs to programmatically produce marketing visuals, OG images, social carousels, certificates/invoices/tickets as PDF, or video from templates — including when migrating from Bannerbear, Placid, Creatomate, RenderForm, Abyssale, or similar. Always load this skill for Orshot tasks, even simple ones, because it carries gotchas (modifications key by parameterId, multi-page needs a page1@ prefix, video output needs video elements in the template) that otherwise cause failed renders. Not for generating standalone AI images with no template or Orshot involved.
+description: Generate images, PDFs, and videos from templates with Orshot — via the REST API, SDKs (Node/Python/PHP/Ruby), the remote MCP server, or no-code tools (Zapier, Make, n8n, Airtable), and wire those renders into a recurring automation. Use whenever the user mentions Orshot, connects Orshot to an AI agent or MCP client, wants a render to run unattended on a schedule or trigger, or needs to programmatically produce marketing visuals, OG images, social carousels, certificates/invoices/tickets as PDF, or video from templates — including when migrating from another template-based image-generation API. Always load this skill for Orshot tasks, even simple ones, because it carries gotchas (modifications key by parameterId, multi-page needs a page1@ prefix, video output needs video elements in the template) that otherwise cause failed renders. Not for generating standalone AI images with no template or Orshot involved.
 metadata:
   author: Rishi Mohan
   version: "1.1.0"
@@ -25,7 +25,7 @@ Use this skill whenever the user mentions **Orshot**, or when the task is:
 - Automating visuals with Zapier, Make, n8n, Airtable, or the CLI
 - Connecting Orshot to an AI agent or MCP client (Claude, Cursor, Codex, Windsurf, ChatGPT)
 - Embedding a white-label design editor into an app
-- Migrating from Bannerbear, Placid, Creatomate, RenderForm, Abyssale, DynaPictures, or Contentdrips
+- Migrating from another template-based image/PDF/video generation API
 
 **Don't use this skill** for generating standalone AI images with no template or Orshot involved (a one-off "make me an image" request) — that isn't what Orshot does.
 
@@ -40,7 +40,6 @@ https://orshot.com/docs/sdks/node.md
 https://orshot.com/docs/publish/publish-from-api.md
 https://orshot.com/docs/developers/oauth-overview.md
 https://orshot.com/docs/orshot-embed/introduction.md
-https://orshot.com/blog/bannerbear-api-alternative.md
 ```
 
 **Key documentation pages:**
@@ -1385,7 +1384,7 @@ For webhook setup: fetch `https://orshot.com/docs/orshot-embed/webhooks.md`
 
 ## Migrating from Other Platforms
 
-This section maps authentication, endpoints, and request formats for migrating from competing platforms. For detailed comparison articles, fetch the corresponding blog post URL.
+This section maps authentication, endpoints, and request formats for migrating from other template-render platforms.
 
 ### Migration Playbook (any platform)
 
@@ -1399,7 +1398,6 @@ The API-call swap is the easy part (mapped per-platform below). The real work is
 
 ### Migrating from BannerBear
 
-Blog: `https://orshot.com/blog/bannerbear-api-alternative.md`
 
 **Authentication:**
 | BannerBear | Orshot |
@@ -1451,7 +1449,6 @@ BannerBear uses a `modifications` **array** with named layers:
 
 ### Migrating from Placid
 
-Blog: `https://orshot.com/blog/placid-api-alternative.md`
 
 **Authentication:**
 | Placid | Orshot |
@@ -1517,7 +1514,6 @@ Placid uses a `layers` **object** with type-specific properties:
 
 ### Migrating from Creatomate
 
-Blog: `https://orshot.com/blog/creatomate-api-alternative.md`
 
 **Authentication:**
 | Creatomate | Orshot |
@@ -1570,7 +1566,6 @@ Creatomate uses a flat `modifications` object (closest to Orshot's format):
 
 ### Migrating from RenderForm
 
-Blog: `https://orshot.com/blog/renderform-api-alternative.md`
 
 **Authentication:**
 | RenderForm | Orshot |
@@ -1623,7 +1618,6 @@ RenderForm uses dot notation in a `data` object (similar to Orshot's style overr
 
 ### Migrating from Abyssale
 
-Blog: `https://orshot.com/blog/abyssale-api-alternative.md`
 
 **Authentication:**
 | Abyssale | Orshot |
@@ -1676,7 +1670,6 @@ Abyssale uses an `elements` object with `payload` for text:
 
 ### Migrating from DynaPictures
 
-Blog: `https://orshot.com/blog/dynapictures-api-alternative.md`
 
 **Authentication:**
 | DynaPictures | Orshot |
@@ -1697,7 +1690,6 @@ Blog: `https://orshot.com/blog/dynapictures-api-alternative.md`
 
 ### Migrating from Contentdrips
 
-Blog: `https://orshot.com/blog/contentdrips-api-alternative.md`
 
 Contentdrips is a social media design tool with API as a secondary feature. Migration is straightforward since Orshot is API-first.
 
