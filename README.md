@@ -2,7 +2,7 @@
 
 Agent skills and plugin for [Orshot](https://orshot.com) – the automated visual content generation platform for images, PDFs, and videos.
 
-This repo doubles as the official **Orshot plugin** for agents that support the plugin format (Grok Build, Grok Bot, Claude Code): it bundles the hosted Orshot MCP server (`.mcp.json`) with the skills below.
+This repo doubles as the official **Orshot plugin** for agents that support the plugin format (Cursor, Grok Build, Grok Bot, Claude Code): it bundles the hosted Orshot MCP server (`.mcp.json`) with the skills below.
 
 ## Installation
 
@@ -12,7 +12,9 @@ This repo doubles as the official **Orshot plugin** for agents that support the 
 npx skills add orshot-hq/orshot-agent-skills
 ```
 
-**As a plugin (Grok Build):** run `/plugin`, search for **Orshot**, install.
+**As a plugin (Cursor):** Settings → Plugins → search **Orshot** → Add.
+
+**Grok Build:** run `/plugin`, search for **Orshot**, install.
 
 **Grok Bot:** Settings → Plugins → Marketplace → search **Orshot** → install.
 
