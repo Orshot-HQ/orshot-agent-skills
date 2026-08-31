@@ -1,0 +1,19 @@
+{
+  "name": "orshot",
+  "version": "1.0.0",
+  "description": "Generate images, PDFs, and videos from your Orshot templates, resize one design to every social format, and publish to social — via the hosted Orshot MCP server plus skills that teach the agent template rendering, dynamic parameters, and on-brand design.",
+  "author": {
+    "name": "Orshot",
+    "url": "https://orshot.com"
+  },
+  "repository": "https://github.com/Orshot-HQ/orshot-agent-skills",
+  "homepage": "https://orshot.com",
+  "license": "MIT",
+  "keywords": [
+    "orshot",
+    "orshot templates",
+    "orshot studio",
+    "orshot render",
+    "mcp"
+  ]
+}

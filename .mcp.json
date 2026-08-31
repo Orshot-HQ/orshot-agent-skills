@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "orshot": {
+      "type": "http",
+      "url": "https://mcp.orshot.com/mcp",
+      "note": "Official Orshot hosted MCP server. Uses OAuth (authorization code + PKCE, dynamic client registration) — on first connection the agent prompts to authorize in the browser; no API key to paste. Tools cover template listing and design, image/PDF/video rendering, brand kit, workflows, and social publishing."
+    }
+  }
+}
