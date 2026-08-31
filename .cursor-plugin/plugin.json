@@ -1,7 +1,7 @@
 {
   "name": "orshot",
   "version": "1.0.0",
-  "description": "Generate images, PDFs, and videos from your Orshot templates, resize one design to every social format, and publish to social — via the hosted Orshot MCP server plus skills for template rendering, dynamic parameters, and on-brand design.",
+  "description": "Automate videos, PDFs, and images from your Orshot templates, post to 15+ social platforms, and track performance to grow. Bundles the hosted Orshot MCP server plus skills for template rendering, dynamic parameters, and on-brand design.",
   "author": {
     "name": "Orshot"
   },
