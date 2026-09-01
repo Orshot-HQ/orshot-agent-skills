@@ -1,9 +1,9 @@
 ---
 name: orshot-design
-description: Design trendy, professional, on-brand Orshot studio templates. Use when creating or refining a template design via the Orshot MCP — social posts, ads, stories, carousels, banners, thumbnails. Applies the craft rules (clear hierarchy, 2-font typography, 60-30-10 color), consults the brand kit first, varies layouts so designs never repeat by type, and runs a render-and-critique loop. Pairs with the orshot MCP create/update/patch tools.
+description: Design trendy, professional, on-brand Orshot studio templates. Use when creating or refining a template design via the Orshot MCP — social posts, ads, stories, carousels, banners, thumbnails, and animated/narrated video templates. Applies the craft rules (clear hierarchy, 2-font typography, 60-30-10 color, restrained motion), consults the brand kit first, varies layouts so designs never repeat by type, and runs a render-and-critique loop. Pairs with the orshot MCP create/update/patch tools.
 metadata:
   author: Rishi Mohan
-  version: "1.0.0"
+  version: "1.1.0"
   mcp-server: orshot
 ---
 
@@ -81,6 +81,25 @@ color emphasis between designs of the same kind.
   `parameterType` matching the element (text→"text", image→"imageUrl", shape→"fill",
   canvas/container→"backgroundColor").
 - Shapes with transparent fill + a border render nothing; SVG `content` must be a data-URI.
+
+## Motion & audio (video templates)
+Making video look designed, not generated:
+- **Reveal in sections over ~4–5s.** Elements that form one unit (icon+label, a spec row,
+  the footer) share the SAME `enter` type and `showAt`; stagger ~0.3–0.5s BETWEEN sections in
+  reading order. `showAt`/`hideAt` are siblings of `enter`/`exit` — never nested inside them.
+- **Every full-bleed photo gets a `kenBurns` ambient** (zoom 1.08–1.15). A still photo held
+  3 seconds reads as a dead frame; a slow push reads as footage. Alternate `panX` direction
+  between pages.
+- **Ambient stays subtle and SLOW** — 6–10s cycles against a 0.5s enter. If the viewer can
+  name the motion it is too strong, unless it is a deliberate accent (a badge that wiggles).
+  `shake`/`slowRotate` need `easing: "linear"` or the loop seam shows.
+- **One `pageTransition` for the whole video**, 0.3–0.5s. A different transition per cut is
+  the clearest tell of an auto-generated edit.
+- **Sound default**: narration track at volume 1 + a restrained generated ambient bed
+  (`sfx`, volume 0.08–0.18, loop) + `page.subtitle { source: "auto-audio" }` with a caption
+  preset (`karaoke`/`bold`) and strokeWidth 2–3 over busy footage. Budget narration at
+  ~2 words/second with 1s headroom. Call `orshot_get_audio_authoring_options` before
+  authoring generated audio; give `tts.parameterId` so spoken copy stays a render parameter.
 
 ## Anti-patterns (the AI-slop tells — avoid)
 - Everything centered and stacked; no focal point.
