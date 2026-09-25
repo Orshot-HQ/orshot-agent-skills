@@ -1266,7 +1266,7 @@ Orshot connects with:
 | 403  | `Authorization header missing` | Add `Authorization: Bearer <KEY>` header     |
 | 403  | `Subscription inactive`        | Check usage or upgrade plan                  |
 | 403  | `Template not found`           | Verify template ID belongs to your workspace |
-| 403  | `Video on free plan`           | Upgrade to paid plan for video generation    |
+| 403  | `ai-video-not-on-plan`         | AI video needs a paid plan; use stock footage or a Brand Library video |
 
 ### General Best Practices
 
