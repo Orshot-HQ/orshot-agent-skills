@@ -3,7 +3,7 @@ name: orshot
 description: Generate images, PDFs, and videos from templates with Orshot — via the REST API, SDKs (Node/Python/PHP/Ruby), the remote MCP server, or no-code tools (Zapier, Make, n8n, Airtable), and wire those renders into a recurring automation. Use whenever the user mentions Orshot, connects Orshot to an AI agent or MCP client, wants a render to run unattended on a schedule or trigger, or needs to programmatically produce marketing visuals, OG images, social carousels, certificates/invoices/tickets as PDF, or video from templates — including when migrating from another template-based image-generation API. Always load this skill for Orshot tasks, even simple ones, because it carries gotchas (modifications key by parameterId, multi-page needs a page1@ prefix, long video renders need async render jobs) that otherwise cause failed renders. Not for generating standalone AI images with no template or Orshot involved.
 metadata:
   author: Rishi Mohan
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Orshot – Automated Visual Content Generation
@@ -1073,7 +1073,7 @@ Image formats only (`png`/`jpg`/`webp`/`avif`), up to 50 extra outputs per call.
 | `mkv`  | Video | Matroska container                         |
 | `gif`  | Video | Animated, no audio support                 |
 
-### Render Usage & Costs
+### Render Usage (credits)
 
 Usage is measured in **credits**. 1 credit = 1 image, 1 PDF page, or 1 second of video.
 
@@ -1151,7 +1151,7 @@ road that matches where the user ALREADY works, not the one easiest to describe.
 
 ### Choose the road first
 
-Check what they already run before pitching anything. `GET /v1/workspace/logs?limit=100`
+Check what they already run before recommending anything. `GET /v1/workspace/logs?limit=100`
 returns a `source` on every row, which answers it factually:
 
 | `source` in their logs | They already run | Lead with |
@@ -1163,7 +1163,7 @@ returns a `source` on every row, which answers it factually:
 | `orshot-*-sdk`, `api`, `cli` | Their own code | Write the call into their repo |
 | only `playground` / `orshot-mcp-server` | Nothing yet | Offer Orshot Workflows |
 
-Never pitch a second orchestrator to someone who already has one. A user with a
+Never recommend a second orchestrator to someone who already has one. A user with a
 live n8n setup wants this template added to it, not a new tool to learn.
 
 If you have browser control or repo access, offer to DO the setup rather than
@@ -1183,9 +1183,9 @@ Orshot runs the whole loop: trigger, render, deliver. Over MCP:
 4. `orshot_get_workflow_connection_data` — resolve "my content sheet" into a
    concrete id, and confirm the name back to the user
 5. `orshot_validate_workflow` — read `errors`, `warnings` AND `gated`. A `gated`
-   entry means a plan block, not a config problem: the draft still saves, only
-   activation is blocked, so tell the user which plan unlocks it instead of
-   editing steps
+   entry means the step is not included in the workspace's current plan, not a
+   config problem: the draft still saves, only activation is blocked, so tell
+   the user that instead of editing steps
 6. `orshot_create_workflow` with `status: "draft"`, then share the edit link from
    the result — it opens pre-configured in their dashboard
 7. `orshot_run_workflow` — prove it works, then they activate
@@ -1264,9 +1264,9 @@ Orshot connects with:
 | 400  | `templateId missing`           | Add `templateId` to request body             |
 | 400  | `Invalid API Key`              | Generate new key from dashboard              |
 | 403  | `Authorization header missing` | Add `Authorization: Bearer <KEY>` header     |
-| 403  | `Subscription inactive`        | Check usage or upgrade plan                  |
+| 403  | `Subscription inactive`        | The workspace subscription is not active; check it in the dashboard |
 | 403  | `Template not found`           | Verify template ID belongs to your workspace |
-| 403  | `ai-video-not-on-plan`         | AI video needs a paid plan; use stock footage or a Brand Library video |
+| 403  | `ai-video-not-on-plan`         | AI video is not included in the workspace's current plan; use stock footage or a Brand Library video instead |
 
 ### General Best Practices
 
@@ -1339,30 +1339,34 @@ await fetch("https://api.orshot.com/v1/studio/render", {
 
 ## Developer Apps & OAuth
 
-Build third-party integrations with Orshot using OAuth 2.0. Register apps, authenticate users, and access their workspaces programmatically.
+Build third-party integrations with Orshot using OAuth 2.0. Register an app, authenticate users, and access their workspaces on their behalf.
 
 For detailed setup: fetch `https://orshot.com/docs/developers/oauth-overview.md`
 
 ### Register an App
 
-1. Go to **Workspace Settings → Developer Apps** in Orshot dashboard
-2. Create a new app with name, redirect URI, and required scopes
-3. Receive `client_id` and `client_secret`
+1. Go to **Workspace Settings → Developer Apps** in the Orshot dashboard
+2. Create a new app with a name, redirect URI, and the scopes it needs
+3. Use the app's `client_id` in the flows below. Orshot OAuth clients are public clients: PKCE (`S256`) is required and no client secret is used.
+
+Discovery: `https://api.orshot.com/.well-known/oauth-authorization-server` (dynamic client registration is available at `registration_endpoint`).
 
 ### OAuth 2.0 Flows
 
-**Authorization Code Flow** (web apps):
+**Authorization Code + PKCE** (web and desktop apps):
 ```
 GET https://orshot.com/oauth/authorize?
   response_type=code&
   client_id=YOUR_CLIENT_ID&
   redirect_uri=https://yourapp.com/callback&
+  code_challenge=BASE64URL_SHA256_OF_VERIFIER&
+  code_challenge_method=S256&
   scope=workspace:templates:read workspace:templates:write render:generate
 ```
 
 **Device Flow** (CLI/headless):
 ```
-POST https://orshot.com/oauth/device/code
+POST https://api.orshot.com/v1/oauth/device/code
   client_id=YOUR_CLIENT_ID&
   scope=workspace:templates:read render:generate
 ```
@@ -1370,13 +1374,15 @@ POST https://orshot.com/oauth/device/code
 ### Token Exchange
 
 ```
-POST https://orshot.com/oauth/token
+POST https://api.orshot.com/v1/oauth/token
   grant_type=authorization_code&
   code=AUTH_CODE&
   client_id=YOUR_CLIENT_ID&
-  client_secret=YOUR_CLIENT_SECRET&
+  code_verifier=THE_PKCE_VERIFIER&
   redirect_uri=https://yourapp.com/callback
 ```
+
+Refresh with `grant_type=refresh_token` when the `offline_access` scope was granted. Store tokens server-side or in the user's own environment; never place them in prompts, logs, or shared files.
 
 ### Available Scopes
 
@@ -1455,337 +1461,18 @@ For React SDK details: fetch `https://orshot.com/docs/orshot-embed/react-sdk.md`
 For Vue SDK details: fetch `https://orshot.com/docs/orshot-embed/vue-sdk.md`
 For webhook setup: fetch `https://orshot.com/docs/orshot-embed/webhooks.md`
 
-## Migrating from Other Platforms
+## Migrating from Another Template-Render API
 
-This section maps authentication, endpoints, and request formats for migrating from other template-render platforms.
-
-### Migration Playbook (any platform)
-
-The API-call swap is the easy part (mapped per-platform below). The real work is recreating the design, because you can't import another platform's template JSON:
+The API-call swap is the easy part. The real work is recreating the design, because another platform's template JSON cannot be imported:
 
 1. **Recreate the template in Orshot Studio** (or via `POST /v1/studio/templates/create`). Rebuild the layout, then mark every dynamic layer parameterizable with a clear `parameterId`.
-2. **Map old field names → Orshot `parameterId`s.** Other platforms key by layer name, `image_url`, `payload`, etc.; Orshot keys by `parameterId`. Keep a lookup from old names to new ones.
-3. **Swap the API call** using the tables below — almost always `Authorization: Bearer` + `POST /v1/studio/render`.
-4. **Handle sync vs async.** Most platforms are async (submit → poll/webhook); Orshot renders **synchronously**, so delete the polling/webhook code and read `data.content` from the response.
-5. **Verify the response shape** — single page is an object, multi-page is an array (Common Gotchas #7) — before cutting traffic over.
+2. **Map old field names → Orshot `parameterId`s.** Other APIs key by layer name or by fixed keys such as `image_url`; Orshot keys by `parameterId`. Keep a lookup from old names to new ones.
+3. **Swap the API call**: `Authorization: Bearer <ORSHOT_API_KEY>` + `POST /v1/studio/render` with `modifications` as a flat object (page-prefixed keys for multi-page templates).
+4. **Handle sync vs async.** Many render APIs are submit-then-poll; Orshot image and PDF renders return synchronously, so delete the polling/webhook code and read `data.content` from the response. Long video renders use async render jobs (see above).
+5. **Style overrides** that other APIs put in per-layer objects become dot-notation keys here (`"title.fontSize": "48px"`).
+6. **Verify the response shape** — single page is an object, multi-page is an array (Common Gotchas #7) — before cutting traffic over.
 
-### Migrating from BannerBear
-
-
-**Authentication:**
-| BannerBear | Orshot |
-|------------|--------|
-| `Authorization: Bearer BB_API_KEY` | `Authorization: Bearer ORSHOT_API_KEY` |
-
-**Endpoint Mapping:**
-| Action | BannerBear | Orshot |
-|--------|-----------|--------|
-| Generate image | `POST /v2/images` (async, returns 202) | `POST /v1/studio/render` (sync) |
-| Generate image (sync) | `POST sync.api.bannerbear.com/v2/images` (10s timeout) | `POST /v1/studio/render` (sync by default) |
-| List templates | `GET /v2/templates` | `GET /v1/studio/templates/all?page=1&limit=10` |
-| Get template | `GET /v2/templates/:uid` | `GET /v1/studio/templates/:id` |
-| Generate video | `POST /v2/videos` | `POST /v1/studio/render` with `format: "mp4"` |
-| Multi-template batch | `POST /v2/collections` | Loop `POST /v1/studio/render` per template |
-
-**Request Format Translation:**
-
-BannerBear uses a `modifications` **array** with named layers:
-```json
-// BannerBear
-{
-  "template": "TEMPLATE_UID",
-  "modifications": [
-    { "name": "title", "text": "Hello World" },
-    { "name": "hero", "image_url": "https://example.com/img.jpg" },
-    { "name": "bg", "color": "#FF0000" }
-  ]
-}
-
-// Orshot equivalent
-{
-  "templateId": 123,
-  "modifications": {
-    "title": "Hello World",
-    "hero": "https://example.com/img.jpg",
-    "canvasBackgroundColor": "#FF0000"
-  },
-  "response": { "type": "url", "format": "png" }
-}
-```
-
-**Key differences:**
-- BannerBear modifications is an **array**, Orshot is a **flat object**
-- BannerBear uses `image_url` for images, Orshot uses the parameter ID directly with a URL value
-- BannerBear requires polling for async results, Orshot returns synchronously
-- BannerBear `template` is a UID string, Orshot `templateId` is an integer for studio templates
-- Orshot supports style overrides via dot notation (e.g., `"title.fontSize": "48px"`) — BannerBear does not
-
-### Migrating from Placid
-
-
-**Authentication:**
-| Placid | Orshot |
-|--------|--------|
-| `Authorization: Bearer PLACID_TOKEN` | `Authorization: Bearer ORSHOT_API_KEY` |
-
-**Endpoint Mapping:**
-| Action | Placid | Orshot |
-|--------|--------|--------|
-| Generate image | `POST /api/rest/{template_uuid}` | `POST /v1/studio/render` |
-| Get image status | `GET /api/rest/images/{id}` | Not needed (sync response) |
-| List templates | `GET /api/rest/templates` | `GET /v1/studio/templates/all?page=1&limit=10` |
-| Get template | `GET /api/rest/templates/{uuid}` | `GET /v1/studio/templates/:id` |
-| Delete render | `DELETE /api/rest/images/{id}` | Not needed (renders don't expire) |
-
-**Request Format Translation:**
-
-Placid uses a `layers` **object** with type-specific properties:
-```json
-// Placid
-{
-  "layers": {
-    "title": {
-      "text": "Hello World",
-      "text_color": "#FF0000",
-      "font": "Arial"
-    },
-    "hero_image": {
-      "image": "https://example.com/img.jpg"
-    },
-    "background": {
-      "background_color": "#000000"
-    }
-  },
-  "modifications": {
-    "width": 1200,
-    "height": 630,
-    "image_format": "jpg"
-  }
-}
-
-// Orshot equivalent
-{
-  "templateId": 123,
-  "modifications": {
-    "title": "Hello World",
-    "title.color": "#FF0000",
-    "title.fontFamily": "Arial",
-    "hero_image": "https://example.com/img.jpg",
-    "canvasBackgroundColor": "#000000"
-  },
-  "response": { "type": "url", "format": "jpg" }
-}
-```
-
-**Key differences:**
-- Placid separates `layers` (content) from `modifications` (output settings), Orshot combines both in `modifications`
-- Placid uses `text_color`, Orshot uses dot notation `parameterId.color`
-- Placid uses `image` key for image URLs, Orshot uses the parameter ID directly
-- Placid requires polling or webhooks, Orshot returns synchronously
-- Placid renders can expire, Orshot renders persist
-- Placid credits vary by resolution, Orshot is a flat 1 credit per image regardless of size
-
-### Migrating from Creatomate
-
-
-**Authentication:**
-| Creatomate | Orshot |
-|------------|--------|
-| `Authorization: Bearer CREATOMATE_KEY` | `Authorization: Bearer ORSHOT_API_KEY` |
-
-**Endpoint Mapping:**
-| Action | Creatomate | Orshot |
-|--------|-----------|--------|
-| Generate render | `POST /v1/renders` | `POST /v1/studio/render` |
-| Get render status | `GET /v1/renders/:id` | Not needed (sync response) |
-| List templates | `GET /v1/templates` | `GET /v1/studio/templates/all?page=1&limit=10` |
-| Get template | `GET /v1/templates/:id` | `GET /v1/studio/templates/:id` |
-
-**Request Format Translation:**
-
-Creatomate uses a flat `modifications` object (closest to Orshot's format):
-```json
-// Creatomate
-{
-  "template_id": "TEMPLATE_UUID",
-  "modifications": {
-    "Title": "Hello World",
-    "Image-1": "https://example.com/img.jpg"
-  },
-  "output_format": "jpg",
-  "render_scale": 1,
-  "max_width": 1080
-}
-
-// Orshot equivalent
-{
-  "templateId": 123,
-  "modifications": {
-    "title": "Hello World",
-    "image_1": "https://example.com/img.jpg"
-  },
-  "response": { "type": "url", "format": "jpg", "scale": 1 }
-}
-```
-
-**Key differences:**
-- Creatomate `template_id` is a UUID string, Orshot `templateId` is an integer
-- Creatomate element names are display names (e.g., "Title", "Image-1"), Orshot uses snake_case parameterIds
-- Creatomate has `output_format` at root level, Orshot uses `response.format`
-- Creatomate requires polling/webhooks, Orshot returns synchronously
-- Creatomate renders can expire, Orshot renders persist
-- Orshot supports style overrides via dot notation — Creatomate requires modifying the template source JSON
-- Creatomate gates its preview SDK to a higher tier; Orshot's embed is available on all paid plans
-
-### Migrating from RenderForm
-
-
-**Authentication:**
-| RenderForm | Orshot |
-|------------|--------|
-| `X-API-KEY: RENDERFORM_KEY` | `Authorization: Bearer ORSHOT_API_KEY` |
-
-**Endpoint Mapping:**
-| Action | RenderForm | Orshot |
-|--------|-----------|--------|
-| Generate image | `POST /api/v2/render` | `POST /v1/studio/render` |
-| List templates | `GET /api/v2/my-templates?page=1&size=50` | `GET /v1/studio/templates/all?page=1&limit=10` |
-| Get template | `GET /api/v2/my-templates/:id` | `GET /v1/studio/templates/:id` |
-| URL-based render | `GET /img/TEMPLATE.jpg?key=...&param=...` | `GET /v1/studio/dynamic-url/TEMPLATE?param=...` |
-
-**Request Format Translation:**
-
-RenderForm uses dot notation in a `data` object (similar to Orshot's style overrides):
-```json
-// RenderForm
-{
-  "template": "TEMPLATE_ID",
-  "data": {
-    "title.text": "Hello World",
-    "hero.src": "https://example.com/img.jpg",
-    "bg.color": "#FF0000"
-  },
-  "fileName": "output",
-  "width": 1200,
-  "height": 630
-}
-
-// Orshot equivalent
-{
-  "templateId": 123,
-  "modifications": {
-    "title": "Hello World",
-    "hero": "https://example.com/img.jpg",
-    "canvasBackgroundColor": "#FF0000"
-  },
-  "response": { "type": "url", "format": "png", "fileName": "output" }
-}
-```
-
-**Key differences:**
-- RenderForm uses `X-API-KEY` header, Orshot uses `Authorization: Bearer`
-- RenderForm uses `data` with `componentId.property` dot notation for everything, Orshot uses `modifications` with parameter IDs for content and dot notation only for style overrides
-- RenderForm `template` is a string ID, Orshot `templateId` is an integer
-- RenderForm images can expire, Orshot renders persist
-- Orshot's free tier has no watermarks
-
-### Migrating from Abyssale
-
-
-**Authentication:**
-| Abyssale | Orshot |
-|----------|--------|
-| `x-api-key: ABYSSALE_KEY` | `Authorization: Bearer ORSHOT_API_KEY` |
-
-**Endpoint Mapping:**
-| Action | Abyssale | Orshot |
-|--------|---------|--------|
-| Generate image | `POST /async/banner-builder/{designId}/generate` (async) | `POST /v1/studio/render` (sync) |
-| Poll status | `GET /generation-request/{requestId}` | Not needed (sync response) |
-| List designs | `GET /designs` | `GET /v1/studio/templates/all?page=1&limit=10` |
-| Get design | `GET /designs/{designId}` | `GET /v1/studio/templates/:id` |
-| Multi-format render | `template_format_names` param | Loop `POST /v1/studio/render` per format, or use Variant Generation API |
-
-**Request Format Translation:**
-
-Abyssale uses an `elements` object with `payload` for text:
-```json
-// Abyssale
-{
-  "template_format_names": ["facebook-feed", "instagram-post"],
-  "elements": {
-    "title": { "payload": "Hello World" },
-    "hero_image": { "image_url": "https://example.com/img.jpg" },
-    "background": { "color": "#FF0000" }
-  },
-  "callback_url": "https://webhook.example.com"
-}
-
-// Orshot equivalent
-{
-  "templateId": 123,
-  "modifications": {
-    "title": "Hello World",
-    "hero_image": "https://example.com/img.jpg",
-    "canvasBackgroundColor": "#FF0000"
-  },
-  "response": { "type": "url", "format": "png" }
-}
-```
-
-**Key differences:**
-- Abyssale uses `payload` for text content, Orshot uses the parameter ID directly
-- Abyssale uses `image_url` for images, Orshot uses the parameter ID with URL value
-- Abyssale supports multi-format in single call via `template_format_names`, Orshot requires separate calls or Variant Generation API
-- Abyssale is async-only (polling/webhook), Orshot returns synchronously
-- Abyssale charges per-seat, Orshot has unlimited team members on all plans
-- Abyssale results can expire, Orshot renders persist
-
-### Migrating from DynaPictures
-
-
-**Authentication:**
-| DynaPictures | Orshot |
-|--------------|--------|
-| `Authorization: Bearer DYNA_KEY` | `Authorization: Bearer ORSHOT_API_KEY` |
-
-**Endpoint Mapping:**
-| Action | DynaPictures | Orshot |
-|--------|-------------|--------|
-| Generate image | `POST /designs/{id}` | `POST /v1/studio/render` |
-| List designs | `GET /designs` | `GET /v1/studio/templates/all?page=1&limit=10` |
-
-**Key differences:**
-- DynaPictures uses an outdated editor interface, Orshot has a modern Figma-like editor
-- No multi-page support in DynaPictures
-- No white-label editor option
-- Limited integrations compared to Orshot's 15+
-
-### Migrating from Contentdrips
-
-
-Contentdrips is a social media design tool with API as a secondary feature. Migration is straightforward since Orshot is API-first.
-
-**Key differences:**
-- Contentdrips API is bolted-on, Orshot is API-first
-- Contentdrips has limited dynamic parameter capabilities
-- No white-label editor, no MCP server, no CLI
-- Per-seat pricing vs. Orshot's credit-based pricing
-
-### Quick Migration Reference
-
-| Feature | BannerBear | Placid | Creatomate | RenderForm | Abyssale | Orshot |
-|---------|-----------|--------|------------|------------|----------|--------|
-| **Auth header** | `Authorization: Bearer` | `Authorization: Bearer` | `Authorization: Bearer` | `X-API-KEY` | `x-api-key` | `Authorization: Bearer` |
-| **Modifications format** | Array of objects | `layers` object | Flat object | `data` with dot notation | `elements` with `payload` | Flat object |
-| **Template ID type** | UID string | UUID string | UUID string | String | UUID string | Integer (studio) |
-| **Response model** | Async (poll) | Async (poll) | Async (poll) | Sync | Async (poll) | Sync |
-| **Render persistence** | Permanent | Can expire | Can expire | Can expire | Can expire | Permanent |
-| **Style overrides** | No | Limited | Via source JSON | Dot notation | No | Dot notation |
-| **Multi-page** | No | No | No | No | No | Yes |
-| **Video support** | Yes (extra cost) | Yes (extra cost) | Yes | No | Animated only | Yes (1 credit/sec) |
-| **White-label editor** | No | No | Higher tier | No | No | All paid plans |
-| **Social publishing** | No | No | No | No | No | 13+ platforms |
+Render URLs on Orshot persist; do not add expiry handling unless you delete renders yourself.
 
 ### Links
 
@@ -1794,7 +1481,6 @@ Contentdrips is a social media design tool with API as a secondary feature. Migr
 - Integrations: https://orshot.com/integrations
 - MCP Server: https://orshot.com/docs/integrations/mcp-server
 - Templates: https://orshot.com/templates
-- Pricing: https://orshot.com/pricing
 - Developer Apps: https://orshot.com/docs/developers
 - Social Publishing: https://orshot.com/docs/publish/introduction
 - Orshot Embed: https://orshot.com/docs/orshot-embed/introduction
