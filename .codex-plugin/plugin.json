@@ -1,0 +1,52 @@
+{
+  "name": "orshot",
+  "version": "1.1.0",
+  "description": "Automate image, PDF and video generation from templates with your agent: blog images, videos and reels, ad creatives, YouTube thumbnails, PDFs, carousels and social posts, rendered on brand and posted to 13 social platforms. Bundles the hosted Orshot MCP server (OAuth, no API key) and one skill per use case.",
+  "author": {
+    "name": "Orshot",
+    "email": "hi@orshot.com",
+    "url": "https://orshot.com"
+  },
+  "homepage": "https://orshot.com/agents/skills",
+  "repository": "https://github.com/Orshot-HQ/orshot-agent-skills",
+  "license": "MIT",
+  "keywords": [
+    "orshot",
+    "image-generation",
+    "pdf-generation",
+    "video-generation",
+    "templates",
+    "mcp",
+    "blog-images",
+    "youtube-thumbnail",
+    "ad-creative",
+    "carousel",
+    "social-media",
+    "automation"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Orshot",
+    "shortDescription": "Image, PDF & video generation",
+    "longDescription": "Orshot is an API for automated image, PDF and video generation from templates. Its skills let Codex design a template on your brand once, then render it again and again with new content: a cover and in-article images for a blog post, a reel with captions, an ad in every size, a YouTube thumbnail, a PDF invoice or certificate, or a carousel, all through the hosted Orshot MCP server. The same templates then run on a schedule through the Orshot API, n8n, Make or Zapier.",
+    "developerName": "Orshot",
+    "category": "Design",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://orshot.com/agents/skills",
+    "supportURL": "https://orshot.com/contact",
+    "privacyPolicyURL": "https://orshot.com/privacy",
+    "termsOfServiceURL": "https://orshot.com/terms",
+    "defaultPrompt": [
+      "Make a cover image and 3 in-article images for this blog post",
+      "Make this ad in every Meta and Google size",
+      "Generate a PDF invoice from this data"
+    ],
+    "brandColor": "#2B42D4",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./logo.png"
+  }
+}

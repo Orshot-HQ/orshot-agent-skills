@@ -1,0 +1,33 @@
+{
+  "id": "orshot",
+  "name": "Orshot",
+  "description": "Image, PDF and video generation from templates and social media posting for OpenClaw. One install adds the hosted Orshot MCP server (OAuth, no API key) and one Orshot skill per use case: blog images, videos and reels, ad creatives, YouTube thumbnails, PDFs, carousels, social media content and scheduling. No bundled code.",
+  "version": "1.1.0",
+  "categories": [
+    "media"
+  ],
+  "skills": [
+    "skills/orshot",
+    "skills/orshot-design",
+    "skills/orshot-blog-images",
+    "skills/orshot-video-generator",
+    "skills/orshot-ad-creative",
+    "skills/orshot-youtube-thumbnail",
+    "skills/orshot-pdf-generator",
+    "skills/orshot-carousel",
+    "skills/orshot-social-media-content",
+    "skills/orshot-social-media-scheduler"
+  ],
+  "mcpServers": {
+    "orshot": {
+      "url": "https://mcp.orshot.com/mcp",
+      "transport": "streamable-http",
+      "auth": "oauth"
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}
