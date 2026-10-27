@@ -74,7 +74,7 @@ If the channel already has thumbnails, the template copies that look. Ask for th
 | Screenshot + reaction | A screenshot or product in a tilted card, face cutout breaking over its edge, 2 to 3 words | Software, tutorials, reviews, news about an app or a post |
 | Screenshot + name | A real gameplay or app screenshot full bleed, a dark gradient, 2 to 4 huge words, an optional small face | Gaming builds, guides, patch notes, tutorials |
 
-Geometry for each layout and a full `pages_data` example: the MCP resource `orshot://reference/youtube-thumbnail-layouts`, read through the connected Orshot MCP server.
+Geometry for each layout and a full `pages_data` example: the thumbnail layouts reference (call `orshot_get_format_reference` with `reference: "youtube-thumbnail-layouts"`).
 
 ## Build the template once per channel style
 

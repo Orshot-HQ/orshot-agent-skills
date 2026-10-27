@@ -149,7 +149,7 @@ The user: "Write 30 slideshow hooks for a plant-care account and render the firs
 "Make a slideshow video from these photos with our track", "turn this carousel into a reel": that is one MP4, not a photo post. Load `orshot-video-generator` alongside this skill and use them as a pair:
 
 1. This skill writes the carousel as usual: the hook slide, the slides, the CTA slide, the fields.
-2. The video skill makes it a film: one scene per slide, laid out natively for 9:16, a segmented progress rail across the top, one cut family, the song under the whole thing ("Carousel as a video" in its the MCP resource `orshot://reference/video-post-formats`).
+2. The video skill makes it a film: one scene per slide, laid out natively for 9:16, a segmented progress rail across the top, one cut family, the song under the whole thing ("Carousel as a video" in its the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`)).
 3. The film keeps the carousel's field names, prefixed per scene, so the same row renders the slides and the video.
 
 The photos and the song must be public URLs.

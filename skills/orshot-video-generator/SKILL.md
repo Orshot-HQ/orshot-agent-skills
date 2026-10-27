@@ -25,7 +25,7 @@ A reel, a Short or a TikTok is the same video every time with new words, new pic
 
 Most videos are **films**: one template whose pages are scenes, played end to end with a transition into each scene, rendered as one MP4. Inside a scene, layers enter, move on keyframes, count up and reveal word by word, and a drawn SVG (a chart, an icon, a mascot, a logo) animates part by part: lines draw themselves, bars fill, a pin drops. This is how a chart from a post or a product launch becomes a video that looks edited, not generated.
 
-The formats, pacing and motion rules come from 83 real videos: 46 brand videos timed frame by frame and 37 Reels compared by views on the same accounts (the MCP resource `orshot://reference/video-post-formats`).
+The formats, pacing and motion rules come from 83 real videos: 46 brand videos timed frame by frame and 37 Reels compared by views on the same accounts (the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`)).
 
 This is not a model that invents footage. You write the script and draw or pick the pictures: drawn SVG, stock clips and photos, or the user's own media. The template stays editable in Orshot Studio, so someone who does not code can change a line, a clip or a color later.
 
@@ -35,7 +35,7 @@ This skill is the motion layer. When the video is a version of something another
 
 | The video | Load with this skill | That skill decides | This skill adds |
 |---|---|---|---|
-| A post as a video: event, launch, match day, stat, speaker, listing, menu, quote | `orshot-social-media-content` | the format, the copy, the fields, the palette and fonts, the static post | the scenes that build to the post, motion, cuts, pacing, the ground and the layer that runs start to end (the MCP resource `orshot://reference/video-post-formats`) |
+| A post as a video: event, launch, match day, stat, speaker, listing, menu, quote | `orshot-social-media-content` | the format, the copy, the fields, the palette and fonts, the static post | the scenes that build to the post, motion, cuts, pacing, the ground and the layer that runs start to end (the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`)) |
 | A carousel as a video: a slideshow with a song, a listicle or tips reel | `orshot-carousel` | the hook slide, the slides, the CTA slide | one scene per slide, a segmented progress rail, one cut family (same file, "Carousel as a video") |
 | A video ad over 6 s, or with footage or more than one scene | `orshot-ad-creative` | the offer, the hook, the product photo, the sizes, the CTA | the scenes, the motion and the end card (same file, "Video ad") |
 | Posting it | `orshot-social-media-scheduler`, after the render | accounts, captions, times | |
@@ -49,10 +49,10 @@ Videos that are not a version of a post, a carousel or an ad (a tips reel, a lau
 
 ## What people ask for
 
-- "Make a video version of our Saturday market post for Reels." "A full-time score video we can post after every game." "Our weekly specials as a reel." (Social post videos: event, launch, match day, stat or chart, speaker, listing, menu, quote. the MCP resource `orshot://reference/video-post-formats`.)
+- "Make a video version of our Saturday market post for Reels." "A full-time score video we can post after every game." "Our weekly specials as a reel." (Social post videos: event, launch, match day, stat or chart, speaker, listing, menu, quote. the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`).)
 - "Here's the chart from our investor update. Turn it into a video for X: the line draws in, the milestones pop, then the takeaway." (Stat or chart, same file.)
 - "Make a reel with 3 tips for choosing a perfume, with our bottle at the end and the shop link." (Tips reel, §2.)
-- "Turn this listing into a reel: 6 photos, price, beds and baths, agent card at the end. Same look for every listing." (Real estate, the MCP resource `orshot://reference/video-post-formats`.)
+- "Turn this listing into a reel: 6 photos, price, beds and baths, agent card at the end. Same look for every listing." (Real estate, the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`).)
 - "Make a 20 second launch video for Tallyhop from our website: the problem, three screens, the signup link." (Launch teaser, §4.)
 - "Our granola needs a product intro reel for Instagram, in Persian." (Product promo reel, §5, in any language.)
 - "Animate our new logo and brand cards into a short brand film." (Brand line-art film, §6.)
@@ -78,7 +78,7 @@ This skill is the flow and the taste. Field shapes, allowed values and limits ar
 | The video | Structure |
 |---|---|
 | Over 8 s, more than one scene, or one deliverable MP4 | **Film** (the default): one page per scene, a `film` block, `transitionIn` on every page after the first |
-| A social post as video (event, launch, score, stat, speaker, listing, menu, quote) | **Film** of 2 to 4 scenes that ends on the post itself, from the MCP resource `orshot://reference/video-post-formats` |
+| A social post as video (event, launch, score, stat, speaker, listing, menu, quote) | **Film** of 2 to 4 scenes that ends on the post itself, from the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`) |
 | A logo sting or a loop under 6 s | One page, no `film` (a film needs 2 or more scenes; one page with `film` is refused) |
 | A voiceover script with burnt-in word-by-word captions, or captions on an existing clip | Not a film: films do not burn captions or take a per-render `audioSource` yet. Follow [`references/narrated-shorts.md`](references/narrated-shorts.md) |
 | Each page posted as its own slide | A carousel: the `orshot-carousel` skill |
@@ -137,7 +137,7 @@ A scene can run up to 12 s (a tool description that says 2 to 8 s is out of date
 Before any JSON, write one line per scene. Each line is a thing that happens on screen, not a sentence about it. "Revenue line draws to $506M" is a beat; "We grew fast" is not. 3 to 6 scenes for 12 to 30 s. Add each scene's length from the pacing rule.
 
 Then open the format that matches the job and follow its scenes and timings:
-- A post type brands publish every week (event, launch or feature update, match day, stat or chart, speaker, real estate, menu, quote), a carousel as a video or a video ad: the MCP resource `orshot://reference/video-post-formats`, with the paired skill loaded (Works in a pair). The film ends on the static post for that type, with the same field names as the image template, so one sheet row can render both.
+- A post type brands publish every week (event, launch or feature update, match day, stat or chart, speaker, real estate, menu, quote), a carousel as a video or a video ad: the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`), with the paired skill loaded (Works in a pair). The film ends on the static post for that type, with the same field names as the image template, so one sheet row can render both.
 - Tips reel, launch teaser, product promo, brand line-art film, occasion reel or character dialogue: [`references/film-recipes.md`](references/film-recipes.md).
 Each gives the scenes, the cut, the motion per scene and the fields that change per render.
 

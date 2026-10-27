@@ -24,7 +24,7 @@ metadata:
 
 A social post from Orshot is a designed template plus fresh copy, not a new AI image every time. This skill is the flow for making one post template that a brand can run every week, and rendering it for every post after that.
 
-The layouts come from the MCP resource `orshot://reference/post-formats`, built from 93 real posts brands published in 2026: the formats brands, clubs, shops and studios actually publish again and again (place-and-date event cards, changelog cards, one big number, split speaker cards, edge rails on match day, row tables for menus). Read it before you design. Design craft (hierarchy, type, color) is in the `orshot-design` skill. Field names and rules live in the docs.
+The layouts come from the post formats reference (call `orshot_get_format_reference` with `reference: "post-formats"`), built from 93 real posts brands published in 2026: the formats brands, clubs, shops and studios actually publish again and again (place-and-date event cards, changelog cards, one big number, split speaker cards, edge rails on match day, row tables for menus). Read it before you design. Design craft (hierarchy, type, color) is in the `orshot-design` skill. Field names and rules live in the docs.
 
 ## What people ask for
 
@@ -47,7 +47,7 @@ The layouts come from the MCP resource `orshot://reference/post-formats`, built 
 
 1. **Look for an existing template.** `orshot_list_studio_templates` with a search for the post type. If one fits, skip to step 8.
    **Already designed in Canva?** Do not rebuild it. The user imports it in Orshot Studio from a public share link, so no Canva API access is needed: https://orshot.com/docs/importing-templates/import-from-canva.md. Text and image layers come in as parameters. After the import, go to step 7 and rename the keys that change per post.
-2. **Name the post type and pick its format** from the MCP resource `orshot://reference/post-formats`. Say it in one line before you design: "Event post, place-and-date card: venue photo full bleed, market name in the sky, one meta line, sponsor row." If the user shared a post that worked, copy its structure and hierarchy, not its words.
+2. **Name the post type and pick its format** from the post formats reference (call `orshot_get_format_reference` with `reference: "post-formats"`). Say it in one line before you design: "Event post, place-and-date card: venue photo full bleed, market name in the sky, one meta line, sponsor row." If the user shared a post that worked, copy its structure and hierarchy, not its words.
 3. **Pick the size.** 4:5 portrait is the default for Instagram and LinkedIn feed posts; 16:9 for X announcements; 9:16 for stories. One image for both LinkedIn and X: 1:1. When the format and this line disagree, this line wins. Create takes `canvas_width` and `canvas_height` in pixels. Preset names and sizes: https://orshot.com/docs/api-reference/render-from-studio-template.md#smart-resize (or the `orshot://formats` MCP resource).
 4. **Get the look.**
    - `orshot_get_brand_kit` when the post should be on brand. Brand colors, fonts and logo win over everything else, but only when the kit is the brand the user named: a workspace kit can hold other brands' assets. If it does not match, use the colors the user gave.
@@ -114,7 +114,7 @@ Format: edge rail over the photo. The player or team photo fills the canvas; `FU
 ## Example: make an existing template less generic
 
 1. `orshot_get_studio_template` to read the current design.
-2. Name its post type and find the format in the MCP resource `orshot://reference/post-formats`. Compare: count the words and the type sizes, find the hero, check the anti-patterns at the end of that file.
+2. Name its post type and find the format in the post formats reference (call `orshot_get_format_reference` with `reference: "post-formats"`). Compare: count the words and the type sizes, find the hero, check the anti-patterns at the end of that file.
 3. `orshot_patch_template_elements` with `layer_operations` for the layers that change, `includeThumbnails: true`, then look at the result.
 
 ## The same post as a video
@@ -122,7 +122,7 @@ Format: edge rail over the photo. The player or team photo fills the canvas; `FU
 "Make it a reel", "an animated version", "a video for TikTok": load `orshot-video-generator` alongside this skill. They work as a pair:
 
 1. This skill picks the format and designs the static post as usual (or finds the existing image template): copy, fields, palette, fonts.
-2. The video skill turns it into a film that builds to that post, re-laid for 9:16: the scenes before it, the motion, the ground footage, the layer that runs start to end. The MCP resource `orshot://reference/video-post-formats` has the film for each format in this skill's formats file.
+2. The video skill turns it into a film that builds to that post, re-laid for 9:16: the scenes before it, the motion, the ground footage, the layer that runs start to end. The MCP resource `orshot_get_format_reference` (`reference: "video-post-formats"`) has the film for each format in this skill's formats file.
 3. Both templates keep the same base field names, so one sheet row renders the image and the video.
 
 ## Rules
