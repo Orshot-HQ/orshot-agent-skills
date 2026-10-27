@@ -19,8 +19,8 @@ The look of every image inside the post. The blueprints already follow it; use t
 - **Numbered cards:** 30px black circle with a white Inter 700 15px number, Fraunces 600 22px two-line title, then a 24px logo and an Inter 500 17px name.
 - **Browser frame** for a website: white card, `#141414` 40px header with three dots and the domain in mono, the screenshot with objectFit contain and the frame sized to its ratio.
 - **Code card:** `#141414` radius 16, Spline Sans Mono 16px `#D6D6D2`, the key line on an accent highlight at 40% in white. Indent with non-breaking spaces.
-- **Type:** Fraunces for headlines and card titles, Inter for body (16 to 19px), Spline Sans Mono for chips, numbers and the footer (14 to 16px). Footer: mono 16px `#8A8A86` with the source and the month.
-- **Colors:** ink `#141414`, body `#4A4A48`, muted `#8A8A86`, bar grey `#CFCDC6`, one accent and its tint. Nothing else.
+- **Type:** Fraunces for headlines and card titles, Inter for body (16 to 19px), Spline Sans Mono for chips, numbers and the footer (14 to 16px). Footer: mono 16px `#6B6A66` with the source and the month.
+- **Colors:** ink `#141414`, body `#4A4A48`, muted `#6B6A66`, bar grey `#CFCDC6`, one accent and its tint. Nothing else.
 - **60 words or fewer** per image.
 
 ## Every image shows something real

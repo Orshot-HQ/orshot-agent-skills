@@ -32,7 +32,7 @@ This skill does not restate field names, style keys, value types, units, animati
 - **Vertical pack for posts, stories and carousels** (formats, safe areas, layout archetypes, an element tree recipe): MCP resource `orshot://design-pack/social-media`.
 - **The same craft rules, served by the MCP server**: `orshot://design-spec/general`.
 - **Computed layouts** (rows, stacks, grids, anchors instead of hand-set x/y): `orshot://layout-spec`.
-- **Motion and video**: https://orshot.com/docs/orshot-studio/animations.md, https://orshot.com/docs/orshot-studio/motion.md, https://orshot.com/docs/video-generation/video-options.md, https://orshot.com/docs/video-generation/adding-subtitles.md.
+- **Motion and video**: MCP resources `orshot://film-spec` and `orshot://design-pack/film`, https://orshot.com/docs/definitions/film.md, https://orshot.com/docs/orshot-studio/animations.md, https://orshot.com/docs/orshot-studio/motion.md, https://orshot.com/docs/video-generation/video-options.md, https://orshot.com/docs/video-generation/adding-subtitles.md.
 - **Text fit modes**: https://orshot.com/docs/orshot-studio/text-modes.md.
 
 ## Operating principle
@@ -79,8 +79,9 @@ Making video look designed, not generated:
 - **Reveal in sections over about 4 to 5 s.** Layers that form one unit (icon and label, a spec row, the footer) share the same enter animation and start time. Stagger about 0.3 to 0.5 s between sections, in reading order. Where the timing keys sit is the spec's number one gotcha: read its animation section.
 - **Every full-bleed photo gets a slow Ken Burns ambient** (zoom about 1.08 to 1.15). A still photo held 3 seconds reads as a dead frame. Alternate the pan direction between pages.
 - **Ambient motion stays subtle and slow:** 6 to 10 s cycles against a 0.5 s enter. If the viewer can name the motion, it is too strong, unless it is a deliberate accent. Looping ambients need linear easing or the loop seam shows.
-- **One page transition for the whole video,** 0.3 to 0.5 s. A different transition per cut is the clearest tell of an auto-generated edit.
-- **Sound.** A voice track at full volume plus a quiet music or ambient bed (about 0.08 to 0.18 volume) sounds produced. That is 2 tracks on a page, and the number of tracks per page depends on the plan (video-options.md), so a render over the limit fails. Budget narration at about 2 words per second with 1 s of headroom. Burn in captions over speech, with a thicker stroke over busy footage (presets: adding-subtitles.md). On Claude clients the server does not offer generated narration or sound effects; use brand audio or uploaded files.
+- **Every word gets read.** A viewer reads at about 2.5 words a second (0.4 s per word) from when a block starts entering, blocks one after another in entrance order, then the scene holds about 1 s before the cut; the last arrival in a scene holds 2 s or more, and line draws take 2 to 3 s. Too long? Cut words, never speed up the motion. The film checks ("Cut too soon", "Dead stretch") measure this.
+- **One cut family per video,** 0.9 to 1.2 s per cut, chosen by what the cut means (`orshot://design-pack/film`). A different transition per cut is the clearest tell of an auto-generated edit. A video over 8 s or with more than one scene is a film: the `orshot-video-generator` skill.
+- **Sound.** A voice track at full volume plus a quiet music or ambient bed (about 0.08 to 0.18 volume) sounds produced. That is 2 tracks on a page, and the number of tracks per page depends on the plan (video-options.md), so a render over the limit fails. Budget narration at about 2.5 words per second with 1 s of headroom. Burn in captions over speech, with a thicker stroke over busy footage (presets: adding-subtitles.md). On Claude clients the server does not offer generated narration or sound effects; use brand audio or uploaded files.
 - **Check the layout with a still, not a video.** The motion preview from `includeThumbnails` is free. Before a paid mp4, render one page as a PNG to check composition.
 
 ## Anti-patterns (the AI-made tells)

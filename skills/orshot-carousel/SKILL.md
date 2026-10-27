@@ -56,7 +56,7 @@ Slide 6  CTA (follow, link in bio, app name)
 
 Hook rule: person + doubt or conflict + specific detail beats a feature line. "my trainer asked me to log a week of meals, she wasn't ready" beats "track calories in seconds". Do not name the product on slide 1.
 
-Two other formulas that keep working, each as its own template with its own page count:
+Six is the default. A list gets one slide per point plus the cover and the CTA (5 mistakes is 7 slides), and a data update gets one number per slide. Two other formulas that keep working, each as its own template with its own page count:
 
 - Question hook, 3 to 5 tips, CTA (5 to 7 slides).
 - This or that: two options, and the viewer picks ("layout 1 or layout 2?").
@@ -65,12 +65,16 @@ Two other formulas that keep working, each as its own template with its own page
 
 1. Load the `orshot-design` skill for type, color and layout rules. Read `orshot://template-design-spec` for the template JSON (same content as https://orshot.com/docs/definitions/template-json.md) and `orshot://design-pack/social-media` for safe areas.
 2. Pick the page size from a render preset, for example `instagram-post-portrait` for Instagram and LinkedIn or `tiktok-video` for TikTok. Sizes: https://orshot.com/docs/api-reference/render-from-studio-template.md#smart-resize.
-3. Build six pages with the same layout:
+3. Build the pages: slide 1 is a cover, the inside slides share one layout, the last slide is the CTA.
    - one text layer per page with `parameterId: "title"`, set to fit its box (https://orshot.com/docs/orshot-studio/text-modes.md);
-   - one full-bleed image layer per page with `parameterId: "bg_image"`;
+   - one image layer per page with `parameterId: "bg_image"`, full bleed or framed;
+   - more fields only where the format needs them, named the same on every page: `body`, `number`, `cost`, `time`, `cta`;
+   - fixed wording (page counters, "Swipe", labels) gets `parameterizable: false`;
    - a scrim or a text box so the words read on any photo;
-   - brand fonts and colors from `orshot_get_brand_kit`, logo small on the last page only.
-4. `orshot_create_template_design` with all six pages and `includeThumbnails: true`. Name it "Carousel 6 (Instagram)" or "Carousel 6 (TikTok)". Fix what the thumbnails show with one `orshot_update_template_design` call.
+   - a button is a shape with the text on top, because a text background only hugs the words;
+   - brand fonts and colors from `orshot_get_brand_kit`, logo small on the last page only. Colors, fonts or photos the user names win over the kit and over any plan the server suggests.
+   - TikTok (1080x1920): keep text out of the top 250px, the bottom 320px (caption) and the right 140px (buttons). Let a photo fill the bottom band so it is not empty.
+4. `orshot_create_template_design` with all pages and `includeThumbnails: true`. Name it "Carousel 6 (Instagram)" or "Carousel 6 (TikTok)". Fix what the thumbnails show with one `orshot_update_template_design` call. A design warning that the preview does not bear out (a shared texture counted as a repeated picture, a big slide number counted as a second headline) can stay; tell the user which ones you left.
 5. `orshot_get_studio_template_modifications` returns the exact render keys. On a multi-page template they carry the page prefix: `page1@title`, `page1@bg_image`, `page2@title`, and so on.
 
 Template design runs over MCP. The REST create endpoint is Enterprise only: https://orshot.com/docs/api-reference/enterprise-template-create.md. Keep the template and reuse it for every post.
@@ -142,7 +146,13 @@ The user: "Write 30 slideshow hooks for a plant-care account and render the firs
 
 ## Slideshow as a video
 
-"Make a slideshow video from these photos with our track" asks for one MP4, not a photo post. A multi-page template renders as one MP4 with `videoOptions.combinePages` and a page audio track: https://orshot.com/docs/video-generation/video-options.md. Hand it to `orshot-video-generator`, which builds video templates. The photos must be public URLs.
+"Make a slideshow video from these photos with our track", "turn this carousel into a reel": that is one MP4, not a photo post. Load `orshot-video-generator` alongside this skill and use them as a pair:
+
+1. This skill writes the carousel as usual: the hook slide, the slides, the CTA slide, the fields.
+2. The video skill makes it a film: one scene per slide, laid out natively for 9:16, a segmented progress rail across the top, one cut family, the song under the whole thing ("Carousel as a video" in its [`references/video-post-formats.md`](https://github.com/Orshot-HQ/orshot-agent-skills/blob/main/skills/orshot-video-generator/references/video-post-formats.md)).
+3. The film keeps the carousel's field names, prefixed per scene, so the same row renders the slides and the video.
+
+The photos and the song must be public URLs.
 
 ## Run it without the agent
 
@@ -169,9 +179,9 @@ Keep a short log the user can read: date, hook, views, change made.
 ## Gotchas
 
 1. On a multi-page template, a content key without a `pageN@` prefix changes no page; the response carries a warning. Send one prefixed key per page. A bare style key such as `title.color` does apply to every page that has a `title` layer. Details: https://orshot.com/docs/image-generation/multi-page-images.md.
-2. Keep every slide under about 20 words so fit mode does not shrink the text too far.
+2. Keep every slide under about 20 words so fit mode does not shrink the text too far. Lists (ingredients, a day plan) go in two short columns or one `body` field with one item per line.
 3. PDFs cannot be posted. Render png, jpg or webp.
 4. Reuse one template. A new template per post is slow and spends design effort twice.
 5. Background photos must be public URLs. Orshot render URLs are.
 
-Related skills: `orshot` (connection, REST, render options), `orshot-design` (design craft), `orshot-social-media-scheduler` (scheduling and analytics), `orshot-social-media-content` (single posts).
+Related skills: `orshot` (connection, REST, render options), `orshot-design` (design craft), `orshot-social-media-scheduler` (scheduling and analytics), `orshot-social-media-content` (single posts), `orshot-video-generator` (the carousel as a video, used as a pair).

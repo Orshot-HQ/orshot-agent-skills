@@ -29,21 +29,21 @@ Words left, face right, accent box under the first line.
         "style": { "fill": "linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0) 75%)" },
         "zIndex": 2 },
       { "id": "accent", "type": "shape", "shapeType": "rectangle",
-        "position": { "x": 56, "y": 372 }, "dimensions": { "width": 600, "height": 176 },
+        "position": { "x": 56, "y": 356 }, "dimensions": { "width": 600, "height": 208 },
         "style": { "fill": "#FFD400", "borderRadius": "18px" }, "zIndex": 3,
         "parameterizable": true, "parameterId": "accent", "parameterType": "fill" },
       { "id": "headline", "type": "text", "content": "$20 BEATS",
-        "position": { "x": 64, "y": 176 }, "dimensions": { "width": 600, "height": 180 },
-        "style": { "fontFamily": "Anton", "fontSize": "160px", "fontWeight": "400", "lineHeight": 1.0,
+        "position": { "x": 64, "y": 206 }, "dimensions": { "width": 600, "height": 132 },
+        "style": { "fontFamily": "Anton", "fontSize": "120px", "fontWeight": "400", "lineHeight": 1.0,
                    "color": "#FFFFFF", "textAlign": "left", "verticalAlign": "flex-end",
                    "textTransform": "uppercase", "textStrokeColor": "#000000", "textStrokeWidth": "4px",
-                   "textMode": "fit", "minFontSize": "90" },
+                   "textMode": "fit", "minFontSize": "72" },
         "zIndex": 4, "parameterizable": true, "parameterId": "headline", "parameterType": "text" },
       { "id": "headline_accent", "type": "text", "content": "$400?",
-        "position": { "x": 80, "y": 384 }, "dimensions": { "width": 552, "height": 152 },
-        "style": { "fontFamily": "Anton", "fontSize": "150px", "fontWeight": "400", "lineHeight": 1.0,
+        "position": { "x": 80, "y": 368 }, "dimensions": { "width": 552, "height": 184 },
+        "style": { "fontFamily": "Anton", "fontSize": "180px", "fontWeight": "400", "lineHeight": 1.0,
                    "color": "#111111", "textAlign": "left", "verticalAlign": "center",
-                   "textTransform": "uppercase", "textMode": "fit", "minFontSize": "80" },
+                   "textTransform": "uppercase", "textMode": "fit", "minFontSize": "100" },
         "zIndex": 5, "parameterizable": true, "parameterId": "headline_accent", "parameterType": "text" },
       { "id": "subject", "type": "image", "content": "{{FACE_CUTOUT_URL}}",
         "position": { "x": 640, "y": 40 }, "dimensions": { "width": 640, "height": 680 },
@@ -61,15 +61,18 @@ Mirror it (words right, face left) for a second series so two series never look 
 
 | Layer | parameterId | Box (x, y, w, h) | Notes |
 |---|---|---|---|
-| Left image | `before_image` | 0, 0, 640, 720 | fills its half |
-| Right image | `after_image` | 640, 0, 640, 720 | fills its half |
+| Left image | `before_image` | 0, 0, 640, 720 | fills its half; move the crop onto the subject with `objectPosition` |
+| Right image | `after_image` | 640, 0, 640, 720 | fills its half, same subject as the left |
 | Divider | `accent` | 632, 0, 16, 720 | shape, brand color |
-| Label pill left | `before_label` | 48, 48, 260, 96 | "BEFORE", dark box behind |
-| Label pill right | `after_label` | 972, 48, 260, 96 | "AFTER", accent box behind |
-| Headline (optional) | `headline` | 140, 520, 1000, 150 | 2 to 3 words, centered, stroke |
+| Label box left | (static) | 48, 48, 260, 96 | dark rounded shape |
+| Label pill left | `before_label` | 48, 48, 260, 96 | "BEFORE" or "DAY 1", over the box |
+| Label box right | (static) | 972, 48, 260, 96 | rounded shape in the accent color |
+| Label pill right | `after_label` | 972, 48, 260, 96 | "AFTER" or "DAY 84", over the box |
+| Scrim | (static) | 0, 400, 1280, 320 | dark gradient up from the bottom |
+| Headline (optional) | `headline` | 48, 520, 960, 150 | 2 to 3 words, left-aligned, stroke |
 | Face (optional) | `subject` | 470, 260, 340, 460 | cutout on the seam, over the divider |
 
-Keep the right label clear of the timestamp: the headline sits bottom-center, not bottom-right.
+Keep the bottom-right corner clear of the timestamp: the headline sits bottom-left. Both halves show the same person or thing, from the video.
 
 ## 3. Number / list
 

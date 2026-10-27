@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/social-media-scheduler
 license: MIT-0
 metadata:
   author: Orshot
-  version: "1.1.0"
+  version: "1.2.0"
   openclaw:
     emoji: "📣"
     homepage: https://orshot.com/agents/skills/social-media-scheduler
@@ -48,6 +48,7 @@ Connect the Orshot MCP server at `https://mcp.orshot.com/mcp` (OAuth, no key). S
 
 `orshot_list_social_accounts` (REST: https://orshot.com/docs/api-reference/social-accounts-list.md). Note each account's numeric `id`. You publish by id, never by platform name.
 
+- Check that the accounts belong to the brand the user named. If the only connected accounts are someone's personal profile or another brand, say so before you draft anything.
 - If a brand has two accounts on one platform (two Facebook Pages, say), ask which one. Do not guess.
 - Accounts belong to the active workspace. If the user keeps each brand or client in its own workspace, switch with `orshot_set_active_workspace` before you list accounts.
 
@@ -58,7 +59,8 @@ Over REST, `include_health=true` adds a `requires_reconnect` flag per account. I
 ## Step 3: the posting loop
 
 1. **Decide the media.** Render from a template (`orshot_render_template` with `publish`) or post media you already have (`orshot_publish_social_post` with `mediaUrls`). Images from Canva, Codex or an image model go in `mediaUrls` as public URLs. Orshot render URLs are already public, so no S3 bucket or Drive share link is needed.
-2. **Draft first.** Both MCP tools publish immediately unless you pass `status: "draft"`. Pass it unless the user clearly said to post now.
+   Before rendering, check that every image field gets the user's own image. A field left empty keeps the template's sample picture, which can put a stranger's face over a customer's name. With no image yet, use a picture with no person in it, or a template without that field, and tell the user.
+2. **Draft first.** Both MCP tools publish immediately unless you pass `status: "draft"`. Pass it unless the user clearly said to post now. A draft holds no time: keep the agreed times in your summary and set `scheduledFor` only when you schedule. A render with `publish` creates one post per account, so list the drafts afterwards to get each post id.
 3. **Show the user** the post. `orshot_get_social_post` renders a visual card with the media, caption, accounts and status.
 4. **Edit** what they change with `orshot_update_social_post`. Editing never re-renders and costs nothing.
 5. **Send.** `orshot_publish_social_draft` posts it now. To schedule instead, `orshot_update_social_post` with `status: "scheduled"` and `scheduledFor`.
@@ -70,6 +72,14 @@ Over REST, `include_health=true` adds a `requires_reconnect` flag per account. I
 For a batch (a week of posts, a launch), do not ask for a go-ahead post by post. Hold every post as a draft and show them together. Repeat the accounts, captions and times once for the whole batch. The user's approval covers those posts only. Anything added or changed later needs a new go-ahead.
 
 Post review in Orshot is the draft step. Orshot approval flows approve templates before automations render them, not posts: https://orshot.com/docs/approval-flows/introduction.md.
+
+## Image and caption split
+
+The image carries one idea in a few words (a name, a number, a date, a short headline). The caption carries the rest: the details, the link, the hashtags. Do not repeat the image's words as the caption.
+
+- First line of the caption is the hook, since the platforms cut the rest behind "more". Lead with what changed, what is on, or the number.
+- Dates, prices, addresses and names in the caption must match the image. Both come from the same values the user gave.
+- When the targets need different captions (a long LinkedIn caption, a short X one), make one draft per platform: `content` is shared by every account in a call, and `platformOptions` only adds extras such as a LinkedIn first comment. Limits per platform are on the limits page above.
 
 ## MCP tools
 
@@ -92,12 +102,13 @@ MCP arguments are camelCase (`mediaUrls`, `scheduledFor`, `tiktokSettings`). RES
 The user: "Schedule this week's posts for Bloomfield Bakery on Instagram and Facebook, one a day around lunch. Show me them first."
 
 1. `orshot_list_social_accounts`. Confirm the Instagram and Facebook accounts by username.
-2. Agree on seven topics with the user (Monday sourdough, Tuesday staff pick, and so on).
-3. Seven `orshot_render_template` calls on one template, each with its own `modifications` and `publish: { accounts, content, status: "draft" }`.
-4. `orshot_list_social_posts` with `status: "draft"`, then `orshot_get_social_post` for the cards. Number them 1 to 7.
-5. The user approves by number ("all but 4, and shorten 4's caption"). Make the edits with `orshot_update_social_post`. Show post 4 again before it counts as approved.
-6. `orshot_get_best_time_to_post` for each platform. Pick a lunchtime slot per day and spread the posts across those slots. Then `orshot_update_social_post` with `status: "scheduled"` and `scheduledFor` for each approved post.
-7. Report the schedule as a short table: day, time in the user's timezone, accounts, first words of the caption.
+2. Agree on seven topics with the user (Monday sourdough, Tuesday staff pick, and so on), and give each its post type: product, staff pick, opening hours, a customer quote.
+3. `orshot_list_studio_templates` for a template per post type. Missing ones are made first with `orshot-social-media-content`, which picks each layout from a format brands really post. Seven posts from one layout read as a repost, so the week uses at least two or three layouts. When every post is the same type, rotate two or three templates that share field names.
+4. Seven `orshot_render_template` calls, each with its template, its own `modifications` and `publish: { accounts, content, status: "draft" }`.
+5. `orshot_list_social_posts` with `status: "draft"`, then `orshot_get_social_post` for the cards. Number them 1 to 7.
+6. The user approves by number ("all but 4, and shorten 4's caption"). Make the edits with `orshot_update_social_post`. Show post 4 again before it counts as approved.
+7. `orshot_get_best_time_to_post` for each platform, because the user said "around lunch" and not an exact time. When the user names a time, use it. Pick a lunchtime slot per day and spread the posts across those slots. Then `orshot_update_social_post` with `status: "scheduled"` and `scheduledFor` for each approved post.
+8. Report the schedule as a short table: day, time in the user's timezone, accounts, first words of the caption.
 
 ### Render and hold a draft (MCP)
 
@@ -160,8 +171,8 @@ Held posts (list, read, edit, send, discard) are under https://orshot.com/docs/a
 
 ## Patterns
 
-1. **Weekly calendar as drafts.** The worked example above: seven drafts from one template, one approval for the batch, then schedule. One update per caption or time change.
-2. **Schedule at the best time.** `orshot_get_best_time_to_post` for the platform. Slots are UTC; convert to the user's timezone when you show them. Pass the chosen time as `scheduledFor`. Empty slots mean too little history, so ask the user for a time instead of inventing one.
+1. **Weekly calendar as drafts.** The worked example above: seven drafts from two or three templates, one approval for the batch, then schedule. One update per caption or time change.
+2. **Schedule at the best time.** `orshot_get_best_time_to_post` for the platform, when the user has not named a time. Slots are UTC; convert to the user's timezone when you show them. Convert each date on its own: daylight saving can change the offset in the middle of a week (9am New York is 13:00 UTC on 30 October 2026 and 14:00 UTC on 2 November). Pass the chosen time as `scheduledFor`. Empty slots mean too little history, so ask the user for a time instead of inventing one.
 3. **Cross-post.** One `accounts` array with every id. Per-account extras go in `platformOptions` keyed by account id: https://orshot.com/docs/publish/publish-from-api.md. Check the caption against the shortest limit among the targets on the limits page. TikTok photo posts use the caption as the title, which has its own limit there.
 4. **Carousel.** Render a multi-page template with `pageN@` keys and add `publish`. Each page becomes one image in the post. Image counts per platform are on the limits page. The `orshot-carousel` skill has the slide formula.
 5. **Learn from results.** `orshot_get_social_analytics` with `source: "orshot"` and `sort: "engagement"`. Keep the hooks of the top posts, drop the bottom ones, write next week's drafts. Keep a short log the user can read. Analytics are rate limited, so ask once and reuse the answer.

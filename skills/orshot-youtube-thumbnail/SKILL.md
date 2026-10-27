@@ -40,7 +40,7 @@ The Orshot docs are the reference for every parameter, value and limit. Each doc
 |---|---|
 | Thumbnail, 1280x720 JPG or PNG | One render of the channel's thumbnail template |
 | A/B variants (optional), 2 to 3 thumbnails | One `orshot_batch_render_template` call, one item per variant |
-| Shorts cover (optional), 9:16 | The same render with `extraSizes: ["youtube-short"]` |
+| Shorts cover (optional), 9:16 | A second 1080x1920 page in the same template, with the same field names |
 
 ## Setup
 
@@ -80,7 +80,8 @@ Geometry for each layout and a full `pages_data` example: `references/layouts.md
 
 1. Check first: `orshot_list_studio_templates` with search `Thumbnail`. Reuse what exists.
 2. Create: `orshot_create_template_design` with `canvas_width: 1280`, `canvas_height: 720`, a name like `Thumbnail: <channel> (Face + big words)`, tags `["youtube", "thumbnail"]`, and `includeThumbnails: true`.
-3. Look at the returned preview. If the result has `designWarnings`, fix them all in one `orshot_update_template_design` call.
+3. Look at the returned preview. Fix the `designWarnings` that show a real problem in one `orshot_update_template_design` call, and tell the user which ones you left and why.
+4. Shorts cover: add it as page 2 (1080x1920) with the same parameterIds, laid out for the tall frame: words in the middle band, the subject large below. Resizing the 16:9 page with `extraSizes` leaves the words too small to use. A two-page template takes `page1@` and `page2@` keys.
 
 Make these layers dynamic:
 
@@ -97,9 +98,9 @@ Give each text layer the Fit text mode with a minimum font size, so a long word 
 ## Get the subject image
 
 - **The host's face.** Use a photo the user gives you. Upload it with `orshot_upload_brand_image` (`attachment` for a file in the chat, or `file` for a URL) and tags `["face"]`, then keep its `direct_url`. Ask for 3 to 5 photos with different expressions once and reuse them.
-- **Cut it out.** Check the fields with `orshot_get_library_template_modifications` for `image-background-removal-api`, then call `orshot_render_library_template` with `templateId: "image-background-removal-api"`, `modifications: { "inputImage": "<photo URL>" }` and `format: "png"`. The result URL is the `subject`. It uses an AI credit, not a render credit. Over REST it is `POST https://api.orshot.com/v1/generate/images` with the same `templateId` and `modifications` (https://orshot.com/docs/api-reference/render-from-template.md).
+- **Cut it out.** Check the fields with `orshot_get_library_template_modifications` for `image-background-removal-api`, then call `orshot_render_library_template` with `templateId: "image-background-removal-api"`, `modifications: { "inputImage": "<photo URL>" }` and `format: "png"`. Trim the transparent edges before using it (for example `magick cutout.png -trim +repage subject.png`), check for leftover background, and upload the trimmed file: an untrimmed cutout keeps the photo's full canvas and sits small in the `subject` box. It uses an AI credit, not a render credit. Over REST it is `POST https://api.orshot.com/v1/generate/images` with the same `templateId` and `modifications` (https://orshot.com/docs/api-reference/render-from-template.md).
 - **A frame from the video.** Grab one locally: `ffmpeg -ss 00:01:23 -i video.mp4 -frames:v 1 frame.jpg`, then upload it the same way. Use it as `background`, or cut out the person in it for `subject`.
-- **Stock.** `orshot_search_stock_media` with the topic in 1 to 3 words and `type: "photo"`. Put the result's `stock://` ref in the template, or call `orshot_use_stock_media` with the ref to get a permanent URL for a render.
+- **Stock.** `orshot_search_stock_media` with the topic in 1 to 3 words and `type: "photo"`. Put the result's `stock://` ref in the template, or call `orshot_use_stock_media` with the ref to get a URL for a render.
 
 ## Render per video
 
@@ -117,12 +118,11 @@ Over MCP, `orshot_render_template`:
   },
   "format": "jpg",
   "quality": 90,
-  "fileName": "mic-test-thumbnail",
-  "extraSizes": ["youtube-short"]
+  "fileName": "mic-test-thumbnail"
 }
 ```
 
-The thumbnail URL is in `content` and the 9:16 copy is under `extraSizes[0].content`. Smart Resize re-lays the same design for the Shorts size, so look at it before using it. Leave `extraSizes` out when there is no Short. How extra sizes work and what they cost: the Smart Resize section of https://orshot.com/docs/api-reference/render-from-studio-template.md and https://orshot.com/docs/definitions/credits-usage.md
+The thumbnail URL is in `content`. With a Shorts page, prefix every key (`page1@headline`, `page2@headline`) and both pages come back in one render. Costs: https://orshot.com/docs/definitions/credits-usage.md
 
 ## A/B variants in one call
 
@@ -147,7 +147,7 @@ Change one thing per variant (the words or the image, not both), so the test tel
 
 1. A sheet with one row per video: video ID, title, hook words and a frame (an image URL, or a timestamp to grab with ffmpeg as above).
 2. Write 3 to 5 click words per row, not the title (rules above). Show the list before rendering.
-3. Say the cost first: 1 credit per thumbnail, plus 1 per extra size ([Credits](https://orshot.com/docs/definitions/credits-usage.md)). Then render in chunks with `orshot_batch_render_template` (the tool schema gives the per-call cap) and write each URL back to its row.
+3. Say the cost first: 1 credit per thumbnail, plus 1 per Shorts page ([Credits](https://orshot.com/docs/definitions/credits-usage.md)). Then render in chunks with `orshot_batch_render_template` (the tool schema gives the per-call cap) and write each URL back to its row.
 4. The user sets them in YouTube Studio, or an automation calls `thumbnails.set` (next section).
 5. Change a few at a time and watch those videos in YouTube Studio before changing the rest.
 
@@ -166,7 +166,7 @@ curl -s -X POST https://api.orshot.com/v1/studio/render \
       "subject": "https://.../shocked.png",
       "background": "https://.../frame.jpg"
     },
-    "response": { "type": "url", "format": "jpg", "quality": 90, "extraSizes": ["youtube-short"] }
+    "response": { "type": "url", "format": "jpg", "quality": 90 }
   }'
 ```
 
@@ -191,13 +191,13 @@ Orshot Workflows have no YouTube or RSS trigger, so this one runs in n8n:
 1. Orshot does not set the thumbnail on YouTube. Social posting does not send images to YouTube (https://orshot.com/docs/publish/social-posting-guidelines.md). Upload the file in YouTube Studio, or through the YouTube Data API `thumbnails.set` in the same automation.
 2. YouTube takes custom thumbnails up to 2 MB. Render `jpg` with `quality` 85 to 90; a photo-heavy PNG can be larger.
 3. Plain text breaks lines with `\n`. Inside rich text (a `<span>` or `<b>`), `\n` is not converted, so use `<br>` there. See the Text section of https://orshot.com/docs/definitions/template-json.md
-4. A `<span>` with a background color stops the layer's text from wrapping. Use the `accent` shape box behind a separate text layer for the colored line instead.
+4. An accent word in another color stays in the headline as an inline `<span>`. An accent line in a colored box is the exception: a `<span>` with a background color stops the text from wrapping, so put a separate `headline_accent` layer over the `accent` shape. Make the accent line the biggest text, at least 1.4 times the other line.
 5. Template images must be public URLs or `stock://` refs. Never use a stock search `previewUrl`; it is a temporary link.
 6. Reuse one template per series. A new template per video spends design effort twice and breaks the series look.
 
 ## Safety
 
-- No misleading thumbnails. The words and image must match what the video shows. No fake quotes, fake screenshots or invented numbers.
+- No misleading thumbnails. The words and image must match what the video shows. No fake quotes, fake screenshots or invented numbers. A before and after shows the same person or thing in both halves, from the video.
 - Use only photos the user owns or has the rights to: their own face, their own frames, licensed stock. Never cut out another person's face or a creator's frame without permission.
 - No generated faces or poses of the host. Cut out a real photo instead.
 - Do not promise a click-through rate. Suggest Test & Compare.

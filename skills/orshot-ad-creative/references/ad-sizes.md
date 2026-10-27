@@ -16,13 +16,13 @@ Add `"link": "facebook-post"` when the campaign runs link-style placements. For 
 
 ## Google display
 
-Design at 300x250 (`medium-rectangle-ad`). Add the common display sizes:
+Design at 300x250 (`medium-rectangle-ad`). Add the sizes designed banners ran at in the scan (see `ad-formats.md`):
 
 ```json
-"extraSizes": ["leaderboard-ad", "300x600", "320x50", "336x280"]
+"extraSizes": ["leaderboard-ad", "300x600"]
 ```
 
-Add `"160x600"`, `"970x250"`, `"970x90"` or `"320x100"` when the buy needs them. Render with `scale: 2` for crisp text on retina screens, then check the network's file size limit.
+Add `"468x60"`, `"970x250"`, `"970x90"`, `"336x280"`, `"320x50"` or `"160x600"` when the buy names them. Small advertisers often run responsive display instead (next section), which Google fits to every slot. Render with `scale: 2` for crisp text on retina screens, then check the network's file size limit.
 
 The strips (728x90, 970x90, 320x50, 970x250) hold a logo, 3 to 5 words and a CTA. If a strip made from a square design does not read, adjust that size in the Studio Smart Resize panel and save it (https://orshot.com/docs/orshot-studio/smart-resize.md), or keep a separate strip template.
 
@@ -38,11 +38,13 @@ Google assembles these with your text, so keep words on the images to a minimum.
 
 ## LinkedIn
 
-Design at 1200x1200. Add the landscape and the vertical:
+Design at 1080x1080, the default static size on LinkedIn. Add the 4:5 for dense cards and the vertical twin:
 
 ```json
-"extraSizes": ["linkedin-post", "720x900"]
+"extraSizes": ["1080x1350", "1080x1920"]
 ```
+
+Add `"linkedin-post"` (1.91:1) only when the campaign asks for link-style images; it was rare among statics in the scan.
 
 ## Other placements people ask for
 

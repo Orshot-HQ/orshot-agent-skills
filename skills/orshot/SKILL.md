@@ -42,7 +42,7 @@ This skill is Orshot itself: connecting, rendering and the gotchas. A whole job 
 | --- | --- |
 | Featured images and OG images for blog posts, in-article images | `orshot-blog-images` |
 | Invoices, certificates, reports and other PDFs from rows of data | `orshot-pdf-generator` |
-| Reels, shorts, faceless and explainer videos | `orshot-video-generator` |
+| Reels, Shorts, product and listing videos, animated charts and brand films | `orshot-video-generator` |
 | Ads in every Meta, Google and LinkedIn size, A/B variants | `orshot-ad-creative` |
 | TikTok, Instagram and LinkedIn carousels | `orshot-carousel` |
 | YouTube thumbnails | `orshot-youtube-thumbnail` |

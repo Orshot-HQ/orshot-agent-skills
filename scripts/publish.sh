@@ -30,7 +30,7 @@ display_name() {
     orshot-social-media-content) echo "Orshot Social Media Post Generator: on-brand Instagram, LinkedIn, Facebook and X posts, stories and quote cards from templates, a Canva alternative by API" ;;
     orshot-design) echo "Orshot Design: on-brand template design rules for images, ads, thumbnails and video" ;;
     orshot-blog-images) echo "Orshot Blog Images: featured image and OG image generator for WordPress, Ghost and Next.js blogs, from templates" ;;
-    orshot-video-generator) echo "Orshot Video Generator: faceless Shorts, Reels and launch videos with auto captions from a template" ;;
+    orshot-video-generator) echo "Orshot Video Generator: Reels, Shorts, product and listing videos and animated chart films from a template" ;;
     orshot-ad-creative) echo "Orshot Ad Creative Generator: static Meta ads, test variations and catalog ads in every size" ;;
     orshot-youtube-thumbnail) echo "Orshot YouTube Thumbnail Maker: your channel's style, your own frames and face, A/B variants" ;;
     orshot-pdf-generator) echo "Orshot PDF Generator: invoice, certificate and report PDFs from a template and sheet data via API, n8n, Make or Zapier" ;;
@@ -64,7 +64,7 @@ topics() {
     orshot-social-media-content) echo "social-media-post-generator,social-media-content,instagram-post,linkedin-post,canva-alternative" ;;
     orshot-design) echo "design,templates,brand,image-generation,video-generation" ;;
     orshot-blog-images) echo "featured-image,og-image,blog-images,wordpress,image-generation" ;;
-    orshot-video-generator) echo "video-generation,faceless-video,youtube-shorts,auto-captions,video-automation" ;;
+    orshot-video-generator) echo "video-generation,reels,youtube-shorts,faceless-video,video-automation" ;;
     orshot-ad-creative) echo "ad-creative,meta-ads,static-ads,ad-variations,banner-generator" ;;
     orshot-youtube-thumbnail) echo "youtube-thumbnail,thumbnail-maker,thumbnail-template,ab-testing,youtube-automation" ;;
     orshot-pdf-generator) echo "pdf-generator,invoice-generator,certificate-generator,document-generation,n8n" ;;

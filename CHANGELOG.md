@@ -10,6 +10,8 @@ Docs-first rewrite of every skill: skills now hold the flow and worked examples,
 
 Reddit research pass (Oct 26 2026, about 2,300 posts from the last year): descriptions lead with the words people use for each job, every skill has example prompts in users' words, and flows gained the steps those threads asked for. Every capability was checked against the docs and the MCP server first.
 
+Blind-test pass (Oct 27 2026, 8 agents, 25 deliverables through the MCP server): blog images, carousel, YouTube thumbnail and PDF generator fixed where the agents got stuck. Shorts covers, Pinterest pins and square cover copies are their own pages instead of `extraSizes`; A4 and Letter canvas sizes and no `pdfDpi` for paper; Smart Stacking JSON; chart and QR image fields; trimmed cutouts; TikTok safe areas; fixed wording marked `parameterizable: false`; the full blueprint color swap list and a darker muted ink (`#6B6A66`) that passes the contrast check; which design warnings can stay.
+
 ### orshot-blog-images 1.0.0
 
 - First release. Cover from a reusable 6-style cover template, 3 to 6 in-article images from 7 tested layouts (13 blueprint pages in `references/blueprints/`), brand swap table, style guide, automation for a cover on every new post.
@@ -19,10 +21,12 @@ Reddit research pass (Oct 26 2026, about 2,300 posts from the last year): descri
 
 ### orshot-video-generator 1.0.0
 
-- First release. Reels, shorts, faceless and explainer videos from a video template: scene plan, stock footage and music, captions from audio, PNG still check before MP4, per-row rendering.
-- Description leads with faceless Shorts and lists launch videos and short video ads; example prompts in users' words.
-- New launch/product video and short video ad recipes; a worked captions-on-an-existing-clip render.
-- Faceless Shorts pipeline in n8n: async render, voice and captions per scene, webhook write-back, credits per month from the per-second rate.
+- First release. Films are the default video: one template whose pages are scenes joined by transitions and rendered as one MP4 (Film mode, Motion v2 and SVG part animation from MCP v1.28.0).
+- Flow: beat sheet, `orshot_plan_design` with `duration_seconds`, drawn SVG previewed with `orshot_preview_element`, one create with `film` and `includeThumbnails`, film and pacing checks, `orshot_verify_design`, one async MP4 render.
+- Pacing rule in the skill, matching the MCP reading check: 0.4 s per word read along as a block enters, blocks in entrance order, 1 s hold before the cut, last arrival holds 2 s, draws 2 to 3 s, cuts 0.9 to 1.2 s, never speed the motion up.
+- `references/film-recipes.md`: chart or stat explainer, tips reel, listing reel, launch teaser, product promo, brand line-art film, occasion reel, testimonial and character dialogue, timed from the reference films that passed review.
+- `references/narrated-shorts.md`: voiceover shorts, podcast clips, captions on an existing clip and the faceless Shorts pipeline in n8n. These stay on `combinePages` because films do not burn captions or take a per-render `audioSource` yet.
+- Description leads with faceless video and Shorts and adds product, listing, chart and brand films; example prompts in users' words, including non-English reels.
 
 ### orshot-ad-creative 1.0.0
 
@@ -57,7 +61,7 @@ Reddit research pass (Oct 26 2026, about 2,300 posts from the last year): descri
 - Homepage moved to orshot.com/agents/skills/carousel; render `publish` example fixed (REST reads `isDraft` and `schedule`).
 - Description leads with "TikTok slideshow" and faceless slideshows; example prompts.
 - Music section: TikTok `autoAddMusic`, and Orshot has no music option for Instagram.
-- Two more slide formulas, an image rights line, a used-image log, a month of slideshows with one approval for the batch; MP4 slideshows with a song go to orshot-video-generator; Workflows for daily runs; Canva import.
+- Two more slide formulas, an image rights line, a used-image log, a month of slideshows with one approval for the batch; MP4 slideshows with a song are films and go to orshot-video-generator; Workflows for daily runs; Canva import.
 
 ### orshot-social-media-scheduler 1.1.0
 
@@ -76,6 +80,7 @@ Reddit research pass (Oct 26 2026, about 2,300 posts from the last year): descri
 ### orshot-design 1.2.0
 
 - Full frontmatter (homepage, license, OpenClaw metadata) and a description that names it the shared craft base.
+- Video motion rules follow the film pacing rule (every word gets read, cuts 0.9 to 1.2 s, one cut family per video) and link the film spec and film pack.
 
 ## 2026-10-22
 

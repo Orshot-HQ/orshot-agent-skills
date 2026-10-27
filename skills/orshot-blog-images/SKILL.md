@@ -54,7 +54,7 @@ Image models draw pictures; they cannot be trusted with words, numbers, logos or
 |---|---|---|
 | Cover (featured image, OG image) | 1200x630 PNG | One page of the user's Blog Cover System template, rendered with the post's title |
 | In-article images | 1200x960 PNG, 3 to 6 | One template per post, one page per image, built from the layouts in `references/blueprints/` |
-| Social sizes of the cover (optional) | any render preset, e.g. `linkedin-post`, `instagram-post`, `instagram-story` | Same render with `extraSizes` |
+| Social sizes of the cover (optional) | wide sizes such as `twitter-post`; a page of its own for a Pinterest pin, a square or a story | `extraSizes` for wide sizes, a designed page for tall or square ones |
 | Alt text and file names | text | Written by you from the image content |
 
 ## Setup
@@ -100,17 +100,19 @@ The blueprints use one accent family. Swap it for the brand's primary color ever
 | Blueprint value | Role | Replace with |
 |---|---|---|
 | `#2B42D4`, `#2B3FC4`, `#4C63F6` | accent (headline line 2, buttons, chips) | brand primary |
-| `#E6EAFE`, `#EBEEFB`, `#D9DFF7` | accent tint (chip backgrounds, card borders) | brand primary at about 12% on white |
-| `rgba(76,99,246,...)` | glow | brand primary, same alpha |
-| `{{LOGO_URL}}` | the user's logo | brand kit logo `direct_url` |
-| `{{PRODUCT_IMAGE_URL}}` | a real product screenshot or output | a brand kit image, a screenshot, or an Orshot render |
-| `stock://unsplash/photo/uae3DujB2lw` | cover background photo | keep, or `orshot_search_stock_media` for another and use its `stock://` ref |
+| `#E6EAFE`, `#EBEEFB`, `#D9DFF7`, `#E4E7F2`, `#E3E7F8` | accent tint (chip backgrounds, card borders) | brand primary at about 12% on white |
+| `#F3F5FE`, `#F4F6FF`, `#ECF0FE`, `#E9EDFF`, `#E2E7FE`, `#D5DCFD`, `#C3CDFB`, `#9DA8F5` | the product window's mesh gradient | the brand tint, lighter to darker in the same order |
+| `rgba(76,99,246,...)`, `rgba(43,66,212,...)`, `rgba(233,237,255,0)` and the other transparent blues | glow | brand primary, same alpha |
+| `#FCE4EE` | prompt chip highlight | a second, lighter brand tint |
+| `{{LOGO_URL}}` | the user's logo | brand kit logo `direct_url`; no logo file, hide the layer with `.opacity: "0"` |
+| `{{PRODUCT_IMAGE_URL}}` | a real product screenshot or output | a brand kit image, a screenshot, an Orshot render, or the post's own photo. A logo tile covers its top-left corner, so crop to the part that matters. When it is one of the post's in-article images, make those first |
+| `stock://unsplash/photo/uae3DujB2lw` | cover background photo | keep, or `orshot_search_stock_media` for another: a `stock://` ref works inside the template, while a render-time modification needs the URL from `orshot_use_stock_media` |
 
-Keep the inks (`#141414`, `#4A4A48`, `#8A8A86`) and the warm greys. Fonts: Fraunces for headlines and Inter for body work for most brands; swap to the brand kit fonts if the brand has a display font. Logos of other tools: `https://cdn.simpleicons.org/<name>/<hex>` or the favicon URL `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://<domain>&size=256`.
+Keep the inks (`#141414`, `#4A4A48`, `#6B6A66`) and the warm greys. Fonts: Fraunces for headlines and Inter for body work for most brands; swap to the brand kit fonts if the brand has a display font. Logos of other tools: `https://cdn.simpleicons.org/<name>/<hex>` or the favicon URL `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://<domain>&size=256`.
 
 ## Step 3. The cover: one template, made once, rendered per post
 
-1. `orshot_list_studio_templates` with search `Blog Cover System`. Found it? Skip to 3.
+1. `orshot_list_studio_templates` with search `Blog Cover System`. Found it? Skip to 3. One system per brand or blog: a workspace with two blogs gets `Blog Cover System (<brand>)` for each.
 2. Create it once: `orshot_create_template_design` named `Blog Cover System`, `pages_data` = the six `cover-*.json` blueprints in the order of the table above, brand swaps from Step 2 applied, `includeThumbnails: true`. Look at the six thumbnails. Fix real problems with one `orshot_update_template_design` call.
 3. Render one page per post. REST body below; over MCP, `orshot_render_template` takes the same `modifications` with `format`, `scale`, `includePages` and `extraSizes` as top-level arguments.
 
@@ -132,7 +134,9 @@ Keep the inks (`#141414`, `#4A4A48`, `#8A8A86`) and the warm greys. Fonts: Fraun
 
 Title rules: line 1 holds the keyword chip, line 2 finishes the promise. 8 words or fewer in total. Fewer logos? Hide a slot with `"page1@logo_4.opacity": "0"` and `"page1@tile_4.opacity": "0"`.
 
-Want the cover for social too? Add `"extraSizes": ["linkedin-post", "instagram-post", "instagram-story"]` (inside `response` over REST, a top-level argument over MCP). Smart Resize re-lays the same design for each size and returns every variant URL. Presets and the response shape: https://orshot.com/docs/api-reference/render-from-studio-template.md#smart-resize.
+Want the cover for social too? For a wide size, add it to `extraSizes` (inside `response` over REST, a top-level argument over MCP). Smart Resize keeps the layout and scales it, so a tall pin, a square or a story leaves the cover small in empty space: add a page designed for that size to the template instead (full-bleed photo, large title). Presets and the response shape: https://orshot.com/docs/api-reference/render-from-studio-template.md#smart-resize.
+
+Photo-led posts (recipes, travel, roundups of places): use the Product window or Prompt card with the post's photo, hide the tool tiles with `.opacity: "0"`, and move the crop with `<image layer>.objectPosition`, such as `"50% 85%"`.
 
 ## Step 4. In-article images: one template per post
 
