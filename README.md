@@ -151,4 +151,4 @@ The skills and plugin ship no hooks, no local executables and no telemetry. The 
 
 MIT for the plugin and every skill.
 
-The format research the skills design from (post, ad and video post formats, thumbnail layouts) is served by the Orshot MCP server through the `orshot_get_format_reference` tool and is read with an Orshot login. It is not part of this repo.
+The format research the skills design from (post, ad and video post formats, thumbnail layouts) is served by the Orshot MCP server: `orshot_plan_design` returns the formats that fit a job, `orshot_get_design_spec` reads a whole reference. Both need an Orshot login. It is not part of this repo.

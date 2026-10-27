@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/youtube-thumbnail
 license: MIT
 metadata:
   author: Orshot
-  version: "1.0.0"
+  version: "1.1.0"
   openclaw:
     emoji: "📺"
     homepage: https://orshot.com/agents/skills/youtube-thumbnail
@@ -46,7 +46,7 @@ The Orshot docs are the reference for every parameter, value and limit. Each doc
 
 1. Connect the Orshot MCP server: https://orshot.com/docs/integrations/mcp-server.md has the steps for each client. Headless or scheduled jobs use REST with an API key: https://orshot.com/docs/quick-start/get-api-key.md
 2. Get the brand: `orshot_get_brand_kit` (colors, fonts, logo, and any photos of the host). Empty kit and a website? `orshot_scan_brand_website` with the URL, and ask before importing with `orshot_import_brand_website`. No brand at all? Load the orshot-design skill to pick a palette and a font pair.
-3. Read the MCP resource `orshot://template-design-spec` once before creating the template. The same content is at https://orshot.com/docs/definitions/template-json.md
+3. `orshot_plan_design` with the brief, `job: "youtube thumbnail for <the video>"`, 1280x720 and `on_brand: true` when the channel has a brand kit. It returns the layouts that fit (geometry and a full `pages_data` example each) and the palette and type. Read `orshot_get_design_spec` topic `template-json` once per session; the same content is at https://orshot.com/docs/definitions/template-json.md
 
 ## Thumbnail rules
 
@@ -74,7 +74,7 @@ If the channel already has thumbnails, the template copies that look. Ask for th
 | Screenshot + reaction | A screenshot or product in a tilted card, face cutout breaking over its edge, 2 to 3 words | Software, tutorials, reviews, news about an app or a post |
 | Screenshot + name | A real gameplay or app screenshot full bleed, a dark gradient, 2 to 4 huge words, an optional small face | Gaming builds, guides, patch notes, tutorials |
 
-Geometry for each layout and a full `pages_data` example: the thumbnail layouts reference (call `orshot_get_format_reference` with `reference: "youtube-thumbnail-layouts"`).
+Geometry for each layout and a full `pages_data` example come back from `orshot_plan_design`; all five at once: `orshot_get_design_spec` topic `youtube-thumbnail-layouts`.
 
 ## Build the template once per channel style
 

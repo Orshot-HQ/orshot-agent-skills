@@ -16,7 +16,7 @@ Add `"link": "facebook-post"` when the campaign runs link-style placements. For 
 
 ## Google display
 
-Design at 300x250 (`medium-rectangle-ad`). Add the sizes designed banners ran at in the scan (see `orshot_get_format_reference` (`reference: "ad-formats"`)):
+Design at 300x250 (`medium-rectangle-ad`). Add the sizes designed banners ran at in the scan (the Google display banners in `orshot_get_design_spec` topic `ad-formats`):
 
 ```json
 "extraSizes": ["leaderboard-ad", "300x600"]

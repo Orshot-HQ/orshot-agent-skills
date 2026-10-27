@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/video-generator
 license: MIT
 metadata:
   author: Orshot
-  version: "1.0.0"
+  version: "1.1.0"
   openclaw:
     emoji: "🎬"
     homepage: https://orshot.com/agents/skills/video-generator
@@ -25,7 +25,7 @@ A reel, a Short or a TikTok is the same video every time with new words, new pic
 
 Most videos are **films**: one template whose pages are scenes, played end to end with a transition into each scene, rendered as one MP4. Inside a scene, layers enter, move on keyframes, count up and reveal word by word, and a drawn SVG (a chart, an icon, a mascot, a logo) animates part by part: lines draw themselves, bars fill, a pin drops. This is how a chart from a post or a product launch becomes a video that looks edited, not generated.
 
-The formats, pacing and motion rules come from 83 real videos: 46 brand videos timed frame by frame and 37 Reels compared by views on the same accounts (the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`)).
+The formats, pacing and motion rules come from 83 real videos: 46 brand videos timed frame by frame and 37 Reels compared by views on the same accounts. `orshot_plan_design` returns the video post format for the job.
 
 This is not a model that invents footage. You write the script and draw or pick the pictures: drawn SVG, stock clips and photos, or the user's own media. The template stays editable in Orshot Studio, so someone who does not code can change a line, a clip or a color later.
 
@@ -35,7 +35,7 @@ This skill is the motion layer. When the video is a version of something another
 
 | The video | Load with this skill | That skill decides | This skill adds |
 |---|---|---|---|
-| A post as a video: event, launch, match day, stat, speaker, listing, menu, quote | `orshot-social-media-content` | the format, the copy, the fields, the palette and fonts, the static post | the scenes that build to the post, motion, cuts, pacing, the ground and the layer that runs start to end (the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`)) |
+| A post as a video: event, launch, match day, stat, speaker, listing, menu, quote | `orshot-social-media-content` | the format, the copy, the fields, the palette and fonts, the static post | the scenes that build to the post, motion, cuts, pacing, the ground and the layer that runs start to end (the video post format `orshot_plan_design` returns) |
 | A carousel as a video: a slideshow with a song, a listicle or tips reel | `orshot-carousel` | the hook slide, the slides, the CTA slide | one scene per slide, a segmented progress rail, one cut family (same file, "Carousel as a video") |
 | A video ad over 6 s, or with footage or more than one scene | `orshot-ad-creative` | the offer, the hook, the product photo, the sizes, the CTA | the scenes, the motion and the end card (same file, "Video ad") |
 | Posting it | `orshot-social-media-scheduler`, after the render | accounts, captions, times | |
@@ -49,10 +49,10 @@ Videos that are not a version of a post, a carousel or an ad (a tips reel, a lau
 
 ## What people ask for
 
-- "Make a video version of our Saturday market post for Reels." "A full-time score video we can post after every game." "Our weekly specials as a reel." (Social post videos: event, launch, match day, stat or chart, speaker, listing, menu, quote. the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`).)
+- "Make a video version of our Saturday market post for Reels." "A full-time score video we can post after every game." "Our weekly specials as a reel." (Social post videos: event, launch, match day, stat or chart, speaker, listing, menu, quote: `orshot_plan_design` returns the format.)
 - "Here's the chart from our investor update. Turn it into a video for X: the line draws in, the milestones pop, then the takeaway." (Stat or chart, same file.)
 - "Make a reel with 3 tips for choosing a perfume, with our bottle at the end and the shop link." (Tips reel, §2.)
-- "Turn this listing into a reel: 6 photos, price, beds and baths, agent card at the end. Same look for every listing." (Real estate, the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`).)
+- "Turn this listing into a reel: 6 photos, price, beds and baths, agent card at the end. Same look for every listing." (Real estate: the format from `orshot_plan_design`.)
 - "Make a 20 second launch video for Tallyhop from our website: the problem, three screens, the signup link." (Launch teaser, §4.)
 - "Our granola needs a product intro reel for Instagram, in Persian." (Product promo reel, §5, in any language.)
 - "Animate our new logo and brand cards into a short brand film." (Brand line-art film, §6.)
@@ -61,11 +61,11 @@ Videos that are not a version of a post, a carousel or an ad (a tips reel, a lau
 
 ## Where the facts live
 
-This skill is the flow and the taste. Field shapes, allowed values and limits are in the docs and the MCP resources. Read them instead of guessing.
+This skill is the flow and the taste. Field shapes, allowed values and limits are in the docs and in `orshot_get_design_spec`. Read them instead of guessing.
 
-- Film schema (the `film` block, `transitionIn` per page, tracks, limits): MCP resource `orshot://film-spec`, or https://orshot.com/docs/definitions/film.md
-- Film craft (beat sheet, cuts with a cause, scene recipes, checks): MCP resource `orshot://design-pack/film`, plus `orshot://design-pack/video` for the first second, eases and words on screen.
-- Template JSON (pages, elements, motion, audio): MCP resource `orshot://template-design-spec`, or https://orshot.com/docs/definitions/template-json.md
+- Film schema (the `film` block, `transitionIn` per page, tracks, limits): `orshot_get_design_spec` topic `film`, or https://orshot.com/docs/definitions/film.md
+- Film craft (beat sheet, cuts with a cause, scene recipes, checks): `orshot_get_design_spec` topic `film-pack`, plus `orshot_get_design_spec` topic `video-pack` for the first second, eases and words on screen.
+- Template JSON (pages, elements, motion, audio): `orshot_get_design_spec` topic `template-json`, or https://orshot.com/docs/definitions/template-json.md
 - Motion (keyframes, reveal, count, groups, camera, SVG parts with `drawIn`, `clock` and `repeat`, per-render motion keys): https://orshot.com/docs/orshot-studio/motion.md
 - Film mode in Studio (what the user sees, the pacing rule, the render body): https://orshot.com/docs/orshot-studio/film-mode.md
 - Formats and video rendering: https://orshot.com/docs/video-generation.md and https://orshot.com/docs/video-generation/video-options.md
@@ -78,7 +78,7 @@ This skill is the flow and the taste. Field shapes, allowed values and limits ar
 | The video | Structure |
 |---|---|
 | Over 8 s, more than one scene, or one deliverable MP4 | **Film** (the default): one page per scene, a `film` block, `transitionIn` on every page after the first |
-| A social post as video (event, launch, score, stat, speaker, listing, menu, quote) | **Film** of 2 to 4 scenes that ends on the post itself, from the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`) |
+| A social post as video (event, launch, score, stat, speaker, listing, menu, quote) | **Film** of 2 to 4 scenes that ends on the post itself, from the video post format `orshot_plan_design` returns |
 | A logo sting or a loop under 6 s | One page, no `film` (a film needs 2 or more scenes; one page with `film` is refused) |
 | A voiceover script with burnt-in word-by-word captions, or captions on an existing clip | Not a film: films do not burn captions or take a per-render `audioSource` yet. Follow [`references/narrated-shorts.md`](references/narrated-shorts.md) |
 | Each page posted as its own slide | A carousel: the `orshot-carousel` skill |
@@ -137,7 +137,7 @@ A scene can run up to 12 s (a tool description that says 2 to 8 s is out of date
 Before any JSON, write one line per scene. Each line is a thing that happens on screen, not a sentence about it. "Revenue line draws to $506M" is a beat; "We grew fast" is not. 3 to 6 scenes for 12 to 30 s. Add each scene's length from the pacing rule.
 
 Then open the format that matches the job and follow its scenes and timings:
-- A post type brands publish every week (event, launch or feature update, match day, stat or chart, speaker, real estate, menu, quote), a carousel as a video or a video ad: the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`), with the paired skill loaded (Works in a pair). The film ends on the static post for that type, with the same field names as the image template, so one sheet row can render both.
+- A post type brands publish every week (event, launch or feature update, match day, stat or chart, speaker, real estate, menu, quote), a carousel as a video or a video ad: `orshot_plan_design` with the job and `duration_seconds` returns its scenes and timings, with the paired skill loaded (Works in a pair). The film ends on the static post for that type, with the same field names as the image template, so one sheet row can render both.
 - Tips reel, launch teaser, product promo, brand line-art film, occasion reel or character dialogue: [`references/film-recipes.md`](references/film-recipes.md).
 Each gives the scenes, the cut, the motion per scene and the fields that change per render.
 
@@ -145,22 +145,22 @@ Show the user the beat sheet when the brief is loose. Go straight on when it is 
 
 ## Step 2. Plan the look
 
-`orshot_plan_design` with the brief, `width`, `height`, `duration_seconds` (the video's length), `headline_words` (a number), `items` (a number: how many tips, rooms or rows), `has_photo`, `on_brand: true` for brand work, and `subject_colours`: 2 to 4 hex colors of real things in the subject's world, or the `colors` of the stock photo you will lead with (search first, Step 3). With no reference and no photo yet, leave `subject_colours` out.
+`orshot_plan_design` with the brief, `job` (the user's words: "reel for match day"), `width`, `height`, `duration_seconds` (the video's length), `headline_words` (a number), `items` (a number: how many tips, rooms or rows), `has_photo`, `on_brand: true` for brand work, and `subject_colours`: 2 to 4 hex colors of real things in the subject's world, or the `colors` of the stock photo you will lead with (search first, Step 3). With no reference and no photo yet, leave `subject_colours` out.
 
-It returns a direction (palette, font pair, type scale, slots) and a skeleton of scenes. **For a film, take only the palette, the fonts and the type scale.** The scenes, cuts and timings come from your beat sheet and the recipe, not from the skeleton: its default cuts and scene lengths are generic. On a 9:16 frame the platform UI covers the top 168 px and the bottom: keep the hero, the numbers and the call to action above 1330 px (where TikTok's caption starts) and every line of text above 1530 px (Reels). Pictures and grounds still run to every edge.
+It returns the video post format for the job (scenes, timings, the cut, the fields and what every strong video shares) and the plan: palette, font pair, type scale, timeline. The format's scenes and your beat sheet set the cuts and timings; the plan sets the look. A tips reel, launch teaser or other recipe from `references/film-recipes.md` keeps its own scenes and takes the plan's palette, fonts and type scale. On a 9:16 frame the platform UI covers the top 168 px and the bottom: keep the hero, the numbers and the call to action above 1330 px (where TikTok's caption starts) and every line of text above 1530 px (Reels). Pictures and grounds still run to every edge.
 
 For a chart, icon or logo film drawn from a reference (a post, a slide, a brand board), the reference sets the colors and fonts. Keep them.
 
-Read `orshot://film-spec` and `orshot://design-pack/film` once before the first create.
+Read `orshot_get_design_spec` topics `film` and `film-pack` once before the first create.
 
 ## Step 3. Get the pictures
 
-- **Drawn SVG** for the thing the scene is about, in every film: each format names its drawn part (a crest or rail, a chart line, spec icons, a marker under a phrase, a circle around a date). A film of photos and sliding text with nothing drawn is the generic look this skill exists to avoid. Draw it as one SVG layer (`type: "element"` with the markup in `svg_markup`) with an `id` on every part that moves. Preview each drawing with `orshot_preview_element` (free, nothing stored), correct it against the reference, then use the same markup in the scene. How parts animate: SVG parts in [Motion](https://orshot.com/docs/orshot-studio/motion.md) and `orshot://film-spec` §3.
+- **Drawn SVG** for the thing the scene is about, in every film: each format names its drawn part (a crest or rail, a chart line, spec icons, a marker under a phrase, a circle around a date). A film of photos and sliding text with nothing drawn is the generic look this skill exists to avoid. Draw it as one SVG layer (`type: "element"` with the markup in `svg_markup`) with an `id` on every part that moves. Preview each drawing with `orshot_preview_element` (free, nothing stored), correct it against the reference, then use the same markup in the scene. How parts animate: SVG parts in [Motion](https://orshot.com/docs/orshot-studio/motion.md) and `orshot_get_design_spec` topic `film` §3.
 - **Stock**: `orshot_search_stock_media` with `type: "video"` or `"photo"`, `orientation: "vertical"` for 9:16, and a 1 to 3 word query ("espresso pour", "living room", "stadium aerial"). Search for every film: a graded clip of the subject's world under the type is the cheapest way to fill a ground (The look). In a template, put the result's `ref` (`stock://...`) as the layer's `content`; a clip is a `type: "video"` layer with `videoOptions: { loop: true, muted: true }`. Never use `previewUrl`; it expires. Most stock video is horizontal: `objectFit: "cover"` crops it to 9:16, and a grade hides the softness. A clip that is off-subject is worse than a photo with a slow push or a drawn ground.
 - **Place the photo for the layout.** With `objectFit: "cover"`, the photo can only slide along its long side. When the subject sits low in the picture and the type goes at the bottom, make the image layer taller than the frame and move it up (a 2800 px tall layer at `y: -900` in a 1920 px frame) so the subject sits above the type.
 - **The user's own media**: `orshot_get_brand_images`, `orshot_get_brand_videos`, `orshot_get_brand_audio`, or any public URL. Upload new files with the `orshot_upload_brand_*` tools.
 - **Stock is searched blind**: results carry no image to look at, and branded products (perfume, sneakers, phones) show up with real labels. Search for unbranded close-ups and textures, and put the user's own product photo in the hero slot.
-- **Music**: `orshot_search_stock_media` has no audio. Use a track from `orshot_get_brand_audio` or a URL the user gives, as one audio clip under the whole film in `film.tracks` at volume 0.25 to 0.35, fading out at the end (`orshot://design-pack/film` §3). No track: no music.
+- **Music**: `orshot_search_stock_media` has no audio. Use a track from `orshot_get_brand_audio` or a URL the user gives, as one audio clip under the whole film in `film.tracks` at volume 0.25 to 0.35, fading out at the end (`orshot_get_design_spec` topic `film-pack` §3). No track: no music.
 
 ## Step 4. Create the film in one call
 
@@ -179,7 +179,7 @@ What makes a film look edited:
 
 1. Read every block at the end of the create result: "Film saved" (scene count, length, cuts), "Film checks", "Design checks", "Imagery check", "Param warnings" (a warned param does nothing) and any pack design check. Fix every real pacing warning.
 2. `orshot_get_studio_template` with `storyboard: true`: it waits for the free motion previews and shows each scene's frames. Check each scene against the beat sheet: does each beat happen, is anything empty, can every word be read? Previews are per scene, at most 8 s, 480 px and muted: they never show the cuts, the music or film tracks. Only an MP4 does. Still thumbnails also skip a count's prefix and separator; the motion preview shows them.
-3. Fix real problems in one `orshot_update_template_design` call. Change one cut or one scene length with `page_operations` (`orshot://film-spec` §6); small layer changes go through `orshot_patch_template_elements`. An update made only of `page_operations` returns no design checks, so after it run `orshot_verify_design` and look at the storyboard again.
+3. Fix real problems in one `orshot_update_template_design` call. Change one cut or one scene length with `page_operations` (`orshot_get_design_spec` topic `film` §6); small layer changes go through `orshot_patch_template_elements`. An update made only of `page_operations` returns no design checks, so after it run `orshot_verify_design` and look at the storyboard again.
 4. `orshot_verify_design` on the saved template before the final render.
 
 Some design checks were written for posts and carousels and can fire on a film (grid or hierarchy notes on a chart scene). Judge those against the beat sheet. The pacing checks always apply.

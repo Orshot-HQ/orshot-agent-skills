@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/pdf-generator
 license: MIT
 metadata:
   author: Orshot
-  version: "1.0.0"
+  version: "1.1.0"
   openclaw:
     emoji: "📄"
     homepage: https://orshot.com/agents/skills/pdf-generator
@@ -81,7 +81,7 @@ Ready templates to copy (Copy This Template saves one to the workspace): [invoic
 
 1. Look first: `orshot_list_studio_templates` with a search like "invoice" or "certificate". Reuse what exists.
 2. Pick the canvas size. The PDF page is the canvas size at 96 px per inch: 794x1123 is A4 and 816x1056 is US Letter. Leave `pdfDpi` unset for paper sizes, because it scales the page itself. The image size presets are not paper sizes. Details: "Page Size" in https://orshot.com/docs/pdf-generation/pdf-options.md
-3. Create: `orshot_create_template_design` with the complete `pages_data` and `includeThumbnails: true`. Read the MCP resource `orshot://template-design-spec` first (the same content is at https://orshot.com/docs/definitions/template-json.md). For layout and type, load the orshot-design skill. Look at the returned preview and `designWarnings`, and fix real problems with one `orshot_update_template_design` call. Some checks are tuned for social posts (repeated labels such as "Invoice no.", the number of type sizes, text on a button pill): fix what the preview shows is wrong and tell the user which warnings you left and why.
+3. Create: `orshot_create_template_design` with the complete `pages_data` and `includeThumbnails: true`. Plan first: `orshot_plan_design` with the brief, `job` ("invoice PDF", "course certificate"), the page size and `on_brand: true` returns the palette, fonts, type scale and a slot layout with a ready skeleton (documents have no format catalogue, so the plan's layout is the layout). Read `orshot_get_design_spec` topic `template-json` once per session (the same content is at https://orshot.com/docs/definitions/template-json.md). For layout and type, load the orshot-design skill. Look at the returned preview and `designWarnings`, and fix real problems with one `orshot_update_template_design` call. Some checks are tuned for social posts (repeated labels such as "Invoice no.", the number of type sizes, text on a button pill): fix what the preview shows is wrong and tell the user which warnings you left and why.
    - Fixed wording (labels, headings, footer) gets `parameterizable: false`, so the modifications list holds only the values that change.
    - Over REST, template create is Enterprise-only: https://orshot.com/docs/api-reference/enterprise-template-create.md. On other plans, build the template over MCP or in the Studio editor.
 4. Blanks inside a paragraph: write `{{effective_date}}` inside the text, make the layer a parameter (say `nda`), and send `nda:effective_date`. The wording around it never travels in the request. Docs: https://orshot.com/docs/orshot-studio/inline-parameters.md

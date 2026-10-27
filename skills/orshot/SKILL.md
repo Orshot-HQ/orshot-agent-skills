@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills
 license: MIT
 metadata:
   author: Orshot
-  version: "1.5.0"
+  version: "1.6.0"
   openclaw:
     emoji: "🖼️"
     homepage: https://orshot.com/agents/skills
@@ -145,7 +145,7 @@ Preset names and size rules: [render-from-studio-template, Smart Resize](https:/
 
 Prompt: "Render this week's quote card and put it on LinkedIn as a draft."
 
-1. `orshot_list_social_accounts`. Pick the LinkedIn account id, say `3`. An empty list means no account is connected; a person connects one in the dashboard ([connect-account](https://orshot.com/docs/publish/connect-account.md)). The API cannot connect one.
+1. `orshot_list_social_accounts`. Pick the LinkedIn account id, say `3`. An empty list means no account is connected yet; a person connects one in the dashboard ([connect-account](https://orshot.com/docs/publish/connect-account.md)), the API cannot. A draft or scheduled post can still be saved with `platforms` instead of `accounts`; it goes out once an account on that platform is connected. Publishing now needs an account.
 2. `orshot_render_template` with the modifications plus `publish: { "accounts": [3], "content": "...", "status": "draft" }`.
 3. Check the `publish` result per account. A failed publish never blocks the render.
 4. After the user approves: `orshot_publish_social_draft`. To change it first: `orshot_update_social_post`.
@@ -175,7 +175,8 @@ Over REST, the render `publish` object reads `isDraft` and `schedule.scheduledFo
 | Long renders as jobs | https://orshot.com/docs/api-reference/async-render-start.md |
 | Video options, audio, captions | https://orshot.com/docs/video-generation/video-options.md, https://orshot.com/docs/video-generation/adding-subtitles.md |
 | PDF options | https://orshot.com/docs/pdf-generation/pdf-options.md |
-| Template JSON (pages, elements, styles, animation) | MCP resource `orshot://template-design-spec`, https://orshot.com/docs/definitions/template-json.md |
+| Plan a design: the formats brands run for the job, palette, type | `orshot_plan_design` (brief, `job`, size), then `orshot_get_design_spec` for the craft, the packs, the film schema, the layout grammar and the format references |
+| Template JSON (pages, elements, styles, animation) | `orshot_get_design_spec` topic `template-json`, https://orshot.com/docs/definitions/template-json.md |
 | Create or update templates over REST (Enterprise) | https://orshot.com/docs/api-reference/enterprise-template-create.md |
 | List and read templates | https://orshot.com/docs/api-reference/studio-templates-list.md, https://orshot.com/docs/api-reference/studio-template-get.md |
 | Dynamic URLs | https://orshot.com/docs/integrations/dynamic-urls.md |

@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/carousel
 license: MIT
 metadata:
   author: Orshot
-  version: "1.1.0"
+  version: "1.2.0"
   openclaw:
     emoji: "🎠"
     homepage: https://orshot.com/agents/skills/carousel
@@ -63,7 +63,7 @@ Six is the default. A list gets one slide per point plus the cover and the CTA (
 
 ## Create the template once
 
-1. Load the `orshot-design` skill for type, color and layout rules. Read `orshot://template-design-spec` for the template JSON (same content as https://orshot.com/docs/definitions/template-json.md) and `orshot://design-pack/social-media` for safe areas.
+1. Load the `orshot-design` skill for type, color and layout rules. `orshot_plan_design` with the brief, `job` ("tiktok slideshow with 5 tips"), the page size and `pages` (the slide count) returns the plan and the inside-slide system. Read `orshot_get_design_spec` topic `template-json` once per session (same content as https://orshot.com/docs/definitions/template-json.md) and topic `social-pack` for safe areas.
 2. Pick the page size from a render preset, for example `instagram-post-portrait` for Instagram and LinkedIn or `tiktok-video` for TikTok. Sizes: https://orshot.com/docs/api-reference/render-from-studio-template.md#smart-resize.
 3. Build the pages: slide 1 is a cover, the inside slides share one layout, the last slide is the CTA.
    - one text layer per page with `parameterId: "title"`, set to fit its box (https://orshot.com/docs/orshot-studio/text-modes.md);
@@ -149,7 +149,7 @@ The user: "Write 30 slideshow hooks for a plant-care account and render the firs
 "Make a slideshow video from these photos with our track", "turn this carousel into a reel": that is one MP4, not a photo post. Load `orshot-video-generator` alongside this skill and use them as a pair:
 
 1. This skill writes the carousel as usual: the hook slide, the slides, the CTA slide, the fields.
-2. The video skill makes it a film: one scene per slide, laid out natively for 9:16, a segmented progress rail across the top, one cut family, the song under the whole thing ("Carousel as a video" in its the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`)).
+2. The video skill makes it a film: one scene per slide, laid out natively for 9:16, a segmented progress rail across the top, one cut family, the song under the whole thing (the "Carousel as a video" format from `orshot_plan_design`).
 3. The film keeps the carousel's field names, prefixed per scene, so the same row renders the slides and the video.
 
 The photos and the song must be public URLs.

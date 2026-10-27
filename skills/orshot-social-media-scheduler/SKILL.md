@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/social-media-scheduler
 license: MIT
 metadata:
   author: Orshot
-  version: "1.2.0"
+  version: "1.3.0"
   openclaw:
     emoji: "📣"
     homepage: https://orshot.com/agents/skills/social-media-scheduler
@@ -54,7 +54,7 @@ Connect the Orshot MCP server at `https://mcp.orshot.com/mcp` (OAuth, no key). S
 
 Over REST, `include_health=true` adds a `requires_reconnect` flag per account. If it is `true`, the user must reconnect that account before you post to it. Check it before you schedule a batch, not after a post fails.
 
-**An empty list means a human has to connect accounts.** The API cannot do it. Send the user to the Orshot dashboard, sidebar "Social Posting" > "Accounts", where each platform connects with its own login: https://orshot.com/docs/publish/connect-account.md. It is a paid add-on and the free plan cannot connect accounts, so link https://orshot.com/docs/publish/pricing.md once. Then wait. The next `orshot_list_social_accounts` call shows the new account.
+**An empty list means a human has to connect accounts.** The API cannot do it. A draft or scheduled post can still be saved now with `platforms` instead of `accounts` (any plan); it goes out once an account on that platform is connected. Publishing now needs an account. Send the user to the Orshot dashboard, sidebar "Social Posting" > "Accounts", where each platform connects with its own login: https://orshot.com/docs/publish/connect-account.md. It is a paid add-on and the free plan cannot connect accounts, so link https://orshot.com/docs/publish/pricing.md once. Then wait. The next `orshot_list_social_accounts` call shows the new account.
 
 ## Step 3: the posting loop
 

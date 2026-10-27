@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/social-media-content
 license: MIT
 metadata:
   author: Orshot
-  version: "1.4.0"
+  version: "1.5.0"
   mcp-server: orshot
   openclaw:
     emoji: "🎨"
@@ -24,7 +24,7 @@ metadata:
 
 A social post from Orshot is a designed template plus fresh copy, not a new AI image every time. This skill is the flow for making one post template that a brand can run every week, and rendering it for every post after that.
 
-The layouts come from the post formats reference (call `orshot_get_format_reference` with `reference: "post-formats"`), built from 93 real posts brands published in 2026: the formats brands, clubs, shops and studios actually publish again and again (place-and-date event cards, changelog cards, one big number, split speaker cards, edge rails on match day, row tables for menus). Read it before you design. Design craft (hierarchy, type, color) is in the `orshot-design` skill. Field names and rules live in the docs.
+The layouts come from the post formats `orshot_plan_design` returns for the job, built from 93 real posts brands published in 2026: the formats brands, clubs, shops and studios actually publish again and again (place-and-date event cards, changelog cards, one big number, split speaker cards, edge rails on match day, row tables for menus). Read it before you design. Design craft (hierarchy, type, color) is in the `orshot-design` skill. Field names and rules live in the docs.
 
 ## What people ask for
 
@@ -47,12 +47,11 @@ The layouts come from the post formats reference (call `orshot_get_format_refere
 
 1. **Look for an existing template.** `orshot_list_studio_templates` with a search for the post type. If one fits, skip to step 8.
    **Already designed in Canva?** Do not rebuild it. The user imports it in Orshot Studio from a public share link, so no Canva API access is needed: https://orshot.com/docs/importing-templates/import-from-canva.md. Text and image layers come in as parameters. After the import, go to step 7 and rename the keys that change per post.
-2. **Name the post type and pick its format** from the post formats reference (call `orshot_get_format_reference` with `reference: "post-formats"`). Say it in one line before you design: "Event post, place-and-date card: venue photo full bleed, market name in the sky, one meta line, sponsor row." If the user shared a post that worked, copy its structure and hierarchy, not its words.
-3. **Pick the size.** 4:5 portrait is the default for Instagram and LinkedIn feed posts; 16:9 for X announcements; 9:16 for stories. One image for both LinkedIn and X: 1:1. When the format and this line disagree, this line wins. Create takes `canvas_width` and `canvas_height` in pixels. Preset names and sizes: https://orshot.com/docs/api-reference/render-from-studio-template.md#smart-resize (or the `orshot://formats` MCP resource).
+2. **Pick the size.** 4:5 portrait is the default for Instagram and LinkedIn feed posts; 16:9 for X announcements; 9:16 for stories. One image for both LinkedIn and X: 1:1. When the format and this line disagree, this line wins. Create takes `canvas_width` and `canvas_height` in pixels. Preset names and sizes: https://orshot.com/docs/api-reference/render-from-studio-template.md#smart-resize (or the `orshot://formats` MCP resource).
+3. **Plan, and pick the format.** `orshot_plan_design` with the brief, `job` (the user's words: "instagram post for our webinar speaker"), the canvas size, the colors the user names as `subject_colours` (hex) and `on_brand: true` when the post should be on brand. It returns the post formats brands run for that job (skeleton, size, fields, what makes each work, and what every strong post shares) and the plan: palette, font pair, type scale. Pick the format whose fields match what changes per post and say it in one line before you design: "Event post, place-and-date card: venue photo full bleed, market name in the sky, one meta line, sponsor row." The format's skeleton is the layout; the plan's colours and type are the look. If the user shared a post that worked, copy its structure and hierarchy, not its words. To plan for a format you already know, pass `format` with its id.
 4. **Get the look.**
-   - `orshot_get_brand_kit` when the post should be on brand. Brand colors, fonts and logo win over everything else, but only when the kit is the brand the user named: a workspace kit can hold other brands' assets. If it does not match, use the colors the user gave.
-   - `orshot_plan_design` with the brief and the canvas size, and the colors the user names in words as `subject_colours` (hex). Take its palette and font pairing only, even though it says "build exactly this". The layout, the type sizes and any decoration come from the format you picked; the plan's slots, stickers and doodles belong to its own layout. Where the `orshot://design-pack/social-media` resource and the formats file disagree (icon rows, ribbons), the formats file wins.
-   - `orshot://template-design-spec` for the template JSON. Same content as https://orshot.com/docs/definitions/template-json.md.
+   - `orshot_get_brand_kit` when the post should be on brand. Brand colors, fonts and logo win over the plan's palette, but only when the kit is the brand the user named: a workspace kit can hold other brands' assets. If it does not match, use the colors the user gave.
+   - `orshot_get_design_spec` topic `template-json` once per session for the template JSON. Same content as https://orshot.com/docs/definitions/template-json.md.
    - Pictures: the user's photos and brand kit images first, then `orshot_search_stock_media`. Pick photos with empty space where the text goes.
 5. **Design the frame for a series, not one post.**
    - Fix the frame: logo spot, label positions, footer and margins that never move.
@@ -76,7 +75,7 @@ The layouts come from the post formats reference (call `orshot_get_format_refere
 The user: "Make an Instagram post for the Fernhill Farm Market on Saturday: date, time, entry price and address, in our brand colors."
 
 1. Format: place-and-date card, 1080x1350. A full-bleed photo of market stalls with open sky at the top; "Fernhill Farm Market" in two lines in the sky, left aligned; one meta line under it, `SAT 14 NOV · 8AM TO 1PM · 12 MILL LANE`; the entry price as a small chip; the market's logo top left.
-2. `orshot_get_brand_kit`, then `orshot_plan_design` for the type scale. One stock search for "farmers market stalls" with space at the top.
+2. `orshot_get_brand_kit`, then `orshot_plan_design` with `job: "instagram post for the farm market"`: it returns the place-and-date card and the palette and type scale. One stock search for "farmers market stalls" with space at the top.
 3. Create with fields `event_name`, `meta_line`, `price` and `photo`, then check the thumbnail at phone size.
 4. Every week after that is a render:
 
@@ -106,7 +105,7 @@ Format: edge rail over the photo. The player or team photo fills the canvas; `FU
 
 ## Example: a week of quotes that don't all look the same
 
-1. Build two or three templates for the same post type from different quote shapes in the formats file (a big statement on a flat ground, a review card with a portrait, a borrowed-UI post card), all with the same parameter ids (`quote`, `name`, `role`, `photo`). Vary the ground too (dark, light, a brand colour), so the grid reads as a rotation, not one layout three times.
+1. Build two or three templates for the same post type from the quote format's three shapes (`orshot_plan_design` with `job: "quote post"`: a big statement on a flat ground, a review card with a portrait, a borrowed-UI post card), all with the same parameter ids (`quote`, `name`, `role`, `photo`). Vary the ground too (dark, light, a brand colour), so the grid reads as a rotation, not one layout three times.
 2. The hero is the strongest 8 to 15 words of the quote, set big. A long quote goes in the caption, or the template gets a second, smaller `quote_more` field. Fill the template with a quote of the length the user really sends and render the longest one too.
 3. Rotate by date: template A, B, C in turn, for example week number modulo 3. In a scheduled automation that is one expression that picks the template id; see the `orshot` skill's recurring-automation reference.
 4. Quotes come from the brand's own people or real customers, with their permission. A sample quote to show the layout is fine when you label it as a sample; never present a quote you wrote as a real customer's.
@@ -114,7 +113,7 @@ Format: edge rail over the photo. The player or team photo fills the canvas; `FU
 ## Example: make an existing template less generic
 
 1. `orshot_get_studio_template` to read the current design.
-2. Name its post type and find the format in the post formats reference (call `orshot_get_format_reference` with `reference: "post-formats"`). Compare: count the words and the type sizes, find the hero, check the anti-patterns at the end of that file.
+2. `orshot_plan_design` with the post's job to get its format and the notes on what strong posts share. Compare: count the words and the type sizes, find the hero, check the anti-patterns in the notes.
 3. `orshot_patch_template_elements` with `layer_operations` for the layers that change, `includeThumbnails: true`, then look at the result.
 
 ## The same post as a video
@@ -122,7 +121,7 @@ Format: edge rail over the photo. The player or team photo fills the canvas; `FU
 "Make it a reel", "an animated version", "a video for TikTok": load `orshot-video-generator` alongside this skill. They work as a pair:
 
 1. This skill picks the format and designs the static post as usual (or finds the existing image template): copy, fields, palette, fonts.
-2. The video skill turns it into a film that builds to that post, re-laid for 9:16: the scenes before it, the motion, the ground footage, the layer that runs start to end. The MCP resource `orshot_get_format_reference` (`reference: "video-post-formats"`) has the film for each format in this skill's formats file.
+2. The video skill turns it into a film that builds to that post, re-laid for 9:16: the scenes before it, the motion, the ground footage, the layer that runs start to end. `orshot_plan_design` with the same job and `duration_seconds` returns the film format for each post type.
 3. Both templates keep the same base field names, so one sheet row renders the image and the video.
 
 ## Rules

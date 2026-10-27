@@ -2,7 +2,7 @@
 
 Use this path when the video is driven by a voice: a faceless Short with a voiceover per scene and word-by-word captions, a podcast clip, or captions burnt into a talking-head clip. Films do not burn captions in or take a per-render `audioSource` yet, so these videos are pages joined with `videoOptions.combinePages` instead of a `film` block. Everything else in the skill (pacing, pictures, checks, drafts) still applies.
 
-Field shapes: `orshot://template-design-spec` and https://orshot.com/docs/definitions/template-json.md. Render options: https://orshot.com/docs/video-generation/video-options.md. Captions: https://orshot.com/docs/video-generation/adding-subtitles.md. Per-render clip keys: https://orshot.com/docs/video-generation/video-elements.md.
+Field shapes: `orshot_get_design_spec` topic `template-json` and https://orshot.com/docs/definitions/template-json.md. Render options: https://orshot.com/docs/video-generation/video-options.md. Captions: https://orshot.com/docs/video-generation/adding-subtitles.md. Per-render clip keys: https://orshot.com/docs/video-generation/video-elements.md.
 
 ## Recipes
 

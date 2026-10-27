@@ -1,12 +1,12 @@
 # Film recipes
 
-One recipe per kind of video people make. Each is a beat sheet with timings that passed review, the cut family, the motion per scene and the fields that change per render. Times count from each scene's start. Field names and allowed values are in `orshot://film-spec`, `orshot://template-design-spec` and https://orshot.com/docs/orshot-studio/motion.md; this file only says what to build.
+One recipe per kind of video people make. Each is a beat sheet with timings that passed review, the cut family, the motion per scene and the fields that change per render. Times count from each scene's start. Field names and allowed values are in `orshot_get_design_spec` topic `film`, `orshot_get_design_spec` topic `template-json` and https://orshot.com/docs/orshot-studio/motion.md; this file only says what to build.
 
 Every recipe follows the pacing rule in the skill: text is read at about 0.4 s per word from when each block starts entering, blocks in entrance order, then the scene holds about 1 s; the last arrival holds 2 s or more, and cuts take 0.9 to 1.2 s. If a scene feels slow, cut words. Never shorten the motion.
 
 ## 1. Chart or stat explainer
 
-Moved to the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`) (stat, milestone or chart: number, chart, count). For a table of results, use the lineup timing there: rows land 0.1 s apart, then a long hold.
+A video post format, returned by `orshot_plan_design` with the job and `duration_seconds` (stat, milestone or chart: number, chart, count). For a table of results, use the lineup timing there: rows land 0.1 s apart, then a long hold.
 
 ## 2. Tips or listicle reel
 
@@ -24,7 +24,7 @@ Moved to the video post formats reference (call `orshot_get_format_reference` wi
 
 ## 3. Real estate listing reel
 
-Moved to the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`) (real estate: status word, rooms, proof numbers, contact).
+A video post format, returned by `orshot_plan_design` with the job and `duration_seconds` (real estate: status word, rooms, proof numbers, contact).
 
 ## 4. Launch teaser
 
@@ -87,7 +87,7 @@ Teacher's day, Eid, a team anniversary, a thank-you to customers. 9:16 or 1:1, 1
 
 ## 8. Testimonial or review film
 
-Moved to the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`) (customer quote: the result, the words, the person).
+A video post format, returned by `orshot_plan_design` with the job and `duration_seconds` (customer quote: the result, the words, the person).
 
 ## 9. Character dialogue
 

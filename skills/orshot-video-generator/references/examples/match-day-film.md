@@ -4,7 +4,7 @@ A club posts this after every game. Three scenes, one progress bar across the wh
 
 Brand: Harbour City FC (sample). Navy `#0E2240`, mint `#8FD6C4`, white `#F4F7F6`. Fonts: Anton (shout and numbers), Barlow Condensed 700 to 800 (names and meta).
 
-Field shapes and motion keys are in `orshot://film-spec` and `orshot://template-design-spec`. The snippets below are excerpts of the real template, trimmed to the keys that matter.
+Field shapes and motion keys are in `orshot_get_design_spec` topics `film` and `template-json`. The snippets below are excerpts of the real template, trimmed to the keys that matter.
 
 ## The timeline
 

@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/blog-images
 license: MIT
 metadata:
   author: Orshot
-  version: "1.0.0"
+  version: "1.1.0"
   openclaw:
     emoji: "📝"
     homepage: https://orshot.com/agents/skills/blog-images
@@ -61,7 +61,7 @@ Image models draw pictures; they cannot be trusted with words, numbers, logos or
 
 1. Connect the Orshot MCP server at `https://mcp.orshot.com/mcp` (OAuth in the browser, no key). Setup per client: https://orshot.com/docs/integrations/mcp-server.md. Headless or scheduled jobs use REST with `ORSHOT_API_KEY` (example below). The `orshot` skill covers both.
 2. Get the brand: `orshot_get_brand_kit`. If it is empty and the user has a website, `orshot_scan_brand_website` with their URL, then use the colors, fonts and logo it finds. Ask before importing anything into their brand kit.
-3. Read `orshot://template-design-spec` once before creating any template. It is the template JSON reference, also at https://orshot.com/docs/definitions/template-json.md. Load the `orshot-design` skill for design craft beyond the style guide here.
+3. `orshot_plan_design` with the brief, `job: "blog cover image for <the post>"`, the size and `on_brand: true`, once per template set: it returns the plan (palette, fonts, type scale) and a layout. Read `orshot_get_design_spec` topic `template-json` once per session; it is the template JSON reference, also at https://orshot.com/docs/definitions/template-json.md. Load the `orshot-design` skill for design craft beyond the style guide here.
 
 ## Step 1. Read the post and plan the images
 
@@ -218,7 +218,7 @@ When the brand changes, apply the new colors to the Blog Cover System once (the 
 1. The keyword chip is a `<span style="background-color:...">` inside the title's content, so it moves with the words. Standalone pills are a shape behind the text.
 2. Card shadows on shapes use the `dropShadow*` style keys, as the blueprints do. The renderer draws `boxShadow*` only on image and video layers.
 3. Title lines with `<span>` tags are rich text, where `\n` is not converted. Use `<br>` there; plain text takes `\n`. Line-break and other field rules: https://orshot.com/docs/definitions/template-json.md.
-4. On a multi-page template, a content key without a `pageN@` prefix changes no page; the response carries a warning. A bare style key (`logo_4.opacity`) applies to every page that has that layer. Details: https://orshot.com/docs/image-generation/multi-page-images.md.
+4. Multi-page keys need the `pageN@` prefix: gotcha 2 in the `orshot` skill. A bare style key (`logo_4.opacity`) applies to every page that has that layer. Details: https://orshot.com/docs/image-generation/multi-page-images.md.
 5. Small layout fixes do not need a full update. `orshot_patch_template_elements` with `layer_operations` adds, edits, moves or deletes any layer by `element_id`. Whole pages go through `orshot_update_template_design` with `page_operations`. Ids come back in the `pageMap` of the create or update result.
 6. Never put a credit line or watermark on the images.
 7. Do not create a new cover template per post. Reuse the one Blog Cover System template.

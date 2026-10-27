@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/ad-creative
 license: MIT
 metadata:
   author: Orshot
-  version: "1.0.0"
+  version: "1.1.0"
   openclaw:
     emoji: "📣"
     homepage: https://orshot.com/agents/skills/ad-creative
@@ -25,7 +25,7 @@ An ad campaign is one design repeated many times: three Meta sizes, five display
 
 Writing ad copy is your job. Rendering it into pixel-exact ads in every size is Orshot's.
 
-The layouts come from the ad formats reference (call `orshot_get_format_reference` with `reference: "ad-formats"`): the formats advertisers actually run, built from 60 static ads that were live in October 2026, most of them running 30 days or longer: 40 from the Meta Ad Library (picked from the ad pages of 23 direct-to-consumer brands and about 230 SaaS, B2B and local service ads), 11 from the LinkedIn Ad Library (240 cards from 10 B2B advertisers) and 9 from the Google Ads Transparency Center (about 4,000 creatives searched). Read it before you design.
+The layouts come from the ad formats `orshot_plan_design` returns for the job: the formats advertisers actually run, built from 60 static ads that were live in October 2026, most of them running 30 days or longer: 40 from the Meta Ad Library (picked from the ad pages of 23 direct-to-consumer brands and about 230 SaaS, B2B and local service ads), 11 from the LinkedIn Ad Library (240 cards from 10 B2B advertisers) and 9 from the Google Ads Transparency Center (about 4,000 creatives searched). Plan before you design.
 
 ## What people ask for
 
@@ -44,11 +44,11 @@ This skill is the flow. Field shapes, allowed values and limits are in the docs.
 - Smart Resize in the editor (adjust and save a size): https://orshot.com/docs/orshot-studio/smart-resize.md
 - Style overrides per render (for example `opacity`): https://orshot.com/docs/orshot-studio/style-parameters.md
 - Canvas background per render: https://orshot.com/docs/orshot-studio/api-specs.md
-- Template JSON: the MCP resource `orshot://template-design-spec`, or https://orshot.com/docs/definitions/template-json.md
+- Template JSON: `orshot_get_design_spec` topic `template-json`, or https://orshot.com/docs/definitions/template-json.md
 - Credits: https://orshot.com/docs/definitions/credits-usage.md
 - Shopify app: https://orshot.com/docs/integrations/shopify.md
 - Animated output (`videoOptions`): https://orshot.com/docs/video-generation/video-options.md
-- Ad formats by type (skeleton, sizes, fields): the ad formats reference (call `orshot_get_format_reference` with `reference: "ad-formats"`)
+- Ad formats by type (skeleton, sizes, fields): `orshot_plan_design` with the campaign as `job`; every format by name: `orshot_get_design_spec` topic `formats-catalogue`
 - Default size sets per campaign: `references/ad-sizes.md`
 - Design craft (hierarchy, type, color, safe areas): load the `orshot-design` skill.
 
@@ -64,7 +64,7 @@ Design the ad once at its main size. Render it with `extraSizes` and Smart Resiz
 
 Rules that keep Smart Resize honest:
 
-- Pick the main size from the format, then from where most spend goes. The format in `orshot_get_format_reference` (`reference: "ad-formats"`) names its size (catalog frames, local offers and LinkedIn are 1:1). Otherwise Meta-first campaigns design at 1080x1350, display-first at 300x250 or 1200x1200.
+- Pick the main size from the format, then from where most spend goes. The format from `orshot_plan_design` names its size (catalog frames, local offers and LinkedIn are 1:1). Otherwise Meta-first campaigns design at 1080x1350, display-first at 300x250 or 1200x1200.
 - Strip banners (728x90, 320x50, 970x250) have room for a logo, a 3 to 5 word headline and a CTA. Look at them before shipping. If one does not read, build a separate strip template with the same parameter ids. (A person can also fix that size in the Studio's Smart Resize panel with Adjust Variant; an agent cannot, so offer it to the user rather than relying on it.)
 - `extraSizes` works for image formats only. Each extra size is billed as its own image.
 
@@ -89,15 +89,15 @@ Copy rules:
 - One message per ad. A test changes one thing at a time.
 - Numbers are digits: "40%", "$29", "3 days left".
 - The hook goes in the top third and reads on its own, so it is the first thing seen. In Stories and Reels the bottom of the frame sits under the caption and buttons.
-- Story placements: keep text, offer and logo out of the zones the platform UI covers: on a 9:16 ad the top 13 to 20% and the bottom 20% hold no text. The safe areas are in `orshot://design-pack/social-media`, section 1.
+- Story placements: keep text, offer and logo out of the zones the platform UI covers: on a 9:16 ad the top 13 to 20% and the bottom 20% hold no text. The safe areas are in `orshot_get_design_spec` topic `social-pack`, section 1.
 - Specific numbers beat adjectives: "$2.65 per meal", "2g vs 39g of sugar". The offer sits on the product (a sticker, the price under the kicker), never in a footer.
 - Contrast: white text on a photo needs a dark scrim (a gradient shape) under it.
 
 ## Build the template once
 
 1. `orshot_list_studio_templates` with search `ad`. A good one exists? Read its keys with `orshot_get_studio_template_modifications` and skip to rendering.
-2. **Name the ad type and pick its format** from the ad formats reference (call `orshot_get_format_reference` with `reference: "ad-formats"`). Say it in one line before you design: "DTC offer ad, offer as the headline: kicker, struck old price and new price, the open box filling the middle, a free-gift sticker on it." The format sets the skeleton, the sizes of things and the fields.
-3. Read `orshot://template-design-spec`, and load the `orshot-design` skill if the user has not fixed a look. If you call `orshot_plan_design` (the social design pack asks for it), take its fonts and texture, but the format from step 2 sets the skeleton and the brand's colours win over the plan's accent.
+2. **Plan, and pick the format.** `orshot_plan_design` with the brief, `job` (the user's words: "meta ad for the spring sale"), the main size and `on_brand: true` for brand work. It returns the ad formats advertisers run for that job (skeleton, size, fields, what makes each work) and the plan: palette, fonts, type scale. Pick the format whose fields match what changes per ad and say it in one line before you design: "DTC offer ad, offer as the headline: kicker, struck old price and new price, the open box filling the middle, a free-gift sticker on it." The format sets the skeleton, the sizes of things and the fields; the brand's colours win over the plan's accent.
+3. Read `orshot_get_design_spec` topic `template-json` once per session, and load the `orshot-design` skill if the user has not fixed a look.
 4. Find real imagery: the user's product shots from the brand kit, or `orshot_search_stock_media` with the subject in 1 to 3 words. Pick stock with no visible brand or label (many product shots show a real logo), and tell the user it is a placeholder for their own shot. Resolve a stock pick to a URL with `orshot_use_stock_media`, or put its `ref` straight into the template.
 5. `orshot_create_template_design` named `Ad: <brand> <campaign type>`, `canvas_width` and `canvas_height` from the format's size, `tags: ["ad"]`, `includeThumbnails: true`. Every part in the table above is `parameterizable: true` with its `parameterId`. Text layers get `textMode: "fit"` and a `minFontSize`. A seasonal background colour needs no field: send `canvasBackgroundColor` per render.
 6. Read the thumbnail and the design checks. Fix real problems with one `orshot_update_template_design` call; small edits go through `orshot_patch_template_elements`.
@@ -196,7 +196,7 @@ For every feed:
 
 ## Animated banners (GIF and MP4)
 
-For a short moving banner (a price that pops, a badge that pulses, 3 to 6 seconds), the same render tool takes `format: "gif"` or `"mp4"`. A video ad over 6 seconds, or with footage, voiceover or more than one scene, is a film: load `orshot-video-generator` alongside this skill and use them as a pair. This skill sets the offer, the hook, the product photo, the sizes and the CTA, and designs the static end card. The video skill builds the scenes that lead to it ("Video ad" in its the video post formats reference (call `orshot_get_format_reference` with `reference: "video-post-formats"`)).
+For a short moving banner (a price that pops, a badge that pulses, 3 to 6 seconds), the same render tool takes `format: "gif"` or `"mp4"`. A video ad over 6 seconds, or with footage, voiceover or more than one scene, is a film: load `orshot-video-generator` alongside this skill and use them as a pair. This skill sets the offer, the hook, the product photo, the sizes and the CTA, and designs the static end card. The video skill builds the scenes that lead to it (the "Video ad" format from `orshot_plan_design`).
 
 - GIF and MP4 need a plan with video rendering. The Free plan renders neither. Check `orshot_get_account` first.
 - Add motion to the template (enter animations, `showAt`, `motion`; see [Template JSON](https://orshot.com/docs/definitions/template-json.md)). Frame 0 must already show the product and the offer.
