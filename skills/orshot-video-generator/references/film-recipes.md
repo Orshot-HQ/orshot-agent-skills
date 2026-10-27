@@ -6,7 +6,7 @@ Every recipe follows the pacing rule in the skill: text is read at about 0.4 s p
 
 ## 1. Chart or stat explainer
 
-Moved to [`video-post-formats.md`](video-post-formats.md) (stat, milestone or chart: number, chart, count). For a table of results, use the lineup timing there: rows land 0.1 s apart, then a long hold.
+Moved to the MCP resource `orshot://reference/video-post-formats` (stat, milestone or chart: number, chart, count). For a table of results, use the lineup timing there: rows land 0.1 s apart, then a long hold.
 
 ## 2. Tips or listicle reel
 
@@ -24,7 +24,7 @@ Moved to [`video-post-formats.md`](video-post-formats.md) (stat, milestone or ch
 
 ## 3. Real estate listing reel
 
-Moved to [`video-post-formats.md`](video-post-formats.md) (real estate: status word, rooms, proof numbers, contact).
+Moved to the MCP resource `orshot://reference/video-post-formats` (real estate: status word, rooms, proof numbers, contact).
 
 ## 4. Launch teaser
 
@@ -87,7 +87,7 @@ Teacher's day, Eid, a team anniversary, a thank-you to customers. 9:16 or 1:1, 1
 
 ## 8. Testimonial or review film
 
-Moved to [`video-post-formats.md`](video-post-formats.md) (customer quote: the result, the words, the person).
+Moved to the MCP resource `orshot://reference/video-post-formats` (customer quote: the result, the words, the person).
 
 ## 9. Character dialogue
 

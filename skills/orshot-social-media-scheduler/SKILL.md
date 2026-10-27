@@ -2,7 +2,7 @@
 name: orshot-social-media-scheduler
 description: "Social media scheduler and auto-poster with Orshot: schedule posts or auto-post to Instagram, TikTok, LinkedIn, X, Facebook, YouTube, Pinterest, Threads, Bluesky, Reddit, Telegram, Snapchat and Google Business, with the image, carousel or video rendered from a template in the same call, so the queue never runs empty. Plans a week of posts as drafts you approve once, cross-posts, schedules at the best time and reads post analytics, from Claude, Codex or any MCP client over the hosted Orshot MCP server (OAuth, no key), or REST for n8n, Make and cron jobs. Use when: \"schedule this week's posts\", \"auto-post to instagram and tiktok\", \"schedule posts from claude\", \"cross-post to every platform\", \"let me approve before it posts\", \"social media scheduler\", \"best time to post\". NOT for designing the image or video itself (use orshot-social-media-content, orshot-carousel or orshot-video-generator)."
 homepage: https://orshot.com/agents/skills/social-media-scheduler
-license: MIT-0
+license: MIT
 metadata:
   author: Orshot
   version: "1.2.0"

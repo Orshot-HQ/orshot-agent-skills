@@ -2,7 +2,7 @@
 name: orshot-pdf-generator
 description: "Invoice and certificate PDF generator with the Orshot API: design an invoice, receipt, quote, certificate, report, proposal, ticket or offer letter once, then render one designed PDF per row or event from Google Sheets, Airtable, Notion, HubSpot, Stripe or a webhook, through n8n, Make, Zapier, REST or an Orshot Workflow, and pass the PDF URL to Gmail, Google Drive or the CRM. Selectable text, line items, page numbers on long documents and clickable pay links. Use when: \"generate invoice PDFs automatically\", \"make certificates for this list of names\", \"bulk certificates from a spreadsheet\", \"turn each row into a PDF\", \"send a PDF receipt when someone pays\", \"PDF from a template via API\". NOT for pulling data out of invoices or PDFs (use an OCR or parsing tool), editing, merging or filling a PDF you already have, or a one-off document (use a local pdf or docx skill). Blog images, ads and social posts: orshot-blog-images, orshot-ad-creative, orshot-social-media-content."
 homepage: https://orshot.com/agents/skills/pdf-generator
-license: MIT-0
+license: MIT
 metadata:
   author: Orshot
   version: "1.0.0"

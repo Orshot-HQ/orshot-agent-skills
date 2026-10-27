@@ -2,7 +2,7 @@
 name: orshot-ad-creative
 description: "Static ad creative generator with Orshot: Facebook and Instagram ad creatives, Meta story ads, catalog ads and display banners rendered from one template with real headlines, offers, prices, logos and product photos, so every test variation is on brand and spelled right. Smart Resize makes every placement size in one call, a batch render makes hook and angle variants, catalog ads render one image per product from a sheet, a CSV or the Orshot Shopify app, plus short GIF or MP4 banners. Use when: \"static ad creatives for Meta\", \"ad variations to test\", \"our ads have creative fatigue\", \"15 ad variants from this product photo\", \"facebook ad maker\", \"catalog ads for my store\", \"banner ads in every size\", \"AI ad generator\". NOT for organic social posts (use orshot-social-media-content), carousels (use orshot-carousel), video ads with footage or voiceover (use orshot-video-generator), YouTube thumbnails (use orshot-youtube-thumbnail) or posting and scheduling (use orshot-social-media-scheduler)."
 homepage: https://orshot.com/agents/skills/ad-creative
-license: MIT-0
+license: MIT
 metadata:
   author: Orshot
   version: "1.0.0"
@@ -25,7 +25,7 @@ An ad campaign is one design repeated many times: three Meta sizes, five display
 
 Writing ad copy is your job. Rendering it into pixel-exact ads in every size is Orshot's.
 
-The layouts come from [`references/ad-formats.md`](references/ad-formats.md): the formats advertisers actually run, built from 60 static ads that were live in October 2026, most of them running 30 days or longer: 40 from the Meta Ad Library (picked from the ad pages of 23 direct-to-consumer brands and about 230 SaaS, B2B and local service ads), 11 from the LinkedIn Ad Library (240 cards from 10 B2B advertisers) and 9 from the Google Ads Transparency Center (about 4,000 creatives searched). Read it before you design.
+The layouts come from the MCP resource `orshot://reference/ad-formats`: the formats advertisers actually run, built from 60 static ads that were live in October 2026, most of them running 30 days or longer: 40 from the Meta Ad Library (picked from the ad pages of 23 direct-to-consumer brands and about 230 SaaS, B2B and local service ads), 11 from the LinkedIn Ad Library (240 cards from 10 B2B advertisers) and 9 from the Google Ads Transparency Center (about 4,000 creatives searched). Read it before you design.
 
 ## What people ask for
 
@@ -48,7 +48,7 @@ This skill is the flow. Field shapes, allowed values and limits are in the docs.
 - Credits: https://orshot.com/docs/definitions/credits-usage.md
 - Shopify app: https://orshot.com/docs/integrations/shopify.md
 - Animated output (`videoOptions`): https://orshot.com/docs/video-generation/video-options.md
-- Ad formats by type (skeleton, sizes, fields): `references/ad-formats.md`
+- Ad formats by type (skeleton, sizes, fields): the MCP resource `orshot://reference/ad-formats`, read through the connected Orshot MCP server
 - Default size sets per campaign: `references/ad-sizes.md`
 - Design craft (hierarchy, type, color, safe areas): load the `orshot-design` skill.
 
@@ -64,7 +64,7 @@ Design the ad once at its main size. Render it with `extraSizes` and Smart Resiz
 
 Rules that keep Smart Resize honest:
 
-- Pick the main size from the format, then from where most spend goes. The format in `references/ad-formats.md` names its size (catalog frames, local offers and LinkedIn are 1:1). Otherwise Meta-first campaigns design at 1080x1350, display-first at 300x250 or 1200x1200.
+- Pick the main size from the format, then from where most spend goes. The format in `orshot://reference/ad-formats` names its size (catalog frames, local offers and LinkedIn are 1:1). Otherwise Meta-first campaigns design at 1080x1350, display-first at 300x250 or 1200x1200.
 - Strip banners (728x90, 320x50, 970x250) have room for a logo, a 3 to 5 word headline and a CTA. Look at them before shipping. If one does not read, build a separate strip template with the same parameter ids. (A person can also fix that size in the Studio's Smart Resize panel with Adjust Variant; an agent cannot, so offer it to the user rather than relying on it.)
 - `extraSizes` works for image formats only. Each extra size is billed as its own image.
 
@@ -96,7 +96,7 @@ Copy rules:
 ## Build the template once
 
 1. `orshot_list_studio_templates` with search `ad`. A good one exists? Read its keys with `orshot_get_studio_template_modifications` and skip to rendering.
-2. **Name the ad type and pick its format** from [`references/ad-formats.md`](references/ad-formats.md). Say it in one line before you design: "DTC offer ad, offer as the headline: kicker, struck old price and new price, the open box filling the middle, a free-gift sticker on it." The format sets the skeleton, the sizes of things and the fields.
+2. **Name the ad type and pick its format** from the MCP resource `orshot://reference/ad-formats`. Say it in one line before you design: "DTC offer ad, offer as the headline: kicker, struck old price and new price, the open box filling the middle, a free-gift sticker on it." The format sets the skeleton, the sizes of things and the fields.
 3. Read `orshot://template-design-spec`, and load the `orshot-design` skill if the user has not fixed a look. If you call `orshot_plan_design` (the social design pack asks for it), take its fonts and texture, but the format from step 2 sets the skeleton and the brand's colours win over the plan's accent.
 4. Find real imagery: the user's product shots from the brand kit, or `orshot_search_stock_media` with the subject in 1 to 3 words. Pick stock with no visible brand or label (many product shots show a real logo), and tell the user it is a placeholder for their own shot. Resolve a stock pick to a URL with `orshot_use_stock_media`, or put its `ref` straight into the template.
 5. `orshot_create_template_design` named `Ad: <brand> <campaign type>`, `canvas_width` and `canvas_height` from the format's size, `tags: ["ad"]`, `includeThumbnails: true`. Every part in the table above is `parameterizable: true` with its `parameterId`. Text layers get `textMode: "fit"` and a `minFontSize`. A seasonal background colour needs no field: send `canvasBackgroundColor` per render.
@@ -196,7 +196,7 @@ For every feed:
 
 ## Animated banners (GIF and MP4)
 
-For a short moving banner (a price that pops, a badge that pulses, 3 to 6 seconds), the same render tool takes `format: "gif"` or `"mp4"`. A video ad over 6 seconds, or with footage, voiceover or more than one scene, is a film: load `orshot-video-generator` alongside this skill and use them as a pair. This skill sets the offer, the hook, the product photo, the sizes and the CTA, and designs the static end card. The video skill builds the scenes that lead to it ("Video ad" in its [`references/video-post-formats.md`](https://github.com/Orshot-HQ/orshot-agent-skills/blob/main/skills/orshot-video-generator/references/video-post-formats.md)).
+For a short moving banner (a price that pops, a badge that pulses, 3 to 6 seconds), the same render tool takes `format: "gif"` or `"mp4"`. A video ad over 6 seconds, or with footage, voiceover or more than one scene, is a film: load `orshot-video-generator` alongside this skill and use them as a pair. This skill sets the offer, the hook, the product photo, the sizes and the CTA, and designs the static end card. The video skill builds the scenes that lead to it ("Video ad" in its the MCP resource `orshot://reference/video-post-formats`).
 
 - GIF and MP4 need a plan with video rendering. The Free plan renders neither. Check `orshot_get_account` first.
 - Add motion to the template (enter animations, `showAt`, `motion`; see [Template JSON](https://orshot.com/docs/definitions/template-json.md)). Frame 0 must already show the product and the offer.

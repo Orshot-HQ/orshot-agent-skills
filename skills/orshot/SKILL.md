@@ -2,7 +2,7 @@
 name: orshot
 description: "Image, PDF and video generation from Orshot templates, through the hosted MCP server (OAuth, no API key) or the REST API. Covers connecting, finding a template and its parameter keys, render options (formats, sizes, Smart Resize, batch, async), dynamic image URLs, utility templates (tweet and website screenshots, charts, mockups), posting a render to connected social accounts, wiring it into n8n, Make, Zapier or cron, and the gotchas that break renders (parameterId keys, page1@ prefixes, public image URLs). Use when: \"render my Orshot template\", \"connect Orshot to Claude\", \"call the Orshot API\", \"my modification is ignored\", \"automate this render in n8n\", \"screenshot this tweet\", \"move from Bannerbear to Orshot\". One job end to end: load its skill (orshot-blog-images, orshot-pdf-generator, orshot-video-generator, orshot-ad-creative, orshot-carousel, orshot-youtube-thumbnail, orshot-social-media-content or orshot-social-media-scheduler). NOT for template design craft (use orshot-design)."
 homepage: https://orshot.com/agents/skills
-license: MIT-0
+license: MIT
 metadata:
   author: Orshot
   version: "1.5.0"

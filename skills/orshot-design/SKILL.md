@@ -2,7 +2,7 @@
 name: orshot-design
 description: "Design craft for Orshot studio templates: one focal point, a 2-font type system, 60-30-10 color, copy that still fits when the data changes, restrained motion, the brand kit when the design should be on-brand, layouts that do not repeat, and a create-then-critique loop over the hosted Orshot MCP server. The shared craft base that every Orshot use-case skill loads when it creates or refines a template (posts, stories, carousels, ads, banners, thumbnails, video). Use when: \"design a template for this\", \"make this template look less generic\", \"refine this design\", \"build an on-brand post template\", \"why does this look AI-made\". NOT for rendering, batches or posting (use orshot) or for a whole job end to end (use its use-case skill, for example orshot-blog-images or orshot-ad-creative)."
 homepage: https://orshot.com/agents/skills
-license: MIT-0
+license: MIT
 metadata:
   author: Orshot
   version: "1.2.0"

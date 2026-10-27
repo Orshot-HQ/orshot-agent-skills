@@ -2,7 +2,7 @@
 name: orshot-blog-images
 description: "Featured image and OG image generator for blog posts with Orshot: an on-brand cover for every post (WordPress featured image, Open Graph image) plus 3 to 6 in-article images, rendered from templates with the post's real title, logos and numbers. Works with WordPress (the Orshot plugin sets the featured image on publish), Webflow, Ghost, Next.js, Astro and MDX blogs. Sets a cover on each new post through n8n, Make, Zapier or a webhook, fills old posts that have no featured image, gives each page an og:image URL, and resizes the cover for LinkedIn, X and Instagram. Use when: \"make a featured image for this post\", \"generate OG images for my blog\", \"auto-generate featured images in WordPress\", \"add featured images to my old posts\", \"OG image for every page\", \"blog cover image\", \"images for my article\". NOT for carousels (use orshot-carousel), ad creatives (use orshot-ad-creative), YouTube thumbnails (use orshot-youtube-thumbnail) or a one-off illustration or photo (use an image model)."
 homepage: https://orshot.com/agents/skills/blog-images
-license: MIT-0
+license: MIT
 metadata:
   author: Orshot
   version: "1.0.0"

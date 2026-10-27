@@ -149,4 +149,6 @@ The skills and plugin ship no hooks, no local executables and no telemetry. The 
 
 ## License
 
-MIT for the plugin, MIT-0 for each skill (see each SKILL.md).
+MIT for the plugin and every skill.
+
+The format research the skills design from (post, ad and video post formats, thumbnail layouts) is served by the Orshot MCP server as `orshot://reference/*` resources and is read with an Orshot login. It is not part of this repo.

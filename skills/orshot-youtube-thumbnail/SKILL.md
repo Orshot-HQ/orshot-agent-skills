@@ -2,7 +2,7 @@
 name: orshot-youtube-thumbnail
 description: "YouTube thumbnail maker with Orshot: thumbnails built from a frame of the video, the host's face cutout and the hook words, rendered from one template per channel style so every video in a series matches. No generated faces or scenes, and the words are real text, sharp and spelled right. 2 to 3 A/B variants for YouTube Test & Compare render in one batch, a back catalogue gets new thumbnails from a sheet, and an n8n, Make or Zapier job renders one for every new upload. Use when: \"make a YouTube thumbnail\", \"youtube thumbnail maker\", \"thumbnail template for my channel\", \"match my thumbnail style\", \"A/B test my thumbnails\", \"automate a thumbnail for every upload\", \"redo thumbnails on my old videos\", \"AI thumbnail maker\". NOT for the video itself (use orshot-video-generator), blog covers (use orshot-blog-images), ad creatives (use orshot-ad-creative) or social posts (use orshot-social-media-content)."
 homepage: https://orshot.com/agents/skills/youtube-thumbnail
-license: MIT-0
+license: MIT
 metadata:
   author: Orshot
   version: "1.0.0"
@@ -74,7 +74,7 @@ If the channel already has thumbnails, the template copies that look. Ask for th
 | Screenshot + reaction | A screenshot or product in a tilted card, face cutout breaking over its edge, 2 to 3 words | Software, tutorials, reviews, news about an app or a post |
 | Screenshot + name | A real gameplay or app screenshot full bleed, a dark gradient, 2 to 4 huge words, an optional small face | Gaming builds, guides, patch notes, tutorials |
 
-Geometry for each layout and a full `pages_data` example: `references/layouts.md`.
+Geometry for each layout and a full `pages_data` example: the MCP resource `orshot://reference/youtube-thumbnail-layouts`, read through the connected Orshot MCP server.
 
 ## Build the template once per channel style
 
