@@ -24,13 +24,12 @@ If you have browser control or repo access, offer to do the setup rather than de
 
 Orshot runs the whole loop: trigger, data, render, delivery. Over MCP:
 
-1. If the client lists `orshot_suggest_workflows`, call it with the `templateId` for automations that fit this template. Claude clients do not have this tool; go to step 2.
-2. `orshot_list_workflow_nodes`. Use the exact node keys it returns (`render`, `slack`, ...). Invented keys fail as an unknown node.
-3. `orshot_list_connected_integrations` to see what is already connected.
-4. `orshot_get_workflow_connection_data` to turn "my content sheet" into a concrete id. Confirm the name back to the user.
-5. `orshot_validate_workflow`. Read `errors`, `warnings` and `gated`. A `gated` entry means the step is not in the workspace's plan, not a config problem: the draft still saves, only activation is blocked. Tell the user that instead of editing steps. A run is refused while any error or warning is left.
-6. `orshot_create_workflow` with `status: "draft"`. Share the link from the result; it opens the workflow in their dashboard.
-7. After a clear yes, `orshot_run_workflow` to prove it works. Then they activate it.
+1. `orshot_list_workflow_nodes`. Use the exact node keys it returns (`render`, `slack`, ...). Invented keys fail as an unknown node.
+2. `orshot_list_connected_integrations` to see what is already connected.
+3. `orshot_get_workflow_connection_data` to turn "my content sheet" into a concrete id. Confirm the name back to the user.
+4. `orshot_validate_workflow`. Read `errors`, `warnings` and `gated`. A `gated` entry means the step is not in the workspace's plan, not a config problem: the draft still saves, only activation is blocked. Tell the user that instead of editing steps. A run is refused while any error or warning is left.
+5. `orshot_create_workflow` with `status: "draft"`. Share the link from the result; it opens the workflow in their dashboard.
+6. After a clear yes, `orshot_run_workflow` to prove it works. Then they activate it.
 
 **When there is no data source yet,** use `webhook` → `webhook_body` → `render` (with its `templateId` set) → `orshot_url`. It needs no OAuth connection, so it can run right away. `orshot_get_workflow_webhook` returns the URL to POST to from cron, their app, n8n or Make. A bare `schedule` → `render` does not run: validation warns "no data source", so a schedule needs a source step after it.
 
