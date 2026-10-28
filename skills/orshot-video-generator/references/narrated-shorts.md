@@ -81,7 +81,7 @@ One template per channel, one n8n node per step:
 4. **Text to speech:** one mp3 per scene from the user's voice service, at a public URL.
 5. **HTTP Request:** the render above over REST, with `"response": { "type": "url", "format": "mp4", "mode": "async" }`, a `webhook_url` pointing at an n8n Webhook node and `"metadata": "{{row_number}}"`. The Orshot n8n node lists image and PDF formats, so video goes through an HTTP Request node.
 6. **Wait for the result:** the Webhook node, or poll `GET /v1/studio/render-jobs/<id>` until `finished` is true ([Async renders](https://orshot.com/docs/api-reference/async-render-start.md)).
-7. **Write back:** the video URL in the row, marked `done`, or render with `publish` and `"isDraft": true` so it waits as a draft.
+7. **Write back:** the video URL in the row, marked `done`, or post it as a draft: `orshot_publish_social_post` with the video URL and `status: "draft"` over MCP, or `publish` with `"isDraft": true` on a REST render.
 
 Say the cost before switching it on: video is 1 credit per second, so one 30 s short a day is about 900 credits a month.
 

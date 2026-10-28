@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/video-generator
 license: MIT
 metadata:
   author: Orshot
-  version: "1.1.0"
+  version: "1.1.1"
   openclaw:
     emoji: "🎬"
     homepage: https://orshot.com/agents/skills/video-generator
@@ -200,7 +200,7 @@ Over MCP, output options are flat arguments. A REST-style `response` object is i
 }
 ```
 
-`orshot_get_render_job` with `id` (the render's `jobId`) and `waitSeconds: 25`; call again while `finished` is false. A 20 s film encodes in about a minute. The job lists one output (labelled page 1): that is the whole film, and `videoDuration` is its length. Open it and watch it; the checks and thumbnails do not show the cuts.
+`orshot_get_render_job` with the render's `jobId` and `waitSeconds: 25`; call again while `finished` is false. A 20 s film encodes in about a minute. The job lists one output (labelled page 1): that is the whole film, and `videoDuration` is its length. Open it and watch it; the checks and thumbnails do not show the cuts.
 
 Video costs 1 credit per second. Say the cost before rendering more than 3 videos or anything over 60 s.
 
@@ -237,13 +237,13 @@ A drawn SVG chart is fixed in the template. For a weekly numbers video, put the 
 
 ## Step 8. Post it as a draft
 
-Add `publish` to the render. Over MCP:
+Over MCP, post the rendered video with `orshot_publish_social_post`:
 
 ```json
-"publish": { "accounts": [7, 9], "content": "3 signs your perfume is fake. Save this for your next order.", "status": "draft" }
+{ "mediaUrls": ["<the render's url>"], "accounts": [7, 9], "content": "3 signs your perfume is fake. Save this for your next order.", "status": "draft" }
 ```
 
-Over REST the render endpoint reads `"isDraft": true` instead of `status` ([Publish from the API](https://orshot.com/docs/publish/publish-from-api.md)). Get account ids from `orshot_list_social_accounts`. After the user approves the draft, `orshot_publish_social_draft`, or schedule it with `orshot_update_social_post`. Scheduling, best time and analytics: the `orshot-social-media-scheduler` skill.
+Over REST you can add `publish` to the render instead; the render endpoint reads `"isDraft": true` there, not `status` ([Publish from the API](https://orshot.com/docs/publish/publish-from-api.md)). Get account ids from `orshot_list_social_accounts`. After the user approves the draft, `orshot_publish_social_draft`, or schedule it with `orshot_update_social_post`. Scheduling, best time and analytics: the `orshot-social-media-scheduler` skill.
 
 ## Gotchas
 

@@ -4,6 +4,8 @@ One entry per published ClawHub version. Skill versions live in each `SKILL.md` 
 
 ## Unreleased
 
+Posting over MCP is two calls: `orshot_render_template` only renders, and `orshot_publish_social_post` posts the render's URL (MCP server #63). Skills that used `publish` on the MCP render now render, then post. REST examples keep `publish` on the render body, which the API still takes. A post saved without an account is sent after the user connects one and the agent adds it with `orshot_update_social_post`; nothing sends it on its own.
+
 Moved the OpenClaw skills and publish setup here from Orshot-HQ/orshot-openclaw; this repo is now the one home for every Orshot skill and plugin manifest.
 
 Docs-first rewrite of every skill: skills now hold the flow and worked examples, and link the Orshot docs (`https://orshot.com/docs/<page>.md`) and the MCP resources for parameters, values, limits and schemas. Removed `orshot/references/` api-reference, render-configuration, integrations-and-errors, embed, oauth-developer-apps and template-design-spec; `orshot-design/references/social-media.md`; `orshot-social-media-content/references/social-media.md`; `orshot-pdf-generator/references/pdf-options.md`; `orshot-video-generator/references/video-template-spec.md`. Every remaining claim was checked against the API, renderer and shipped MCP code; features that exist only on unmerged MCP branches were taken out.

@@ -10,7 +10,7 @@
       "name": "orshot",
       "source": "./",
       "description": "Automate image, PDF and video generation from templates: blog images, videos, ads, thumbnails, PDFs, carousels and social posts, through the hosted Orshot MCP server (OAuth) and one skill per use case.",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "skills": [
         "./skills/orshot",
         "./skills/orshot-design",
