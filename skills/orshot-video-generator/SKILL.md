@@ -200,7 +200,7 @@ Over MCP, output options are flat arguments. A REST-style `response` object is i
 }
 ```
 
-`orshot_get_render_job` with `id` (the render's `jobId`) and `waitSeconds: 25`; call again while `finished` is false. A 20 s film encodes in about a minute. The job lists one output (labelled page 1): that is the whole film, and `videoDuration` is its length. Open it and watch it; the checks and thumbnails do not show the cuts.
+`orshot_get_render_job` with the render's `jobId` and `waitSeconds: 25`; call again while `finished` is false. A 20 s film encodes in about a minute. The job lists one output (labelled page 1): that is the whole film, and `videoDuration` is its length. Open it and watch it; the checks and thumbnails do not show the cuts.
 
 Video costs 1 credit per second. Say the cost before rendering more than 3 videos or anything over 60 s.
 
