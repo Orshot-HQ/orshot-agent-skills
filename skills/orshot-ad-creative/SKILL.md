@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/ad-creative
 license: MIT
 metadata:
   author: Orshot
-  version: "1.1.0"
+  version: "1.1.1"
   openclaw:
     emoji: "📣"
     homepage: https://orshot.com/agents/skills/ad-creative
@@ -212,7 +212,7 @@ For a short moving banner (a price that pops, a badge that pulses, 3 to 6 second
 2. Style overrides like `"old_price.opacity"` only reach parameterized layers ([style parameters](https://orshot.com/docs/orshot-studio/style-parameters.md)).
 3. Keep ad templates single page; sizes come from Smart Resize, not pages. On a multi-page template a key without a `pageN@` prefix reaches no page.
 4. Image URLs must be public. Feed image links behind auth or signed links that expire fail the render.
-5. Rendering does not run an ad. `orshot_render_template` can post organic content to connected social accounts with `publish`, but that is not a paid ad and is never the default.
+5. Rendering does not run an ad. A render can be posted as organic content with `orshot_publish_social_post`, but that is not a paid ad and is never the default.
 6. A 9:16 variant made by Smart Resize keeps the feed layout's logic. Check the top 250 px as well as the bottom 380 px for text, and look for stretched stickers and empty bands.
 7. Do not make a new template per campaign. Swap the colour, offer and image fields instead.
 8. Serif faces with old-style figures (Cormorant, Playfair) make prices like "$110" hard to read. Set prices in a face with lining figures.

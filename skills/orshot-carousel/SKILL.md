@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/carousel
 license: MIT
 metadata:
   author: Orshot
-  version: "1.2.0"
+  version: "1.2.1"
   openclaw:
     emoji: "🎠"
     homepage: https://orshot.com/agents/skills/carousel
@@ -125,7 +125,7 @@ Background images can come from the brand kit, stock search (`orshot_search_stoc
 
 The render `publish` object reads `isDraft` and `schedule.scheduledFor` for timing; with neither it posts immediately. Full object: https://orshot.com/docs/publish/publish-from-api.md.
 
-**Through Orshot, MCP.** `orshot_render_template` with `publish: { accounts, content, status: "draft" }`. Its `publish` has no `tiktokSettings`. For TikTok music, render without `publish`, then call `orshot_publish_social_post` with the page URLs as `mediaUrls`, `status: "draft"` and `tiktokSettings`.
+**Through Orshot, MCP.** Render with `orshot_render_template`, then `orshot_publish_social_post` with the page URLs as `mediaUrls`, `accounts`, `content` and `status: "draft"` (add `tiktokSettings` for TikTok music). The render only renders; posting is always this second call.
 
 Keep it a draft until the user has seen the slides (`orshot_get_social_post` shows the post as a card). Then `orshot_publish_social_draft`, or schedule with `orshot_update_social_post`, `status: "scheduled"` and `scheduledFor`. No accounts connected yet? The user connects them in the dashboard (https://orshot.com/docs/publish/connect-account.md). It is a paid add-on: https://orshot.com/docs/publish/pricing.md. The `orshot-social-media-scheduler` skill covers the rest.
 
@@ -139,7 +139,7 @@ The user: "Write 30 slideshow hooks for a plant-care account and render the firs
 
 1. Write 30 hooks. Show them as a numbered list and let the user cut the weak ones.
 2. Say the cost first: 10 carousels of 6 slides is 60 credits, because each page is one image.
-3. For each of the first 10, write slides 2 to 6 and pick background images that are not in the used-image log. Render with `publish` and `status: "draft"`. For TikTok music, render first, then `orshot_publish_social_post` with the page URLs, `status: "draft"` and `tiktokSettings`.
+3. For each of the first 10, write slides 2 to 6 and pick background images that are not in the used-image log. Render, then `orshot_publish_social_post` with the page URLs and `status: "draft"` (and `tiktokSettings` for TikTok music).
 4. Show the batch together (`orshot_list_social_posts` with `status: "draft"`) and get one go-ahead for the whole batch, not one per post.
 5. Schedule 1 to 3 a day at the best-time slots. The `orshot-social-media-scheduler` skill covers it.
 6. Add each hook and image URL to the log.

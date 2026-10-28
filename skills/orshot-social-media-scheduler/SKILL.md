@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/social-media-scheduler
 license: MIT
 metadata:
   author: Orshot
-  version: "1.3.0"
+  version: "1.3.1"
   openclaw:
     emoji: "📣"
     homepage: https://orshot.com/agents/skills/social-media-scheduler
@@ -54,13 +54,13 @@ Connect the Orshot MCP server at `https://mcp.orshot.com/mcp` (OAuth, no key). S
 
 Over REST, `include_health=true` adds a `requires_reconnect` flag per account. If it is `true`, the user must reconnect that account before you post to it. Check it before you schedule a batch, not after a post fails.
 
-**An empty list means a human has to connect accounts.** The API cannot do it. A draft or scheduled post can still be saved now with `platforms` instead of `accounts` (any plan); it goes out once an account on that platform is connected. Publishing now needs an account. Send the user to the Orshot dashboard, sidebar "Social Posting" > "Accounts", where each platform connects with its own login: https://orshot.com/docs/publish/connect-account.md. It is a paid add-on and the free plan cannot connect accounts, so link https://orshot.com/docs/publish/pricing.md once. Then wait. The next `orshot_list_social_accounts` call shows the new account.
+**An empty list means a human has to connect accounts.** The API cannot do it. A draft or scheduled post can still be saved now with `platforms` instead of `accounts` (any plan); once an account on that platform is connected, add it with `orshot_update_social_post` and send the post. Publishing now needs an account. Send the user to the Orshot dashboard, sidebar "Social Posting" > "Accounts", where each platform connects with its own login: https://orshot.com/docs/publish/connect-account.md. It is a paid add-on and the free plan cannot connect accounts, so link https://orshot.com/docs/publish/pricing.md once. Then wait. The next `orshot_list_social_accounts` call shows the new account.
 
 ## Step 3: the posting loop
 
-1. **Decide the media.** Render from a template (`orshot_render_template` with `publish`) or post media you already have (`orshot_publish_social_post` with `mediaUrls`). Images from Canva, Codex or an image model go in `mediaUrls` as public URLs. Orshot render URLs are already public, so no S3 bucket or Drive share link is needed.
+1. **Decide the media.** Render from a template (`orshot_render_template`, then its URL goes in `mediaUrls`) or use media you already have. Either way the post is `orshot_publish_social_post` with `mediaUrls`. Images from Canva, Codex or an image model go in `mediaUrls` as public URLs. Orshot render URLs are already public, so no S3 bucket or Drive share link is needed.
    Before rendering, check that every image field gets the user's own image. A field left empty keeps the template's sample picture, which can put a stranger's face over a customer's name. With no image yet, use a picture with no person in it, or a template without that field, and tell the user.
-2. **Draft first.** Both MCP tools publish immediately unless you pass `status: "draft"`. Pass it unless the user clearly said to post now. A draft holds no time: keep the agreed times in your summary and set `scheduledFor` only when you schedule. A render with `publish` creates one post per account, so list the drafts afterwards to get each post id.
+2. **Draft first.** `orshot_publish_social_post` publishes immediately unless you pass `status: "draft"`. Pass it unless the user clearly said to post now. A draft holds no time: keep the agreed times in your summary and set `scheduledFor` only when you schedule. The result carries the post id.
 3. **Show the user** the post. `orshot_get_social_post` renders a visual card with the media, caption, accounts and status.
 4. **Edit** what they change with `orshot_update_social_post`. Editing never re-renders and costs nothing.
 5. **Send.** `orshot_publish_social_draft` posts it now. To schedule instead, `orshot_update_social_post` with `status: "scheduled"` and `scheduledFor`.
@@ -86,8 +86,8 @@ The image carries one idea in a few words (a name, a number, a date, a short hea
 | Job | Tool |
 | --- | --- |
 | list accounts | `orshot_list_social_accounts` |
-| render and post in one call | `orshot_render_template` with `publish` |
-| post a media URL | `orshot_publish_social_post` |
+| render | `orshot_render_template` (renders only) |
+| post a render or any media URL | `orshot_publish_social_post` |
 | list or read posts | `orshot_list_social_posts`, `orshot_get_social_post` |
 | edit, send, discard a held post | `orshot_update_social_post`, `orshot_publish_social_draft`, `orshot_discard_social_post` |
 | analytics | `orshot_get_social_analytics`, `orshot_get_social_analytics_daily`, `orshot_get_social_followers`, `orshot_get_social_post_analytics` |
@@ -104,7 +104,7 @@ The user: "Schedule this week's posts for Bloomfield Bakery on Instagram and Fac
 1. `orshot_list_social_accounts`. Confirm the Instagram and Facebook accounts by username.
 2. Agree on seven topics with the user (Monday sourdough, Tuesday staff pick, and so on), and give each its post type: product, staff pick, opening hours, a customer quote.
 3. `orshot_list_studio_templates` for a template per post type. Missing ones are made first with `orshot-social-media-content`, which picks each layout from a format brands really post. Seven posts from one layout read as a repost, so the week uses at least two or three layouts. When every post is the same type, rotate two or three templates that share field names.
-4. Seven `orshot_render_template` calls, each with its template, its own `modifications` and `publish: { accounts, content, status: "draft" }`.
+4. Seven `orshot_render_template` calls, each with its template and its own `modifications`, then one `orshot_publish_social_post` per render with its URL in `mediaUrls`, `accounts`, `content` and `status: "draft"`.
 5. `orshot_list_social_posts` with `status: "draft"`, then `orshot_get_social_post` for the cards. Number them 1 to 7.
 6. The user approves by number ("all but 4, and shorten 4's caption"). Make the edits with `orshot_update_social_post`. Show post 4 again before it counts as approved.
 7. `orshot_get_best_time_to_post` for each platform, because the user said "around lunch" and not an exact time. When the user names a time, use it. Pick a lunchtime slot per day and spread the posts across those slots. Then `orshot_update_social_post` with `status: "scheduled"` and `scheduledFor` for each approved post.
@@ -112,20 +112,19 @@ The user: "Schedule this week's posts for Bloomfield Bakery on Instagram and Fac
 
 ### Render and hold a draft (MCP)
 
+Two calls. `orshot_render_template` returns the image URL:
+
 ```json
-{
-  "templateId": 123,
-  "modifications": { "headline": "Ship day", "stat": "2,000 renders" },
-  "format": "png",
-  "publish": {
-    "accounts": [1, 3],
-    "content": "We shipped it.",
-    "status": "draft"
-  }
-}
+{ "templateId": 123, "modifications": { "headline": "Ship day", "stat": "2,000 renders" }, "format": "png" }
 ```
 
-These are `orshot_render_template` arguments. For a scheduled post use `"status": "scheduled"` with `"scheduledFor": "2026-11-01T14:00:00Z"`. The MCP server turns `status` into what the render API reads.
+Then `orshot_publish_social_post`:
+
+```json
+{ "mediaUrls": ["<the render's url>"], "accounts": [1, 3], "content": "We shipped it.", "status": "draft" }
+```
+
+For a scheduled post use `"status": "scheduled"` with `"scheduledFor": "2026-11-01T14:00:00Z"`.
 
 ### Render and schedule (REST)
 
@@ -174,7 +173,7 @@ Held posts (list, read, edit, send, discard) are under https://orshot.com/docs/a
 1. **Weekly calendar as drafts.** The worked example above: seven drafts from two or three templates, one approval for the batch, then schedule. One update per caption or time change.
 2. **Schedule at the best time.** `orshot_get_best_time_to_post` for the platform, when the user has not named a time. Slots are UTC; convert to the user's timezone when you show them. Convert each date on its own: daylight saving can change the offset in the middle of a week (9am New York is 13:00 UTC on 30 October 2026 and 14:00 UTC on 2 November). Pass the chosen time as `scheduledFor`. Empty slots mean too little history, so ask the user for a time instead of inventing one.
 3. **Cross-post.** One `accounts` array with every id. Per-account extras go in `platformOptions` keyed by account id: https://orshot.com/docs/publish/publish-from-api.md. Check the caption against the shortest limit among the targets on the limits page. TikTok photo posts use the caption as the title, which has its own limit there.
-4. **Carousel.** Render a multi-page template with `pageN@` keys and add `publish`. Each page becomes one image in the post. Image counts per platform are on the limits page. The `orshot-carousel` skill has the slide formula.
+4. **Carousel.** Render a multi-page template with `pageN@` keys, then post the page URLs together in `mediaUrls` (over REST, add `publish` to the render). Each page becomes one image in the post. Image counts per platform are on the limits page. The `orshot-carousel` skill has the slide formula.
 5. **Learn from results.** `orshot_get_social_analytics` with `source: "orshot"` and `sort: "engagement"`. Keep the hooks of the top posts, drop the bottom ones, write next week's drafts. Keep a short log the user can read. Analytics are rate limited, so ask once and reuse the answer.
 6. **Recover a failure.** A per-account result with `action: "reconnect"` means the user must reconnect that account in the dashboard. Keep the post as a draft and retry with `orshot_publish_social_draft` after they confirm. For any other error, show it as is and do not retry blindly. If a publish call timed out, check `orshot_list_social_posts` before you call it again. The post may already exist, and a second call can create a second post.
 7. **Run it without the agent.** "Every morning" or "whenever I add a row" is a job for a schedule, not a chat. The `orshot` skill's [`references/recurring-automation.md`](https://github.com/Orshot-HQ/orshot-agent-skills/blob/main/skills/orshot/references/recurring-automation.md) builds it as an Orshot Workflow or in the user's own n8n, Make or Zapier. Ready-made examples: https://orshot.com/workflows/images-from-sheet-to-social and https://orshot.com/workflows/random-drive-photo-to-tiktok.
