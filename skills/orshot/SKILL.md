@@ -1,1486 +1,197 @@
 ---
 name: orshot
-description: Generate images, PDFs, and videos from templates with Orshot — via the REST API, SDKs (Node/Python/PHP/Ruby), the remote MCP server, or no-code tools (Zapier, Make, n8n, Airtable), and wire those renders into a recurring automation. Use whenever the user mentions Orshot, connects Orshot to an AI agent or MCP client, wants a render to run unattended on a schedule or trigger, or needs to programmatically produce marketing visuals, OG images, social carousels, certificates/invoices/tickets as PDF, or video from templates — including when migrating from another template-based image-generation API. Always load this skill for Orshot tasks, even simple ones, because it carries gotchas (modifications key by parameterId, multi-page needs a page1@ prefix, long video renders need async render jobs) that otherwise cause failed renders. Not for generating standalone AI images with no template or Orshot involved.
+description: "Image, PDF and video generation from Orshot templates, through the hosted MCP server (OAuth, no API key) or the REST API. Covers connecting, finding a template and its parameter keys, render options (formats, sizes, Smart Resize, batch, async), dynamic image URLs, utility templates (tweet and website screenshots, charts, mockups), posting a render to connected social accounts, wiring it into n8n, Make, Zapier or cron, and the gotchas that break renders (parameterId keys, page1@ prefixes, public image URLs). Use when: \"render my Orshot template\", \"connect Orshot to Claude\", \"call the Orshot API\", \"my modification is ignored\", \"automate this render in n8n\", \"screenshot this tweet\", \"move from Bannerbear to Orshot\". One job end to end: load its skill (orshot-blog-images, orshot-pdf-generator, orshot-video-generator, orshot-ad-creative, orshot-carousel, orshot-youtube-thumbnail, orshot-social-media-content or orshot-social-media-scheduler). NOT for template design craft (use orshot-design)."
+homepage: https://orshot.com/agents/skills
+license: MIT
 metadata:
-  author: Rishi Mohan
-  version: "1.3.0"
+  author: Orshot
+  version: "1.6.0"
+  openclaw:
+    emoji: "🖼️"
+    homepage: https://orshot.com/agents/skills
+    primaryEnv: ORSHOT_API_KEY
+    requires:
+      env: []
+      bins: []
+    envVars:
+      - name: ORSHOT_API_KEY
+        required: false
+        description: Orshot API key from Workspace Settings > API Keys. Only needed for REST. Not needed when the agent connects through the hosted MCP server with OAuth.
 ---
 
-# Orshot – Automated Visual Content Generation
+# Orshot: generate images, PDFs and videos from templates through the API
 
-[Orshot](https://orshot.com) is an automated image, PDF, and video generation platform. Design templates in Orshot Studio (or import from Canva/Figma), then generate renders via REST API, SDKs, or no-code integrations.
+Orshot is an API for automated image, PDF and video generation from templates. A template is designed once (in the Orshot studio, imported, or built by an agent), then rendered with new data on every call. The output can be posted to connected social accounts in the same request.
 
-- **Documentation:** https://orshot.com/docs
-- **API Base URL:** https://api.orshot.com/v1
+This skill is the flow: which tool or endpoint to call, in what order, and what to check. Parameters, allowed values, limits and response fields live in the docs. Every docs page is readable as markdown at `https://orshot.com/docs/<path>.md`; the docs map at the end lists the pages for each job.
 
-## When to Use This Skill
+- MCP server: `https://mcp.orshot.com/mcp`
+- REST base: `https://api.orshot.com/v1`
 
-Use this skill whenever the user mentions **Orshot**, or when the task is:
+Three things hold in every flow below:
 
-- Generating images, PDFs, or videos programmatically from templates
-- Building automated marketing visual pipelines (OG images, ad creatives, thumbnails)
-- Creating dynamic social media content (carousels, posts, stories) and publishing it
-- Generating certificates, invoices, tickets, or reports as PDFs
-- Building image/PDF/video generation into a product
-- Automating visuals with Zapier, Make, n8n, Airtable, or the CLI
-- Connecting Orshot to an AI agent or MCP client (Claude, Cursor, Codex, Windsurf, ChatGPT)
-- Embedding a white-label design editor into an app
-- Migrating from another template-based image/PDF/video generation API
+- No API key over the hosted MCP server. It signs in with OAuth. A key is only for cron jobs, servers and n8n.
+- The credit cost comes first. Say it before a bulk render.
+- Nothing is posted, run or deleted without the user's yes.
 
-**Don't use this skill** for generating standalone AI images with no template or Orshot involved (a one-off "make me an image" request) — that isn't what Orshot does.
+## One job end to end? Load its skill
 
-## Accessing Detailed Documentation
+This skill is Orshot itself: connecting, rendering and the gotchas. A whole job has its own skill with the flow and worked examples:
 
-Any page on orshot.com can be fetched as clean markdown by appending `.md` to the URL or sending `Accept: text/markdown` header. Use this to get detailed, up-to-date information on demand without relying solely on this skill file.
+| The job | Skill |
+| --- | --- |
+| Featured images and OG images for blog posts, in-article images | `orshot-blog-images` |
+| Invoices, certificates, reports and other PDFs from rows of data | `orshot-pdf-generator` |
+| Reels, Shorts, product and listing videos, animated charts and brand films | `orshot-video-generator` |
+| Ads in every Meta, Google and LinkedIn size, A/B variants | `orshot-ad-creative` |
+| TikTok, Instagram and LinkedIn carousels | `orshot-carousel` |
+| YouTube thumbnails | `orshot-youtube-thumbnail` |
+| On-brand social posts and stories | `orshot-social-media-content` |
+| Scheduling, posting and analytics across platforms | `orshot-social-media-scheduler` |
+| Designing or refining a template | `orshot-design` |
 
-**Examples:**
-```
-https://orshot.com/docs/api-reference.md
-https://orshot.com/docs/sdks/node.md
-https://orshot.com/docs/publish/publish-from-api.md
-https://orshot.com/docs/developers/oauth-overview.md
-https://orshot.com/docs/orshot-embed/introduction.md
-```
+## Connect first
 
-**Key documentation pages:**
-| Topic | URL |
-|-------|-----|
-| API Reference | `https://orshot.com/docs/api-reference.md` |
-| Node.js SDK | `https://orshot.com/docs/sdks/node.md` |
-| Python SDK | `https://orshot.com/docs/sdks/python.md` |
-| PHP SDK | `https://orshot.com/docs/sdks/php.md` |
-| Ruby SDK | `https://orshot.com/docs/sdks/ruby.md` |
-| Studio Templates | `https://orshot.com/docs/orshot-studio/introduction.md` |
-| Style Parameters | `https://orshot.com/docs/orshot-studio/style-parameters.md` |
-| Setting Parameters | `https://orshot.com/docs/orshot-studio/setting-parameters.md` |
-| Image Generation | `https://orshot.com/docs/image-generation.md` |
-| Video Generation | `https://orshot.com/docs/video-generation.md` |
-| PDF Generation | `https://orshot.com/docs/pdf-generation.md` |
-| Social Publishing | `https://orshot.com/docs/publish/introduction.md` |
-| OAuth / Developer Apps | `https://orshot.com/docs/developers.md` |
-| White-Label Embed | `https://orshot.com/docs/orshot-embed/introduction.md` |
-| Integrations | `https://orshot.com/docs/integrations.md` |
-| Dynamic URLs | `https://orshot.com/docs/integrations/dynamic-urls.md` |
-| Webhooks | `https://orshot.com/docs/integrations/webhooks.md` |
-| Error Reference | `https://orshot.com/docs/error-reference.md` |
-
-When a user asks about a specific topic, fetch the relevant `.md` URL for the latest details.
-
-## Getting Started
-
-### Authentication
-
-All API requests require a Bearer token in the `Authorization` header:
-
-```
-Authorization: Bearer <ORSHOT_API_KEY>
-```
-
-[Get your API key](https://orshot.com/docs/quick-start/get-api-key) from **Workspace Settings → API Keys** in the Orshot dashboard.
-
-### Remote MCP Server
-
-Orshot runs a hosted MCP server so agents (Claude, Cursor, Codex, Windsurf, ChatGPT, etc.) can use Orshot as tools — no local install.
-
-- **URL:** `https://mcp.orshot.com/mcp` (transport: `streamable-http`)
-- **Auth:** OAuth 2.0 (the client walks you through it), or send an Orshot API key as a Bearer token
-- **Claude Code:** `claude mcp add --transport http orshot https://mcp.orshot.com/mcp`
-- **Cursor / Windsurf / VS Code / ChatGPT / Codex:** add the URL as a remote/HTTP MCP server
-
-It exposes tools for rendering, studio + library templates, brand assets, workflows, social accounts, and workspace/logs. Full discovery doc: `https://orshot.com/.well-known/mcp.json`. Setup guide: `https://orshot.com/docs/integrations/mcp-server.md`.
-
-### SDKs
-
-#### Node.js
+The hosted MCP server is the fastest route and the only one that returns inline previews and design checks.
 
 ```bash
-npm install orshot
+# OpenClaw
+openclaw mcp add orshot --url https://mcp.orshot.com/mcp --transport streamable-http --auth oauth
+openclaw mcp login orshot
+
+# Claude Code
+claude mcp add orshot --transport http https://mcp.orshot.com/mcp
 ```
 
-```js
-import { Orshot } from "orshot";
-const orshot = new Orshot("<ORSHOT_API_KEY>");
+Other clients: https://orshot.com/docs/integrations/mcp-server.md
 
-// Render from template
-const response = await orshot.renderFromTemplate({
-  templateId: "open-graph-image-1",
-  modifications: { title: "Hello World" },
-  responseType: "base64", // "base64" | "url" | "binary"
-  responseFormat: "png", // "png" | "webp" | "jpg" | "pdf"
-});
+Confirm with `orshot_get_account`. It returns the plan, credits and which features the plan includes (video, workflows, embed). If it reports an inactive subscription or a used-up limit, that is a billing state, not an auth error. Send the user to https://orshot.com/pricing and stop retrying.
 
-// Generate signed URL
-const signedUrl = await orshot.generateSignedUrl({
-  templateId: "open-graph-image-1",
-  modifications: { title: "Hello" },
-  expiresAt: 1744276943,
-  renderType: "images",
-  responseFormat: "png",
-});
-```
-
-#### Python
+**Headless fallback: REST with an API key.** Use it only when the agent cannot run MCP (a cron job, a server script, n8n). Read the key from the environment.
 
 ```bash
-pip install orshot
+curl -s https://api.orshot.com/v1/me -H "Authorization: Bearer $ORSHOT_API_KEY"
 ```
 
-```python
-import orshot
-os = orshot.Orshot('<ORSHOT_API_KEY>')
+Do not go on until one of the two works.
 
-response = os.render_from_template({
-  'template_id': 'open-graph-image-1',
-  'modifications': {'title': 'Hello World'},
-  'response_type': 'base64',
-  'response_format': 'png'
-})
-```
+## Core workflow
 
-#### Other SDKs
+1. **Connect** (above).
+2. **Find the template.** `orshot_list_studio_templates` (search by name or tags) or `GET /v1/studio/templates/all`. No template yet? Browse `orshot_list_library_templates`, or design one with the `orshot-design` skill.
+3. **Read its keys.** `orshot_get_studio_template_modifications` or `GET /v1/studio/templates/:id`. Never guess a key.
+4. **Render.** `orshot_render_template` or `POST /v1/studio/render`.
+5. **Deliver or post.** Show the output URL. Add `publish` to post it in the same call (see Social posting).
+6. **Automate.** Put the call into what the user already runs. Playbook: `references/recurring-automation.md`.
+7. **Verify.** `orshot_list_workspace_logs` or `GET /v1/workspace/logs` shows the render and the `source` that made it. Show the output before calling it done.
 
-- **PHP:** `composer require rishimohan/orshot`
-- **Ruby:** `gem install orshot`
+## Safety rules
 
-## Common Gotchas (read before rendering)
+- **Confirm before anything leaves the workspace.** Publishing a post, running a workflow (it spends credits and can deliver or post) and deleting a template, workflow or brand asset need an explicit yes. Say what will go where, and when.
+- **Default social posts to drafts.** "Prepare", "draft" and "let me look first" mean a draft. A draft reaches nobody until it is published.
+- **Show the cost before bulk work.** Renders spend credits and AI modifications spend AI credits ([credits-usage](https://orshot.com/docs/definitions/credits-usage.md)). Say so before a loop of hundreds of renders.
+- **Never paste the API key into chat, files or URLs.** Prefer MCP, which has no key.
+- **Do not delete anything to "clean up" on your own.**
 
-The mistakes that most often make Orshot calls fail or return the wrong output:
+## Gotchas (read before rendering)
 
-1. **Modifications key by `parameterId`, not layer name.** `modifications: { "headline": "..." }` targets the element whose `parameterId` is `headline`. If a value is ignored, the key is wrong — fetch the template's modifications (`GET /v1/studio/templates/:id`) to see the real keys instead of guessing.
-2. **Multi-page templates need a `pageN@` prefix.** Use `"page1@title"`, `"page2@title"`. A bare `"title"` only affects page 1.
-3. **Studio `templateId` is an integer; utility `templateId` is a string.** `/v1/studio/render` takes an integer ID; `/v1/generate/:renderType` takes a string slug like `"website-screenshot"`.
-4. **Video output does NOT require video elements.** `format: "mp4"`/`"webm"`/`"gif"` renders any template — motion can come from video elements, page animations (enter/exit/ambient transitions), page-to-page transitions, or generated narration; a fully static page renders as a still clip of its `videoDuration`. Long video renders should use async render jobs (`response.mode: "async"`) so they don't hit client timeouts.
-5. **Image/video URLs in modifications must be publicly reachable.** The renderer fetches them server-side, so `localhost`, expired signed URLs, or auth-gated URLs won't load.
-6. **Style overrides use dot notation on the parameterId** — `"title.fontSize": "48px"`, not a nested object.
-7. **Response shape differs by page count:** single page → `data` is an object (read `data.content`); multi-page/carousel → `data` is an array of `{ page, content }`. Handle both.
-8. **`base64` and `binary` response types don't combine** — `binary` returns one raw file stream.
-9. **Credits vs AI Credits are separate** — normal renders spend credits; `.prompt` (AI) modifications additionally spend AI Credits.
-10. **On `429`, back off** using the `Retry-After` response header.
+1. **Modifications key by `parameterId`, not layer name.** If a value is ignored, the key is wrong. Fetch the keys instead of guessing.
+2. **Multi-page templates need a `pageN@` prefix on every content key** (`"page1@title"`, `"page2@title"`). A bare content key reaches no page; the response carries a warning. A bare dotted style key (`"title.fontSize"`) applies to every page that has that layer. [multi-page-images](https://orshot.com/docs/image-generation/multi-page-images.md)
+3. **Studio template ids are numbers; library template ids are slugs** (`"website-screenshot"`). [template-id](https://orshot.com/docs/definitions/template-id.md)
+4. **MCP and REST shape the render call differently.** Over MCP, output options are flat arguments of `orshot_render_template` (`format`, `scale`, `includePages`, `size`, `extraSizes`, `background`, `videoOptions`, `publish`). Over REST they sit inside the `response` object.
+5. **Long renders must not block.** Over MCP pass `background: true`, then collect with `orshot_get_render_job`. Over REST add `mode: "async"` to `response`, then poll or use a webhook ([async-render-start](https://orshot.com/docs/api-reference/async-render-start.md)). Any template can render as video; the plan must include video.
+6. **Image and video URLs in modifications must be public.** The renderer fetches them server side; localhost, expired signed URLs and login-gated URLs fail.
+7. **The response shape depends on the page count.** Read the Response section of [render-from-studio-template](https://orshot.com/docs/api-reference/render-from-studio-template.md) before writing code that reads it.
+8. **On `429`, back off** for the `Retry-After` seconds.
+9. **Publish by account id, never by platform name.** Two accounts on one platform have different ids. Media rules differ per platform: check [social-posting-guidelines](https://orshot.com/docs/publish/social-posting-guidelines.md) before posting. A PDF render posts only to LinkedIn.
 
-When unsure about a template's parameters, always fetch its modifications first.
+## Worked example: one design, several sizes
 
-## Template Architecture
+Prompt: "Render the launch template as an OG image and an Instagram story, title 'We just shipped'."
 
-This section describes the complete structure of an Orshot template for MCP tools and AI agents.
+1. `orshot_list_studio_templates` with `search: "launch"`. One match: id `123`.
+2. `orshot_get_studio_template_modifications` with `templateId: 123`. Keys: `title`, `hero_image`.
+3. `orshot_render_template`:
 
-### Template Structure
-
-An Orshot template consists of **pages**, each containing a **canvas** and **elements**.
-
-```
-Template
-├── id: number | string
-├── name: string
-├── description: string
-├── width: number
-├── height: number
-├── pages_data: Array
-    └── Page
-        ├── id: string (UUID)
-        ├── name: string
-        ├── canvas: CanvasConfig
-            ├── width: number
-            ├── height: number
-            ├── backgroundColor: string
-            ├── backgroundImage: string
-        ├── elements: Element[]
-        ├── modifications: Modification[] (API parameters)
-            ├── id: string
-            ├── type: string
-            ├── element: Element
-            ├── description: string
-        └── thumbnail_url: string | null
-```
-
-### Canvas Configuration
-
-| Property          | Type   | Default         | Description                               |
-| ----------------- | ------ | --------------- | ----------------------------------------- |
-| `width`           | number | 800             | Canvas width in pixels (max: 5000)        |
-| `height`          | number | 800             | Canvas height in pixels (max: 5000)       |
-| `backgroundColor` | string | "#ffffff"       | Background color (hex, rgba, or gradient) |
-| `backgroundImage` | string | ""              | URL to background image                   |
-| `borderWidth`     | number | 0               | Border width in pixels                    |
-| `borderColor`     | string | "rgba(0,0,0,1)" | Border color                              |
-| `borderStyle`     | string | "solid"         | Border style (solid, dashed, etc)         |
-
-### Canvas Size Presets
-
-| Name                 | Dimensions | Use Case                        |
-| -------------------- | ---------- | ------------------------------- |
-| Square               | 1080×1080  | Instagram posts, general social |
-| Instagram Story      | 1080×1920  | Stories, Reels, TikTok          |
-| Slide/Presentation   | 1920×1080  | Presentations, slides           |
-| YouTube Thumbnail    | 1280×720   | Video thumbnails                |
-| Twitter Post         | 1600×900   | X/Twitter posts                 |
-| Open Graph           | 1200×630   | Link previews, Facebook         |
-| Pinterest Pin        | 1000×1500  | Pinterest                       |
-| A4 Document          | 2480×3508  | Print documents                 |
-| App Store Screenshot | 1290×2796  | iOS app screenshots             |
-
-### Universal Element Properties
-
-All elements share these base properties:
-
-| Property            | Type    | Description                                  |
-| ------------------- | ------- | -------------------------------------------- |
-| `id`                | string  | Unique identifier (UUID)                     |
-| `name`              | string  | Display name in layer list (was `layerName`) |
-| `type`              | string  | "text", "image", "shape", "video"            |
-| `position`          | object  | `{ x: number, y: number }` from top-left     |
-| `dimensions`        | object  | `{ width: number, height: number }`          |
-| `rotation`          | number  | Rotation in degrees (0-360)                  |
-| `zIndex`            | number  | Layer order (higher = on top)                |
-| `aspectRatioLocked` | boolean | Lock aspect ratio during resize              |
-| `isHidden`          | boolean | Hide element from render                     |
-| `skewX`             | number  | Horizontal skew angle                        |
-| `skewY`             | number  | Vertical skew angle                          |
-
-### Text Element
-
-**Content Types:**
-
-- **Plain text**: `"Hello World"` - Standard text string
-- **Multi-line**: Use `\n` for line breaks: `"Line 1\nLine 2"`
-- **Dynamic via API**: Use `.prompt` modifier for AI-generated text
-
-```javascript
-{
-  type: "text",
-  content: string,          // Plain text string
-  layerName: string,        // Display name
-  zIndex: number,
-  rotation: number,
-  position: { x: number, y: number },
-  dimensions: { width: number, height: number },
-  style: {
-    // Typography
-    fontFamily: string,     // e.g., "Inter", "Prata", "SF Pro"
-    fontSize: string,       // e.g., "48px"
-    fontWeight: string | number, // "400", "700", 700
-    fontStyle: string,      // "normal", "italic"
-    lineHeight: number,     // e.g., 1.2
-    letterSpacing: string,  // e.g., "0px", "2px"
-
-    // Appearance
-    fill: string,           // Color or gradient
-    color: string,          // Hex or rgba
-    opacity: number,        // 0-1
-    stroke: string,         // Stroke color
-    strokeWidth: string,    // e.g., "0px"
-
-    // Alignment & Layout
-    textAlign: string,      // "left", "center", "right"
-    verticalAlign: string,  // "flex-start", "center", "flex-end"
-    textTransform: string,  // "none", "uppercase"
-    textDecoration: string, // "none", "underline"
-    textMode: string,       // "overflow", "fit"
-    paddingX: string,
-    paddingY: string,
-
-    // Borders & Backgrounds
-    borderColor: string,
-    borderWidth: string,
-    borderRadius: string,
-    textBackgroundColor: string,
-    textBackgroundRadius: string,
-    textStrokeColor: string,
-    textStrokeWidth: string,
-
-    // Effects
-    minFontSize: string,    // For "fit" mode
-    filter: string,         // e.g., "blur(0px)"
-    mixBlendMode: string,   // "normal", "multiply", etc.
-    boxShadowX: string,
-    boxShadowY: string,
-    boxShadowBlur: string,
-    boxShadowColor: string,
-    dropShadowX: string,
-    dropShadowY: string,
-    dropShadowBlur: string,
-    dropShadowColor: string
-  },
-  // Parameterization
-  parameterizable: boolean,
-  parameterId: string,
-  parameterType: "text"
-}
-```
-
-**Gradient text:**
-
-```javascript
-color: "linear-gradient(90deg, #FF6B6B 0%, #4ECDC4 100%)";
-```
-
-### Image Element
-
-**Content Types:**
-
-- **URL** (recommended): `"https://example.com/image.png"` - Best for dynamic content
-- **Base64**: `"data:image/png;base64,iVBORw0KGgo..."` - For embedded images
-- **Binary**: Raw binary data (API upload only)
-
-```javascript
-{
-  type: "image",
-  content: string,          // URL (preferred), base64, or binary
-  isSvg: boolean,
-  layerName: string,
-  style: {
-    // Sizing & Positioning
-    objectFit: string,      // "contain", "cover", "fill"
-    objectPosition: string, // "center", "top left"
-
-    // Appearance
-    opacity: number,
-    fill: string,           // Background fill
-    stroke: string,         // Border stroke
-
-    // Borders
-    borderRadius: string,   // "0px", "12px", "50%"
-    borderWidth: string,
-    borderColor: string,
-
-    // Effects
-    filter: string,         // "blur(2px)", "grayscale(100%)"
-    mixBlendMode: string,
-    boxShadowX: string,
-    boxShadowY: string,
-    boxShadowBlur: string,
-    boxShadowColor: string,
-    dropShadowX: string,
-    dropShadowY: string,
-    dropShadowBlur: string,
-    dropShadowColor: string,
-
-    svgColor: string        // Recolor monochrome SVGs
-  },
-  parameterType: "imageUrl"
-}
-```
-
-### Shape Element
-
-```javascript
-{
-  type: "shape",
-  shapeType: string,        // "rectangle", "circle", "arrow"
-  layerName: string,
-  style: {
-    // Fill & Stroke
-    fill: string,           // Color or gradient
-    stroke: string,
-    strokeWidth: string,    // e.g. "0px"
-
-    // Dimensions
-    borderRadius: string,   // Rectangle only
-    borderWidth: string,
-    borderColor: string,
-    borderStyle: string,
-
-    // Appearance
-    opacity: number,
-    filter: string,
-    mixBlendMode: string,
-
-    // Shadows
-    boxShadowX: string,
-    boxShadowY: string,
-    boxShadowBlur: string,
-    boxShadowColor: string,
-    dropShadowX: string,
-    dropShadowY: string,
-    dropShadowBlur: string,
-    dropShadowColor: string
-  },
-  parameterType: "fill"
-}
-```
-
-**Gradient fills:**
-
-```javascript
-fill: "linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%)";
-fill: "radial-gradient(circle at center, #FF6B6B 0%, #4ECDC4 100%)";
-```
-
-### Video Element
-
-**Content Types:**
-
-- **URL** (required): `"https://example.com/video.mp4"` - Must be a publicly accessible URL
-- Supported formats: MP4, WebM, MOV
-- For best results, use MP4 with H.264 codec
-
-```javascript
-{
-  type: "video",
-  content: string,          // Video URL (must be publicly accessible)
-  videoOptions: {
-    loop: boolean,
-    muted: boolean,
-    trim_start_time: string,
-    trim_end_time: string,
-    duration: number | null
-  },
-  style: {
-    // Sizing & Positioning
-    objectFit: string,      // "contain", "cover", "fill"
-    objectPosition: string,
-
-    // Appearance
-    opacity: number,
-    filter: string,
-    mixBlendMode: string,
-
-    // Borders & Shadows
-    borderRadius: string,
-    borderWidth: string,
-    borderColor: string,
-    elementBoxShadowX: string,
-    elementBoxShadowY: string,
-    elementBoxShadowBlur: string,
-    elementBoxShadowColor: string
-  },
-  parameterType: "videoUrl"
-}
-```
-
-### Parameterization Best Practices
-
-When creating or updating templates, **always ensure all text, image, and video elements are parameterizable** with unique IDs. This enables dynamic content replacement via the API.
-
-#### Required Setup
-
-Every dynamic element MUST have:
-
-```javascript
-{
-  parameterizable: true,
-  parameterId: "unique_id",  // Unique across template, lowercase with underscores
-  parameterType: "text" | "imageUrl" | "videoUrl"
-}
-```
-
-#### Naming Conventions
-
-| Element Type | parameterId Examples                        | parameterType |
-| ------------ | ------------------------------------------- | ------------- |
-| Text         | `headline`, `subtitle`, `cta_text`, `price` | `"text"`      |
-| Image        | `product_image`, `logo`, `background_image` | `"imageUrl"`  |
-| Video        | `hero_video`, `background_video`            | `"videoUrl"`  |
-
-#### Best Practices
-
-1. **Use descriptive IDs:** `product_title` not `text1`
-2. **Be consistent:** Use snake_case across all templates
-3. **Unique per template:** No duplicate parameterIds on same page
-4. **Group logically:** Related elements share naming prefix (e.g., `card_title`, `card_image`)
-
-#### Validation Checklist
-
-Before finalizing any template update:
-- [ ] All text elements have `parameterizable: true` and unique `parameterId`
-- [ ] All image elements have `parameterizable: true` and unique `parameterId`
-- [ ] All video elements have `parameterizable: true` and unique `parameterId`
-- [ ] No duplicate parameterIds exist on the same page
-- [ ] parameterIds are descriptive and follow snake_case convention
-
-### Design Best Practices
-
-#### Typography Guidelines
-- **Font limit:** Use 2-3 fonts maximum per template
-- **Hierarchy:** Headings should be 1.5-2x larger than body text
-- **Minimum size:** 24px for social media readability
-- **Weights:** Headings 600-900 (bold), Body 400-500 (regular)
-
-**Popular font pairings:**
-- `Prata` + `Inter`
-- `Instrument Serif` + `DM Sans`
-- `Playfair Display` + `Lato`
-- `Montserrat` + `Open Sans`
-
-**Platform-specific fonts:**
-- iOS: `SF Pro Display`, `SF Pro Text`
-- Android: `Google Sans`, `Roboto`
-
-#### Color Guidelines
-**Luxury/Gold palette:**
-- Gold: `#D4AF37`
-- Dark gold: `#B8860B`
-- Light gold: `#F5E7A3`
-
-**iOS system colors:**
-- Blue: `#007AFF`
-- Gray: `#8E8E93`
-- Background: `#F5F5F7`
-
-**Professional dark:**
-- Navy: `#0F172A`
-- Slate: `#1E293B`, `#334155`
-- Muted: `#64748B`, `#94A3B8`
-
-**Best practices:**
-- Ensure 4.5:1 minimum contrast for text readability
-- Use gradients sparingly for premium effects
-- Consistent color palette (3-5 colors max)
-
-#### Layout Guidelines
-- **Edge padding:** 40-60px from canvas edges
-- **Element spacing:** 20-40px between elements
-- **Alignment:** Center for formal, left for modern
-- **Visual flow:** Guide eye with size, color, position
-
-**zIndex ordering:**
-- Background images/colors: 1
-- Overlay shapes: 2-3
-- Text elements: 4-6
-- Interactive elements: 7+
-
-#### Common Operations (Design Automation)
-
-**Add text element:**
-```javascript
-addElement("text", {
-  content: "Hello World",
-  fontFamily: "Inter",
-  fontSize: 48,
-  fontWeight: "700",
-  color: "#FFFFFF",
-  x: 100,
-  y: 100,
-  width: 400,
-  height: 60,
-});
-```
-
-**Add shape backdrop:**
-```javascript
-addElement("rectangle", {
-  fill: "rgba(0,0,0,0.5)",
-  width: 1080,
-  height: 200,
-  x: 0,
-  y: 800,
-  borderRadius: "0px",
-});
-```
-
-**Batch update multiple elements:**
-```javascript
-batchUpdate([
-  {
-    elementId: "heading",
-    type: "ORSHOT_UPDATE_ELEMENT",
-    updates: { style: { fontSize: 72 } },
-  },
-  {
-    elementId: "subtitle",
-    type: "ORSHOT_UPDATE_ELEMENT",
-    updates: { style: { color: "#94A3B8" } },
-  },
-  { type: "ORSHOT_UPDATE_CANVAS", updates: { backgroundColor: "#0F172A" } },
-]);
-```
-
-## API Reference
-
-### 1. Render from Studio Template
-
-Generate images/PDFs/videos from templates designed in Orshot Studio.
-
-**POST** `https://api.orshot.com/v1/studio/render`
-
-```js
-await fetch("https://api.orshot.com/v1/studio/render", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: "Bearer <ORSHOT_API_KEY>",
-  },
-  body: JSON.stringify({
-    templateId: 123, // Integer - your studio template ID
-    modifications: {
-      title: "Hello World",
-      imageUrl: "https://example.com/photo.jpg",
-      canvasBackgroundColor: "#eff2fa",
-    },
-    response: {
-      type: "base64", // "base64" | "url" | "binary"
-      format: "png", // "png" | "webp" | "jpg" | "pdf" | "mp4" | "webm" | "gif"
-      scale: 1, // 1 = original size, 2 = double
-      includePages: [1, 3], // optional – only for multi-page templates
-      fileName: "my-render", // optional – custom filename (without extension)
-    },
-    pdfOptions: {
-      // optional – only when format is "pdf"
-      margin: "20px",
-      rangeFrom: 1,
-      rangeTo: 2,
-      colorMode: "rgb", // "rgb" or "cmyk"
-      dpi: 300,
-    },
-  }),
-});
-```
-
-**Response (single page):**
 ```json
 {
-  "data": {
-    "content": "data:image/png;base64,iVBORw0.....",
-    "format": "png",
-    "type": "base64",
-    "responseTime": 325.22
-  }
-}
-```
-
-**Response (multi-page/carousel):**
-```json
-{
-  "data": [
-    { "page": 1, "content": "https://storage.orshot.com/.../image1.png" },
-    { "page": 2, "content": "https://storage.orshot.com/.../image2.png" }
-  ],
+  "templateId": 123,
+  "modifications": { "title": "We just shipped" },
   "format": "png",
-  "type": "url",
-  "responseTime": 3166.01,
-  "totalPages": 2,
-  "renderedPages": 2
+  "size": "og-image",
+  "extraSizes": ["instagram-story"]
 }
 ```
 
-### 2. Render from Utility Template
+4. Check: the result lists every output URL and each extra size. A per-size `error` means that one size failed; the others are fine. Show the user every link.
 
-Generate renders from Orshot's pre-built utility templates (e.g., website screenshots, tweet images).
-
-**POST** `https://api.orshot.com/v1/generate/{renderType}`
-
-- `renderType`: `images` or `pdfs`
-
-```js
-await fetch("https://api.orshot.com/v1/generate/images", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: "Bearer <ORSHOT_API_KEY>",
-  },
-  body: JSON.stringify({
-    templateId: "website-screenshot", // String ID for utility templates
-    response: {
-      format: "png",
-      type: "base64",
-    },
-    modifications: {
-      websiteUrl: "https://example.com",
-      fullCapture: false,
-      delay: 500,
-      width: 1200,
-      height: 1000,
-    },
-  }),
-});
-```
-
-### 3. Generate Signed URL
-
-Create publicly accessible render URLs without exposing your API key.
-
-**POST** `https://api.orshot.com/v1/signed-url/create`
-
-```js
-await fetch("https://api.orshot.com/v1/signed-url/create", {
-  method: "POST",
-  headers: {
-    Authorization: "Bearer <ORSHOT_API_KEY>",
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    templateId: "website-screenshot",
-    expiresAt: 1744550160505, // UNIX timestamp, or null for no expiry
-    renderType: "images",
-    modifications: {
-      websiteUrl: "https://example.com",
-    },
-  }),
-});
-```
-
-### 4. List Studio Templates
-
-**GET** `https://api.orshot.com/v1/studio/templates/all?page=1&limit=10`
-
-Response includes `data` array of templates and `pagination` object with `page`, `limit`, `total`, `totalPages`.
-
-### 5. Get Studio Template
-
-**GET** `https://api.orshot.com/v1/studio/templates/:templateId`
-
-Returns the template metadata including available `modifications`.
-
-### 6. Delete Studio Template
-
-**DELETE** `https://api.orshot.com/v1/studio/templates/:templateId`
-
-### 7. Duplicate Studio Template
-
-**POST** `https://api.orshot.com/v1/studio/templates/:templateId/duplicate`
-
-### 8. Get Profile & Workspaces
-
-**GET** `https://api.orshot.com/v1/me`
-
-Returns your profile and the workspaces your API key or OAuth token can access, including plan info and credit usage.
-
-### 9. Brand Assets API
-
-Brand assets are grouped by type — **images**, **colors**, **fonts**, **videos**, **audio** — each with its own routes under `/v1/brand-assets/{type}/…`.
-
-#### Images
-- **Get:** `GET https://api.orshot.com/v1/brand-assets/images/get`
-- **Upload:** `POST https://api.orshot.com/v1/brand-assets/images/add` — `multipart/form-data` with a `file` field
-- **Update tags:** `PATCH https://api.orshot.com/v1/brand-assets/images/update/:id`
-- **Delete:** `DELETE https://api.orshot.com/v1/brand-assets/images/delete/:id`
-
-#### Colors
-- **Get:** `GET https://api.orshot.com/v1/brand-assets/colors/get`
-- **Add:** `POST https://api.orshot.com/v1/brand-assets/colors/add` — body `{ type: "hex" | "gradient", value, tags? }`
-- **Update tags:** `PATCH https://api.orshot.com/v1/brand-assets/colors/update/:id`
-- **Delete:** `DELETE https://api.orshot.com/v1/brand-assets/colors/delete/:id`
-
-#### Fonts / Videos / Audio
-Same shape — swap the type segment (`fonts`, `videos`, `audio`):
-- **Get:** `GET /v1/brand-assets/{type}/get`
-- **Upload:** `POST /v1/brand-assets/{type}/add` (`multipart/form-data`, `file` field)
-- **Update tags:** `PATCH /v1/brand-assets/{type}/update/:id`
-- **Delete:** `DELETE /v1/brand-assets/{type}/delete/:id`
-
-#### Search
-- **Search assets:** `GET https://api.orshot.com/v1/brand-assets/search`
-
-Use an uploaded asset in a render by passing its hosted URL as an image/video modification value.
-
-### 10. Enterprise API Endpoints
-
-These endpoints require an Enterprise plan.
-
-#### Create Studio Template
-**POST** `https://api.orshot.com/v1/studio/templates/create`
-
-```js
-{
-  name: "Product Banner",        // required, max 255 chars
-  description: "Banner template", // optional
-  canvas_width: 1200,             // required, 1-5000
-  canvas_height: 628,             // required, 1-5000
-  pages_data: [...]               // optional - array of page objects with elements
-}
-```
-
-#### Bulk Create Studio Templates
-**POST** `https://api.orshot.com/v1/studio/templates/bulk-create`
-Create multiple templates at once via CSV or JSON.
-
-#### Update Template
-**PATCH** `https://api.orshot.com/v1/studio/templates/:templateId`
-Update template name and description.
-
-#### Update Template Modifications
-**PATCH** `https://api.orshot.com/v1/studio/templates/:templateId/update-modifications`
-Update text and image content in template layers.
-
-#### Generate Template Variants
-**POST** `https://api.orshot.com/v1/studio/templates/:templateId/generate-variants`
-Generate multiple size variants of a template using AI.
-
-### 11. Dynamic URLs
-
-Generate images directly from URL parameters:
-
-```
-https://api.orshot.com/v1/studio/dynamic-url/my-image?title=Hello%20World&title.fontSize=48px&title.color=%23ff0000
-```
-URL-encode special characters (e.g., `#` → `%23`).
-
-### 12. Template Folders & Sharing
-
-Organize studio templates into folders and share them:
-
-- **List folders:** `GET https://api.orshot.com/v1/studio/folders`
-- **Create folder:** `POST https://api.orshot.com/v1/studio/folders`
-- **Update folder:** `PATCH https://api.orshot.com/v1/studio/folders/:folderId`
-- **Delete folder:** `DELETE https://api.orshot.com/v1/studio/folders/:folderId`
-- **Move template into folder:** `PATCH https://api.orshot.com/v1/studio/templates/:templateId/folder`
-- **Get template sharing:** `GET https://api.orshot.com/v1/studio/templates/:templateId/share`
-- **Update template sharing:** `POST https://api.orshot.com/v1/studio/templates/:templateId/share`
-
-### 13. Workflows API
-
-Workflows automate multi-step pipelines (trigger → fetch data → render → publish/deliver). Available to first-party clients (like the Orshot MCP server) and Enterprise workspaces.
-
-- **List workflows:** `GET https://api.orshot.com/v1/workflows`
-- **Create workflow:** `POST https://api.orshot.com/v1/workflows`
-- **Get workflow:** `GET https://api.orshot.com/v1/workflows/:id`
-- **Update workflow:** `PATCH https://api.orshot.com/v1/workflows/:id`
-- **Delete workflow:** `DELETE https://api.orshot.com/v1/workflows/:id`
-- **Run workflow:** `POST https://api.orshot.com/v1/workflows/:id/run`
-- **List runs:** `GET https://api.orshot.com/v1/workflows/:id/runs`
-- **Get a run:** `GET https://api.orshot.com/v1/workflows/:id/runs/:runId`
-- **Validate a workflow:** `POST https://api.orshot.com/v1/workflows/validate`
-- **List available nodes:** `GET https://api.orshot.com/v1/workflows/nodes`
-- **Get/update sharing:** `GET` / `POST https://api.orshot.com/v1/workflows/:id/share`
-
-## Render Configuration
-
-### Dynamic Parameters
-
-Override template styles, content, and behavior at render time using dot notation.
-
-#### Style Parameters
-
-Format: `parameterId.property`
-
-```json
-{
-  "modifications": {
-    "title": "Hello World",
-    "title.fontSize": "48px",
-    "title.color": "#ff0000",
-    "title.fontFamily": "Roboto",
-    "title.textAlign": "center",
-    "logo.borderRadius": "50%",
-    "logo.objectFit": "cover"
-  }
-}
-```
-
-**Text properties:** `fontSize`, `fontWeight`, `fontStyle`, `fontFamily`, `lineHeight`, `letterSpacing`, `textAlign`, `verticalAlign`, `textDecoration`, `textTransform`, `color`, `backgroundColor`, `backgroundRadius`, `textStrokeWidth`, `textStrokeColor`, `opacity`, `filter`, `dropShadowX/Y/Blur/Color`
-
-**Image properties:** `objectFit`, `objectPosition`, `borderRadius`, `borderWidth`, `borderColor`, `boxShadowX/Y/Blur/Color`, `opacity`, `filter`
-
-**Shape properties:** `fill`, `stroke`, `strokeWidth`, `borderRadius`, `opacity`
-
-**Position/Size (all elements):** `x`, `y`, `width`, `height`
-
-Property names are **case-insensitive**.
-
-#### Multi-Page Templates
-
-Prefix modifications with page number:
-```json
-{
-  "modifications": {
-    "page1@title": "Page 1 Title",
-    "page2@title": "Page 2 Title",
-    "page1@title.fontSize": "48px"
-  }
-}
-```
-
-#### AI Content Generation (.prompt)
-
-Generate text or images using AI:
-```json
-{
-  "modifications": {
-    "headline.prompt": "Write a catchy headline about coffee",
-    "background.prompt": "A serene mountain landscape at sunset"
-  }
-}
-```
-- `.prompt` on a text element generates copy; on an image element it generates imagery. The underlying AI models are managed by Orshot and may change over time — don't hardcode a specific model. AI modifications consume AI Credits.
-
-#### Interactive Links (.href)
-
-Add clickable links in PDF outputs:
-```json
-{
-  "modifications": {
-    "cta_button.href": "https://example.com/signup",
-    "logo.href": "https://company.com"
-  },
-  "response": { "format": "pdf" }
-}
-```
-
-#### Video Parameters
-
-Control video elements dynamically:
-```json
-{
-  "modifications": {
-    "bgVideo": "https://example.com/video.mp4",
-    "bgVideo.trimStart": 5,
-    "bgVideo.trimEnd": 15,
-    "bgVideo.muted": false,
-    "bgVideo.loop": true
-  },
-  "response": { "format": "mp4" }
-}
-```
-
-### Video Render Example
-
-Render templates with video elements as MP4, WebM, or GIF:
+The same render over REST:
 
 ```js
 await fetch("https://api.orshot.com/v1/studio/render", {
   method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: "Bearer <ORSHOT_API_KEY>",
-  },
+  headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.ORSHOT_API_KEY}` },
   body: JSON.stringify({
     templateId: 123,
-    modifications: {
-      videoElement: "https://example.com/custom-video.mp4",
-      "videoElement.trimStart": 0,
-      "videoElement.trimEnd": 10,
-      "videoElement.muted": false,
-      "videoElement.loop": true,
-    },
-    videoOptions: {
-      trimStart: 0,
-      trimEnd: 20,
-      muted: true,
-      loop: true,
-    },
-    response: {
-      type: "url",
-      format: "mp4",
-    },
+    modifications: { title: "We just shipped" },
+    response: { type: "url", format: "png", size: "og-image", extraSizes: ["instagram-story"] },
   }),
 });
 ```
 
-### Render-level `videoOptions` (top level, sibling of `modifications`)
-
-Controls the whole video render, not one element:
-
-```json
-{
-  "templateId": 123,
-  "modifications": { "page1@headline": "Launch day" },
-  "videoOptions": {
-    "duration": 12,
-    "fps": 30,
-    "muted": false,
-    "combinePages": true,
-    "pageTransition": "fade",
-    "pageTransitionDuration": 0.5,
-    "audioSource": "https://example.com/track.mp3",
-    "subtitleSource": "https://example.com/voiceover.mp3",
-    "captionPreset": "karaoke"
-  },
-  "response": { "type": "url", "format": "mp4" }
-}
-```
-
-- `duration`, `fps` (≤30), `quality`, `muted`, `trimStart`+`trimEnd` (must be paired).
-- `combinePages: true` merges a multi-page template into ONE video, with `pageTransition` (42 types — fades, slides, wipes, zooms, blurs and more) and `pageTransitionDuration` (0–2s, default 0.5) between scenes. A string `audioSource` then lays one continuous soundtrack across the combined video — the recipe for multi-scene videos.
-- `audioSource` swaps an existing URL audio track at render time while keeping its saved trim/fades/volume/offset/loop. Generated narration changes through `tts.parameterId` instead (see Audio below).
-- Captions: `subtitleSource` (a media URL to auto-transcribe, or a `.srt`/`.vtt` used as-is), `captionPreset` (`pill` | `minimal` | `karaoke` | `bold` | `outline` | `neon`), plus fine-grained `subtitleMode` (`phrase`|`word-by-word`), `subtitleWordReveal` (`appear`|`highlight`|`align`), `subtitleSplit` (`word`|`letter`), `subtitleMaxWordsPerLine` or `subtitleMaxCharsPerLine`, and `subtitle*` styling keys. Prefer authored `page.subtitle` with source `"auto-audio"` so captions word-sync automatically.
-
-### Async render jobs (long videos — use this from automations)
-
-A synchronous render holds the HTTP connection for the full render time; video routinely outlives client timeouts (Zapier ~30s, many MCP clients 120s). Add `response.mode: "async"`:
-
-```
-POST /v1/studio/render  { ..., "response": { "mode": "async", "format": "mp4" } }
-  → 202 with a job object in ~100ms
-GET  /v1/studio/render-jobs/:id          → poll the job (queued → processing → succeeded/failed/canceled)
-GET  /v1/studio/render-jobs?status=&limit=  → newest-first list
-POST /v1/studio/render-jobs/:id/cancel   → cancel while not terminal
-```
-
-The job's `result` is byte-identical to the sync response. Pass a `webhook_url` to get the settled job POSTed to you instead of polling. Jobs time out at 15 minutes.
-
-### Page animations & ambient motion (video templates)
-
-Elements animate via a page-level `transitions` object on the element — no video file needed:
-
-```json
-{
-  "transitions": {
-    "enter": { "type": "slideInUp", "duration": 0.5, "easing": "ease-out" },
-    "showAt": 0.4,
-    "ambient": { "type": "kenBurns", "customValues": { "zoom": 1.12, "panX": 6 } },
-    "exit": { "type": "fadeOut", "duration": 0.3 },
-    "hideAt": 3.6
-  }
-}
-```
-
-- Three phases: `enter` → `ambient` (plays the element's whole visible life) → `exit`. `showAt`/`hideAt` are siblings of `enter`/`exit`, never nested inside them (the #1 authoring bug).
-- Ambient types: `kenBurns` (runs once, stretched across visibility — give every full-bleed photo one), plus looping `pulse`, `float`, `drift`, `wiggle`, `shake`, `slowRotate`, `breathe`. `shake`/`slowRotate` need `easing: "linear"` or the loop seam shows.
-- All timing is tunable per render via dot-notation modifications: `"photo.showAt": 2.1`, `"photo.enterType": "scaleIn"`, `"photo.ambientType": "kenBurns"`, etc.
-
-### Audio: soundtracks & AI voiceover (video templates)
-
-Each page carries `audioTracks` (max 10, page-level, mixed into every mp4/webm render):
-
-- **Existing audio**: `{ "url": "https://...", "trimStart": 33.2, "trimEnd": 44.1, "fadeOut": 1, "volume": 1, "loop": false, "offset": 0 }` — trim to the song's best part; `videoOptions.audioSource` swaps the file at render keeping these settings.
-- **AI voiceover**: `{ "tts": { "text": "words to speak", "voiceId": "...", "modelId": "flash", "parameterId": "voiceover" } }` instead of `url`. Synthesized when the template is saved (metered voice minutes; identical scripts are cached and free on re-render). Narration length drives the page length, and `page.subtitle` with source `"auto-audio"` gives word-synced captions with no transcription step.
-- **Generated ambient/SFX**: `{ "sfx": { "prompt": "warm modern pulse, instrumental, seamless loop", "seconds": 12 }, "volume": 0.12, "loop": true }`.
-- `tts.parameterId` makes the SPOKEN TEXT a render parameter: `modifications: { "voiceover": "new words" }` (multi-page: `"page1@voiceover"`) re-voices the video per render; `"voiceover.voiceId"` / `"voiceover.modelId"` tune the voice.
-- Budget narration at ~2 words/second plus 1 second of headroom for the page duration.
-- Via MCP, call `orshot_get_audio_authoring_options` first — it returns valid voice ids, models and the workspace's voice allowance in one read-only call.
-
-### Smart Resize (one design → any size)
-
-Render a template at a **different canvas size without redesigning it** — the layout is deterministically re-solved to fit (elements re-anchor, backgrounds stretch, groups move together). Set these on the `response` object:
-
-- **`size`** — *replace* the render size. A preset slug (`"instagram-story"`, `"og-image"`, `"youtube-thumbnail"`, …), a `"WIDTHxHEIGHT"` string (`"1080x1920"`), or use `width` + `height` (10–5000px each).
-- **`extraSizes`** — *add* the same design at extra sizes in one call. An array (`["1080x1920", "1080x1080"]`) or a named object (`{ story: "1080x1920", square: "1080x1080" }`). Each output gains a nested `extraSizes` array of `{ size, width, height, content }`.
-
-```json
-{
-  "templateId": 123,
-  "modifications": { "title": "Launch Day" },
-  "response": {
-    "type": "url",
-    "format": "png",
-    "size": "1200x630",
-    "extraSizes": ["1080x1920", "1080x1080"]
-  }
-}
-```
-
-Image formats only (`png`/`jpg`/`webp`/`avif`), up to 50 extra outputs per call. Each extra output is billed like a page (1 credit). Saved sizes from the Studio Smart Resize panel reproduce their approved preview exactly.
-
-### Response Types
-
-| Type     | Description                                     |
-| -------- | ----------------------------------------------- |
-| `url`    | Returns a hosted URL to the rendered file       |
-| `base64` | Returns base64-encoded content as a string      |
-| `binary` | Returns binary file content for custom handling |
-
-### Response Formats
-
-| Format | Type  | Notes                                      |
-| ------ | ----- | ------------------------------------------ |
-| `png`  | Image | Best quality, larger size                  |
-| `webp` | Image | Smaller size, good quality                 |
-| `jpg`  | Image | Compressed, no transparency                |
-| `avif` | Image | Smallest size, modern browsers             |
-| `pdf`  | Doc   | Supports multi-page, clickable links, CMYK |
-| `mp4`  | Video | H.264, requires video elements in template |
-| `webm` | Video | VP9, web-optimized                         |
-| `mov`  | Video | QuickTime container                        |
-| `mkv`  | Video | Matroska container                         |
-| `gif`  | Video | Animated, no audio support                 |
-
-### Render Usage (credits)
-
-Usage is measured in **credits**. 1 credit = 1 image, 1 PDF page, or 1 second of video.
-
-| Output               | Cost                     |
-| -------------------- | ------------------------ |
-| Image (PNG/JPG/WebP/AVIF) | 1 credit per image  |
-| PDF                  | 1 credit per page        |
-| Video (MP4/WebM/MOV/MKV/GIF) | 1 credit per second |
-
-Multi-page templates and Smart Resize extra sizes: each output page/size counts as its own credit. AI modifications (`.prompt`) additionally consume AI Credits.
-
-## Common Recipes
-
-End-to-end patterns for the jobs people most often automate with Orshot.
-
-### OG image on every deploy
-Render a studio template to a stable hosted URL and drop it into your `<meta>` tags.
-```js
-const { data } = await fetch("https://api.orshot.com/v1/studio/render", {
-  method: "POST",
-  headers: { "Content-Type": "application/json", Authorization: "Bearer <KEY>" },
-  body: JSON.stringify({
-    templateId: 123,
-    modifications: { title: post.title, author: post.author },
-    response: { type: "url", format: "png", size: "og-image" },
-  }),
-}).then((r) => r.json());
-// <meta property="og:image" content={data.content} />
-```
-
-### Bulk-generate from a CSV (certificates, badges, invoices)
-Loop rows and render one PDF each. Describe image layers with `.alt` for accessible PDFs.
-```js
-for (const row of rows) {
-  await fetch("https://api.orshot.com/v1/studio/render", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: "Bearer <KEY>" },
-    body: JSON.stringify({
-      templateId: 456,
-      modifications: { name: row.name, course: row.course, date: row.date },
-      response: { type: "url", format: "pdf" },
-      pdfOptions: { title: `${row.name} — Certificate` },
-    }),
-  });
-}
-```
-
-### Render and auto-post to social in one call
-Add a `publish` object (see Social Publishing) — no second request.
-```js
-body: JSON.stringify({
-  templateId: 123,
-  modifications: { title: "Launch day!" },
-  response: { type: "url", format: "png" },
-  publish: { accounts: [1, 2], content: "We just shipped 🚀" },
-});
-```
-
-### One design, every social size (Smart Resize)
-```js
-response: { type: "url", format: "png", extraSizes: ["1080x1920", "1080x1080", "1200x630"] }
-// each output gains a nested extraSizes[] of { size, width, height, content }
-```
-
-### Automate a recurring pipeline (Workflows)
-Create a workflow (trigger → fetch data → render → publish/deliver) with `POST /v1/workflows`, then trigger it with `POST /v1/workflows/:id/run`. Inspect results via `GET /v1/workflows/:id/runs`. Best driven through the MCP server or the Workflows API on Enterprise/first-party clients.
-
-See **Setting Up Recurring Automation** below for the full playbook, including how
-to wire it into an n8n/Make/Zapier setup the user already runs.
-
-## Setting Up Recurring Automation
-
-A one-off render is a demo. The value shows up when it runs unattended. Pick the
-road that matches where the user ALREADY works, not the one easiest to describe.
-
-### Choose the road first
-
-Check what they already run before recommending anything. `GET /v1/workspace/logs?limit=100`
-returns a `source` on every row, which answers it factually:
-
-| `source` in their logs | They already run | Lead with |
-| --- | --- | --- |
-| `n8n-integration` | n8n | Add a node to the n8n workflow they have |
-| `orshot-make` | Make | Add a module to their scenario |
-| `zapier-integration` | Zapier | Add an action to their Zap |
-| `orshot-pipedream` | Pipedream | Add a step |
-| `orshot-*-sdk`, `api`, `cli` | Their own code | Write the call into their repo |
-| only `playground` / `orshot-mcp-server` | Nothing yet | Offer Orshot Workflows |
-
-Never recommend a second orchestrator to someone who already has one. A user with a
-live n8n setup wants this template added to it, not a new tool to learn.
-
-If you have browser control or repo access, offer to DO the setup rather than
-describe it. Whichever road you take, **run it once and show the resulting image
-URL** before calling it done.
-
-### Road A — Orshot Workflows (no orchestrator yet)
-
-Orshot runs the whole loop: trigger, render, deliver. Over MCP:
-
-1. `orshot_suggest_workflows` with the `templateId` — returns automations that
-   fit this template, with draft-ready steps
-2. `orshot_list_workflow_nodes` — use the EXACT node keys it returns. Invented
-   keys (e.g. `render_studio_template`, `slack_send`) fail as `unknown node`;
-   the real keys are `render`, `slack`, and so on
-3. `orshot_list_connected_integrations` — see what is already connected
-4. `orshot_get_workflow_connection_data` — resolve "my content sheet" into a
-   concrete id, and confirm the name back to the user
-5. `orshot_validate_workflow` — read `errors`, `warnings` AND `gated`. A `gated`
-   entry means the step is not included in the workspace's current plan, not a
-   config problem: the draft still saves, only activation is blocked, so tell
-   the user that instead of editing steps
-6. `orshot_create_workflow` with `status: "draft"`, then share the edit link from
-   the result — it opens pre-configured in their dashboard
-7. `orshot_run_workflow` — prove it works, then they activate
-
-**Scaffolding shapes.** If they have no data source ready, use
-`webhook` → `webhook_body` → `render` → `orshot_url`. It is the only
-trigger→source pair needing no OAuth AND it validates clean with empty configs,
-so it is runnable immediately and they can POST to it from cron, their app, n8n,
-or Make. A bare `schedule` → `render` is NOT runnable — it fails with "no data
-source"; a schedule needs a source step after it.
-
-### Road B — their existing automation platform
-
-Every platform needs the same three things: endpoint, auth header, modification
-keys. Get the exact keys first — never guess them:
-
-```
-orshot_get_studio_template_modifications   (or GET /v1/studio/templates/:id/modifications)
-```
-
-Then the call to drop in:
-
-```http
-POST https://api.orshot.com/v1/studio/render
-Authorization: Bearer <ORSHOT_API_KEY>
-Content-Type: application/json
-
-{
-  "templateId": 1234,
-  "modifications": { "headline": "{{ row.title }}", "hero_image": "{{ row.image_url }}" },
-  "response": { "type": "url", "format": "png" }
-}
-```
-
-The response contains the rendered URL — map it to whatever the next step needs.
-
-- **n8n** — HTTP Request node, POST, header auth, body as above. A dedicated
-  Orshot node also exists in the n8n library.
-- **Make** — HTTP "Make a request" module, or the Orshot app modules.
-- **Zapier** — Webhooks by Zapier → POST, or the Orshot Zapier app.
-- **Pipedream** — HTTP step; Orshot components are published.
-- **Own code / cron** — any HTTP client. Use `response.type: "url"` in production
-  so you are not moving base64 around, and keep the API key in an environment
-  variable, never inline.
-
-Recurring triggers that work well: a new spreadsheet/Airtable/Notion row, a
-schedule, an inbound webhook, or a CMS publish event.
-
-### Verify before you call it done
-
-1. Trigger one real run
-2. `orshot_list_workspace_logs` (or `GET /v1/workspace/logs`) — the new render
-   appears with the `source` of whatever fired it, proving which system made it
-3. Show the user the image URL from that run
-
-If the render 403s, read the body: an expired key, an inactive subscription, and
-a plan limit all return 403 with different messages. A plan block is not an auth
-problem — do not retry it as one.
-
-## Integrations & Helps
-
-### Integrations Service Support
-Orshot connects with:
-- **No-code:** Zapier, Make (Integromat), n8n, Pipedream, Airtable
-- **Storage:** Amazon S3, Cloudflare R2, Google Drive, Dropbox
-- **Notifications:** Slack, Webhooks
-- **Design:** Figma Plugin, Canva Import, Polotno Import
-- **CLI:** `npx orshot-cli` for terminal-based generation
-- **MCP Server:** Use with Claude, Cursor, Windsurf via MCP protocol
-- **Embed:** White-label design editor for your app (React SDK, Vue SDK, iframe)
-
-### Common Error Codes
-
-| Code | Error                          | Fix                                          |
-| ---- | ------------------------------ | -------------------------------------------- |
-| 400  | `templateId missing`           | Add `templateId` to request body             |
-| 400  | `Invalid API Key`              | Generate new key from dashboard              |
-| 403  | `Authorization header missing` | Add `Authorization: Bearer <KEY>` header     |
-| 403  | `Subscription inactive`        | The workspace subscription is not active; check it in the dashboard |
-| 403  | `Template not found`           | Verify template ID belongs to your workspace |
-| 403  | `ai-video-not-on-plan`         | AI video is not included in the workspace's current plan; use stock footage or a Brand Library video instead |
-
-### General Best Practices
-
-1. **Use `url` response type** for production – avoids large base64 payloads
-2. **Use `webp` format** for smaller file sizes with good quality
-3. **Test in Playground** before coding – each template has an interactive playground
-4. **Use style parameters** instead of creating multiple template variants
-5. **Use consistent units** – stick to `px` for sizes
-6. **Multi-page prefix** – always use `page1@paramId` format for carousel templates
-7. **Cache renders** – use `?cache=false` query param to bypass cache when needed
-8. **Handle errors** – check for 403/400 status codes and parse error messages
-
-## Social Publishing
-
-Publish rendered images/videos directly to 13+ social platforms via API. Supports Twitter/X, Instagram, LinkedIn, Pinterest, Facebook, TikTok, YouTube, Threads, Bluesky, Reddit, Telegram, Snapchat, and Google Business.
-
-For detailed setup: fetch `https://orshot.com/docs/publish/introduction.md`
-
-### Connect Accounts
-
-Connect social accounts in **Workspace Settings → Social Accounts** in the Orshot dashboard. Each connected account gets a numeric ID used in API calls.
-
-### Publish from API
-
-Add the `publish` object to any render request:
-
-```js
-await fetch("https://api.orshot.com/v1/studio/render", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: "Bearer <ORSHOT_API_KEY>",
-  },
-  body: JSON.stringify({
-    templateId: 123,
-    modifications: { title: "New Post" },
-    response: { type: "url", format: "png" },
-    publish: {
-      accounts: [1, 3],          // Social account IDs
-      content: "Check this out!", // Caption text (max 5000 chars)
-      isDraft: false,             // true = save as draft
-      schedule: {                 // Optional: schedule for later
-        scheduledFor: "2026-04-25T14:00:00Z"
-      },
-      timezone: "America/New_York",
-      platformOptions: {          // Per-account overrides (keyed by account ID)
-        "1": { firstComment: "https://example.com" },     // LinkedIn
-        "3": { title: "Pin Title", link: "https://..." }   // Pinterest
-      }
-    }
-  }),
-});
-```
-
-**Response includes publish status:**
-```json
-{
-  "data": { "content": "https://storage.orshot.com/..." },
-  "publish": [
-    { "platform": "twitter", "username": "acme", "status": "published", "url": "https://x.com/..." },
-    { "platform": "linkedin", "username": "acme", "status": "scheduled" }
-  ]
-}
-```
-
-**Format compatibility:**
-- PDF cannot be published to any platform
-- Video (mp4/webm/gif) cannot be published to Google Business
-- Image (png/jpg/webp) cannot be published to TikTok or YouTube (video-only)
-
-## Developer Apps & OAuth
-
-Build third-party integrations with Orshot using OAuth 2.0. Register an app, authenticate users, and access their workspaces on their behalf.
-
-For detailed setup: fetch `https://orshot.com/docs/developers/oauth-overview.md`
-
-### Register an App
-
-1. Go to **Workspace Settings → Developer Apps** in the Orshot dashboard
-2. Create a new app with a name, redirect URI, and the scopes it needs
-3. Use the app's `client_id` in the flows below. Orshot OAuth clients are public clients: PKCE (`S256`) is required and no client secret is used.
-
-Discovery: `https://api.orshot.com/.well-known/oauth-authorization-server` (dynamic client registration is available at `registration_endpoint`).
-
-### OAuth 2.0 Flows
-
-**Authorization Code + PKCE** (web and desktop apps):
-```
-GET https://orshot.com/oauth/authorize?
-  response_type=code&
-  client_id=YOUR_CLIENT_ID&
-  redirect_uri=https://yourapp.com/callback&
-  code_challenge=BASE64URL_SHA256_OF_VERIFIER&
-  code_challenge_method=S256&
-  scope=workspace:templates:read workspace:templates:write render:generate
-```
-
-**Device Flow** (CLI/headless):
-```
-POST https://api.orshot.com/v1/oauth/device/code
-  client_id=YOUR_CLIENT_ID&
-  scope=workspace:templates:read render:generate
-```
-
-### Token Exchange
-
-```
-POST https://api.orshot.com/v1/oauth/token
-  grant_type=authorization_code&
-  code=AUTH_CODE&
-  client_id=YOUR_CLIENT_ID&
-  code_verifier=THE_PKCE_VERIFIER&
-  redirect_uri=https://yourapp.com/callback
-```
-
-Refresh with `grant_type=refresh_token` when the `offline_access` scope was granted. Store tokens server-side or in the user's own environment; never place them in prompts, logs, or shared files.
-
-### Available Scopes
-
-| Scope | Description |
-|-------|-------------|
-| `workspace:read` | List and read workspace details |
-| `workspace:templates:read` | List and read templates |
-| `workspace:templates:write` | Update template modifications via API |
-| `render:generate` | Generate images, PDFs, and videos |
-| `mcp:access` | Access via Model Context Protocol |
-| `offline_access` | Long-lived refresh tokens |
-
-For endpoint details: fetch `https://orshot.com/docs/developers/oauth-endpoints.md`
-
-## White-Label Embed (Orshot Embed)
-
-Embed Orshot's template editor into your application as a white-label component. Users can design and customize templates directly in your app.
-
-For detailed setup: fetch `https://orshot.com/docs/orshot-embed/introduction.md`
-
-### Quick Setup (iframe)
-
-```html
-<iframe
-  src="https://orshot.com/embeds/YOUR_EMBED_ID?userId=USER_123"
-  width="100%"
-  height="600"
-  frameborder="0"
-></iframe>
-```
-
-### React SDK
-
-```bash
-npm install @orshot/react
-```
-
-```jsx
-import { OrshotEmbed } from "@orshot/react";
-
-<OrshotEmbed
-  embedId="YOUR_EMBED_ID"
-  userId="user_123"
-  token="JWT_TOKEN"
-  onRender={(data) => console.log("Rendered:", data)}
-  onSave={(data) => console.log("Saved:", data)}
-/>
-```
-
-### Vue SDK
-
-```bash
-npm install @orshot/vue
-```
-
-```vue
-<template>
-  <OrshotEmbed
-    embed-id="YOUR_EMBED_ID"
-    user-id="user_123"
-    @render="onRender"
-    @save="onSave"
-  />
-</template>
-```
-
-### Key Features
-
-- **Per-user templates**: Pass `userId` to give each user their own template copies
-- **JWT authentication**: Secure embed access with domain whitelist validation
-- **Webhooks**: Get notified on render completion, template save, etc.
-- **Custom buttons**: Add your own action buttons to the editor toolbar
-- **PostMessage API**: Control the embed programmatically from your app
-
-For React SDK details: fetch `https://orshot.com/docs/orshot-embed/react-sdk.md`
-For Vue SDK details: fetch `https://orshot.com/docs/orshot-embed/vue-sdk.md`
-For webhook setup: fetch `https://orshot.com/docs/orshot-embed/webhooks.md`
-
-## Migrating from Another Template-Render API
-
-The API-call swap is the easy part. The real work is recreating the design, because another platform's template JSON cannot be imported:
-
-1. **Recreate the template in Orshot Studio** (or via `POST /v1/studio/templates/create`). Rebuild the layout, then mark every dynamic layer parameterizable with a clear `parameterId`.
-2. **Map old field names → Orshot `parameterId`s.** Other APIs key by layer name or by fixed keys such as `image_url`; Orshot keys by `parameterId`. Keep a lookup from old names to new ones.
-3. **Swap the API call**: `Authorization: Bearer <ORSHOT_API_KEY>` + `POST /v1/studio/render` with `modifications` as a flat object (page-prefixed keys for multi-page templates).
-4. **Handle sync vs async.** Many render APIs are submit-then-poll; Orshot image and PDF renders return synchronously, so delete the polling/webhook code and read `data.content` from the response. Long video renders use async render jobs (see above).
-5. **Style overrides** that other APIs put in per-layer objects become dot-notation keys here (`"title.fontSize": "48px"`).
-6. **Verify the response shape** — single page is an object, multi-page is an array (Common Gotchas #7) — before cutting traffic over.
-
-Render URLs on Orshot persist; do not add expiry handling unless you delete renders yourself.
-
-### Links
-
-- Documentation: https://orshot.com/docs
-- API Reference: https://orshot.com/docs/api-reference
-- Integrations: https://orshot.com/integrations
-- MCP Server: https://orshot.com/docs/integrations/mcp-server
-- Templates: https://orshot.com/templates
-- Developer Apps: https://orshot.com/docs/developers
-- Social Publishing: https://orshot.com/docs/publish/introduction
-- Orshot Embed: https://orshot.com/docs/orshot-embed/introduction
+Preset names and size rules: [render-from-studio-template, Smart Resize](https://orshot.com/docs/api-reference/render-from-studio-template.md).
+
+## Worked example: render and hold as a draft post
+
+Prompt: "Render this week's quote card and put it on LinkedIn as a draft."
+
+1. `orshot_list_social_accounts`. Pick the LinkedIn account id, say `3`. An empty list means no account is connected yet; a person connects one in the dashboard ([connect-account](https://orshot.com/docs/publish/connect-account.md)), the API cannot. A draft or scheduled post can still be saved with `platforms` instead of `accounts`; it goes out once an account on that platform is connected. Publishing now needs an account.
+2. `orshot_render_template` with the modifications plus `publish: { "accounts": [3], "content": "...", "status": "draft" }`.
+3. Check the `publish` result per account. A failed publish never blocks the render.
+4. After the user approves: `orshot_publish_social_draft`. To change it first: `orshot_update_social_post`.
+
+Over REST, the render `publish` object reads `isDraft` and `schedule.scheduledFor` for timing, not `status` ([publish-from-api](https://orshot.com/docs/publish/publish-from-api.md)). To post a file that already exists, use `orshot_publish_social_post` or `POST /v1/social/publish`. Scheduling, analytics and best time to post: the `orshot-social-media-scheduler` skill.
+
+## Other jobs
+
+- **Utility templates** (tweet and website screenshots, bar and comparison charts, app store screenshots, phone mockups, background removal): `orshot_render_library_template` or `POST /v1/generate/:renderType`.
+- **Many variants of one template** (a list of names, a set of products): `orshot_batch_render_template`, or loop the REST render. A full invoice or certificate run: `orshot-pdf-generator`.
+- **Stable image URLs** for OG tags, emails and embeds: `orshot_create_dynamic_url`. OG images for a whole blog or site: `orshot-blog-images`.
+- **Brand assets**: `orshot_get_brand_kit`, `orshot_import_brand_website`.
+- **Folders and workspaces**: `orshot_list_template_folders`, `orshot_set_active_workspace`.
+- **Coming from another tool**: `references/migration.md`.
+- **Recurring jobs** (n8n, Make, Zapier, Pipedream, cron, Orshot Workflows): `references/recurring-automation.md`.
+
+## Docs map
+
+| Job | Docs page |
+| --- | --- |
+| Render a studio template: body, response object, Smart Resize, PDF, video, publish | https://orshot.com/docs/api-reference/render-from-studio-template.md |
+| Render a library (utility) template | https://orshot.com/docs/api-reference/render-from-template.md |
+| What modification values can be | https://orshot.com/docs/definitions/modifications.md |
+| Style overrides with dot keys | https://orshot.com/docs/orshot-studio/style-parameters.md |
+| AI-generated values (`.prompt`) | https://orshot.com/docs/dynamic-parameters/prompt.md |
+| Output formats and response types | https://orshot.com/docs/definitions/response-format.md, https://orshot.com/docs/definitions/response-type.md |
+| Long renders as jobs | https://orshot.com/docs/api-reference/async-render-start.md |
+| Video options, audio, captions | https://orshot.com/docs/video-generation/video-options.md, https://orshot.com/docs/video-generation/adding-subtitles.md |
+| PDF options | https://orshot.com/docs/pdf-generation/pdf-options.md |
+| Plan a design: the formats brands run for the job, palette, type | `orshot_plan_design` (brief, `job`, size), then `orshot_get_design_spec` for the craft, the packs, the film schema, the layout grammar and the format references |
+| Template JSON (pages, elements, styles, animation) | `orshot_get_design_spec` topic `template-json`, https://orshot.com/docs/definitions/template-json.md |
+| Create or update templates over REST (Enterprise) | https://orshot.com/docs/api-reference/enterprise-template-create.md |
+| List and read templates | https://orshot.com/docs/api-reference/studio-templates-list.md, https://orshot.com/docs/api-reference/studio-template-get.md |
+| Dynamic URLs | https://orshot.com/docs/integrations/dynamic-urls.md |
+| Signed render URLs (REST) | https://orshot.com/docs/api-reference/generate-signed-url.md |
+| Social posting | https://orshot.com/docs/publish/publish-from-api.md, https://orshot.com/docs/api-reference/social-publish.md |
+| Social add-on pricing | https://orshot.com/docs/publish/pricing.md |
+| Credits | https://orshot.com/docs/definitions/credits-usage.md |
+| Errors | https://orshot.com/docs/error-reference.md |
+| Workspace logs and `source` values | https://orshot.com/docs/api-reference/workspace-logs.md |
+| Workflows over REST | https://orshot.com/docs/api-reference/workflow-create.md |
+| n8n, Make, Zapier, Pipedream and other integrations | https://orshot.com/docs/integrations/index.md |
+| SDKs (Node, Python, PHP, Ruby) | https://orshot.com/docs/sdks/index.md |
+| Importing templates | https://orshot.com/docs/importing-templates/index.md |
+| White-label editor embed | https://orshot.com/docs/orshot-embed/introduction.md |
+| Third-party apps with OAuth | https://orshot.com/docs/developers/oauth-overview.md |
+| MCP setup and tool list | https://orshot.com/docs/integrations/mcp-server.md |
+
+The MCP server also serves `orshot://formats` (output formats and size presets).
