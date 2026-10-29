@@ -6,6 +6,11 @@ One entry per published ClawHub version. Skill versions live in each `SKILL.md` 
 
 Setup now points to `https://mcp.orshot.com/full`, the hosted Orshot server with every tool. The Claude and ChatGPT directory connectors keep working as before.
 
+### orshot plugin 1.2.3
+
+- Listing description now matches the Claude directory: "Automate Videos, PDFs and Images from templates for marketing, post to social platforms, and track and grow engagement"
+- Homepage points to each host's page on orshot.com (/agents/claude, /agents/codex, /agents/cursor, /agents/grok-bot, /agents/openclaw), or /agents
+
 ### orshot-ad-creative 1.1.2
 
 - Connect to https://mcp.orshot.com/full, the hosted Orshot server with every tool

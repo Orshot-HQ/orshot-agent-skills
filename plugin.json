@@ -1,14 +1,14 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "orshot",
-  "version": "1.2.2",
-  "description": "Automate image, PDF and video generation from templates with your agent: blog images, videos and reels, ad creatives, YouTube thumbnails, PDFs, carousels and social posts, rendered on brand and posted to 13 social platforms. Bundles the hosted Orshot MCP server (OAuth, no API key) and one skill per use case.",
+  "version": "1.2.3",
+  "description": "Automate Videos, PDFs and Images from templates for marketing, post to social platforms, and track and grow engagement. Bundles the hosted Orshot MCP server (OAuth, no API key) and one skill per use case: blog images, videos and reels, ad creatives, YouTube thumbnails, PDFs, carousels and social posts.",
   "author": {
     "name": "Orshot",
     "email": "hi@orshot.com",
     "url": "https://orshot.com"
   },
-  "homepage": "https://orshot.com/agents/skills",
+  "homepage": "https://orshot.com/agents",
   "repository": "https://github.com/Orshot-HQ/orshot-agent-skills",
   "license": "MIT",
   "keywords": [
@@ -37,7 +37,7 @@
           "Read",
           "Write"
         ],
-        "websiteURL": "https://orshot.com/agents/skills",
+        "websiteURL": "https://orshot.com/agents/codex",
         "supportURL": "https://orshot.com/contact",
         "privacyPolicyURL": "https://orshot.com/privacy",
         "termsOfServiceURL": "https://orshot.com/terms",
