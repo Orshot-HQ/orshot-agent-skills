@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/carousel
 license: MIT
 metadata:
   author: Orshot
-  version: "1.2.1"
+  version: "1.2.2"
   openclaw:
     emoji: "🎠"
     homepage: https://orshot.com/agents/skills/carousel
@@ -34,7 +34,7 @@ A carousel is six images with the same layout and different words. That is a tem
 
 ## Setup
 
-1. Connect the Orshot MCP server at `https://mcp.orshot.com/mcp` (OAuth, no key): https://orshot.com/docs/integrations/mcp-server.md. Headless jobs use `ORSHOT_API_KEY` over REST. The `orshot` skill covers both.
+1. Connect the Orshot MCP server at `https://mcp.orshot.com/full` (OAuth, no key): https://orshot.com/docs/integrations/mcp-server.md. Headless jobs use `ORSHOT_API_KEY` over REST. The `orshot` skill covers both.
 2. Find a carousel template: `orshot_list_studio_templates` with a search for "carousel". None? Create one (below). Already have it in Canva? The user imports it in Orshot Studio from a public share link, and each page comes in with `pageN@` keys: https://orshot.com/docs/importing-templates/import-from-canva.md.
 3. Decide where it posts: Orshot social accounts (`orshot_list_social_accounts`) or Postiz.
 

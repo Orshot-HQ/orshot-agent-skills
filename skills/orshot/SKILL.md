@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills
 license: MIT
 metadata:
   author: Orshot
-  version: "1.6.1"
+  version: "1.6.2"
   openclaw:
     emoji: "🖼️"
     homepage: https://orshot.com/agents/skills
@@ -25,7 +25,7 @@ Orshot is an API for automated image, PDF and video generation from templates. A
 
 This skill is the flow: which tool or endpoint to call, in what order, and what to check. Parameters, allowed values, limits and response fields live in the docs. Every docs page is readable as markdown at `https://orshot.com/docs/<path>.md`; the docs map at the end lists the pages for each job.
 
-- MCP server: `https://mcp.orshot.com/mcp`
+- MCP server: `https://mcp.orshot.com/full`
 - REST base: `https://api.orshot.com/v1`
 
 Three things hold in every flow below:
@@ -56,11 +56,11 @@ The hosted MCP server is the fastest route and the only one that returns inline 
 
 ```bash
 # OpenClaw
-openclaw mcp add orshot --url https://mcp.orshot.com/mcp --transport streamable-http --auth oauth
+openclaw mcp add orshot --url https://mcp.orshot.com/full --transport streamable-http --auth oauth
 openclaw mcp login orshot
 
 # Claude Code
-claude mcp add orshot --transport http https://mcp.orshot.com/mcp
+claude mcp add orshot --transport http https://mcp.orshot.com/full
 ```
 
 Other clients: https://orshot.com/docs/integrations/mcp-server.md
