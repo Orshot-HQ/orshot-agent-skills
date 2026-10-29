@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/ad-creative
 license: MIT
 metadata:
   author: Orshot
-  version: "1.1.1"
+  version: "1.1.2"
   openclaw:
     emoji: "📣"
     homepage: https://orshot.com/agents/skills/ad-creative
@@ -54,7 +54,7 @@ This skill is the flow. Field shapes, allowed values and limits are in the docs.
 
 ## Setup
 
-1. Connect the hosted MCP server `https://mcp.orshot.com/mcp` (OAuth in the browser, no key). Client steps: https://orshot.com/docs/integrations/mcp-server.md. Scheduled jobs, n8n, Make, Zapier and server code use REST with `ORSHOT_API_KEY` (Workspace Settings > API Keys).
+1. Connect the hosted MCP server `https://mcp.orshot.com/full` (OAuth in the browser, no key). Client steps: https://orshot.com/docs/integrations/mcp-server.md. Scheduled jobs, n8n, Make, Zapier and server code use REST with `ORSHOT_API_KEY` (Workspace Settings > API Keys).
 2. Confirm with `orshot_get_account`. A "plan limit" or "inactive subscription" reply is billing, not auth: send the user to https://orshot.com/pricing.
 3. Get the brand: `orshot_get_brand_kit`. Empty and the user has a website? `orshot_scan_brand_website` with the URL, show what it found, and only after a yes call `orshot_import_brand_website`.
 

@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/social-media-scheduler
 license: MIT
 metadata:
   author: Orshot
-  version: "1.3.1"
+  version: "1.3.2"
   openclaw:
     emoji: "📣"
     homepage: https://orshot.com/agents/skills/social-media-scheduler
@@ -42,7 +42,7 @@ Supported platforms, pricing and per-platform limits are in the docs. Do not gue
 
 ## Step 1: connect
 
-Connect the Orshot MCP server at `https://mcp.orshot.com/mcp` (OAuth, no key). Setup per client: https://orshot.com/docs/integrations/mcp-server.md. Headless jobs (cron, n8n, a server script) call REST with `ORSHOT_API_KEY`. The `orshot` skill covers both.
+Connect the Orshot MCP server at `https://mcp.orshot.com/full` (OAuth, no key). Setup per client: https://orshot.com/docs/integrations/mcp-server.md. Headless jobs (cron, n8n, a server script) call REST with `ORSHOT_API_KEY`. The `orshot` skill covers both.
 
 ## Step 2: check the accounts
 

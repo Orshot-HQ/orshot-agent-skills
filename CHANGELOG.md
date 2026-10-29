@@ -4,6 +4,36 @@ One entry per published ClawHub version. Skill versions live in each `SKILL.md` 
 
 ## Unreleased
 
+Setup now points to `https://mcp.orshot.com/full`, the hosted Orshot server with every tool. The Claude and ChatGPT directory connectors keep working as before.
+
+### orshot-ad-creative 1.1.2
+
+- Connect to https://mcp.orshot.com/full, the hosted Orshot server with every tool
+
+### orshot-blog-images 1.1.1
+
+- Connect to https://mcp.orshot.com/full, the hosted Orshot server with every tool
+
+### orshot-carousel 1.2.2
+
+- Connect to https://mcp.orshot.com/full, the hosted Orshot server with every tool
+
+### orshot-social-media-content 1.5.1
+
+- Connect to https://mcp.orshot.com/full, the hosted Orshot server with every tool
+
+### orshot-social-media-scheduler 1.3.2
+
+- Connect to https://mcp.orshot.com/full, the hosted Orshot server with every tool
+
+### orshot-video-generator 1.1.2
+
+- Connect to https://mcp.orshot.com/full, the hosted Orshot server with every tool
+
+### orshot 1.6.2
+
+- Connect to https://mcp.orshot.com/full, the hosted Orshot server with every tool
+
 Posting over MCP is two calls: `orshot_render_template` only renders, and `orshot_publish_social_post` posts the render's URL (MCP server #63). Skills that used `publish` on the MCP render now render, then post. REST examples keep `publish` on the render body, which the API still takes. A post saved without an account is sent after the user connects one and the agent adds it with `orshot_update_social_post`; nothing sends it on its own.
 
 Moved the OpenClaw skills and publish setup here from Orshot-HQ/orshot-openclaw; this repo is now the one home for every Orshot skill and plugin manifest.

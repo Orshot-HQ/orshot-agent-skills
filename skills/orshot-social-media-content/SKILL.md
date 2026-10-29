@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/social-media-content
 license: MIT
 metadata:
   author: Orshot
-  version: "1.5.0"
+  version: "1.5.1"
   mcp-server: orshot
   openclaw:
     emoji: "🎨"
@@ -39,7 +39,7 @@ The layouts come from the post formats `orshot_plan_design` returns for the job,
 
 ## Before you start
 
-- Connect the Orshot MCP server at `https://mcp.orshot.com/mcp` (OAuth, no key). Setup per client: https://orshot.com/docs/integrations/mcp-server.md. The `orshot` skill covers connection and REST.
+- Connect the Orshot MCP server at `https://mcp.orshot.com/full` (OAuth, no key). Setup per client: https://orshot.com/docs/integrations/mcp-server.md. The `orshot` skill covers connection and REST.
 - Load the `orshot-design` skill. It holds the design rules this flow relies on.
 - Template design runs over MCP. The REST create endpoint is Enterprise only: https://orshot.com/docs/api-reference/enterprise-template-create.md.
 

@@ -4,7 +4,7 @@ Skills that let Claude Code, Codex, Cursor, OpenClaw and other agents generate i
 
 ```bash
 npx skills add orshot-hq/orshot-agent-skills
-claude mcp add --transport http orshot https://mcp.orshot.com/mcp
+claude mcp add --transport http orshot https://mcp.orshot.com/full
 ```
 
 - Plain Markdown: SKILL.md files and JSON layouts. No hooks, no local executables, no telemetry.
@@ -35,7 +35,7 @@ Base skills, loaded by the ones above:
 
 ## Install
 
-Every option below gives your agent the same two things: the skills in `skills/` and the hosted Orshot MCP server at `https://mcp.orshot.com/mcp`. The server signs in with OAuth in the browser, so there is no API key to paste. A workspace API key sent as a bearer token also works for headless jobs.
+Every option below gives your agent the same two things: the skills in `skills/` and the hosted Orshot MCP server at `https://mcp.orshot.com/full`. The server signs in with OAuth in the browser, so there is no API key to paste. A workspace API key sent as a bearer token also works for headless jobs.
 
 ### Any agent with Agent Skills (skills.sh)
 
@@ -46,7 +46,7 @@ npx skills add orshot-hq/orshot-agent-skills
 npx skills add orshot-hq/orshot-agent-skills --skill orshot-blog-images   # one skill
 ```
 
-Then add the MCP server in your agent's MCP settings, for example `claude mcp add --transport http orshot https://mcp.orshot.com/mcp`.
+Then add the MCP server in your agent's MCP settings, for example `claude mcp add --transport http orshot https://mcp.orshot.com/full`.
 
 ### Claude Code
 
@@ -59,7 +59,7 @@ Or inside a session: `/plugin install orshot --marketplace Orshot-HQ/orshot-agen
 
 ### Claude.ai and Claude Desktop
 
-Add the Orshot connector from the Connectors directory, or add `https://mcp.orshot.com/mcp` as a custom connector. To add a skill, run `./scripts/build-dist.sh` in a clone of this repo and upload a zip from `dist/claude-skills/` in **Customize > Skills**.
+Add the Orshot connector from the Connectors directory in one click, or add `https://mcp.orshot.com/full` as a custom connector to get every tool, including AI generation on paid plans. To add a skill, run `./scripts/build-dist.sh` in a clone of this repo and upload a zip from `dist/claude-skills/` in **Customize > Skills**.
 
 ### Codex and ChatGPT
 
@@ -131,7 +131,7 @@ Setup guides for every agent: [orshot.com/agents](https://orshot.com/agents). Pr
 
 Declared for reviewers and IT admins:
 
-- `https://mcp.orshot.com/mcp`: the hosted Orshot MCP server (streamable HTTP). Auth is OAuth 2.0 (authorization code with PKCE, dynamic client registration) against `https://api.orshot.com`; tokens stay in your MCP client. A workspace API key as a bearer token works for headless use.
+- `https://mcp.orshot.com/full`: the hosted Orshot MCP server (streamable HTTP). Auth is OAuth 2.0 (authorization code with PKCE, dynamic client registration) against `https://api.orshot.com`; tokens stay in your MCP client. A workspace API key as a bearer token works for headless use.
 - `https://api.orshot.com/v1`: Orshot's REST API, called only when you follow a skill's REST instructions.
 - `https://orshot.com/docs/*`: documentation pages the skills may fetch as markdown.
 

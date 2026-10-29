@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/blog-images
 license: MIT
 metadata:
   author: Orshot
-  version: "1.1.0"
+  version: "1.1.1"
   openclaw:
     emoji: "📝"
     homepage: https://orshot.com/agents/skills/blog-images
@@ -59,7 +59,7 @@ Image models draw pictures; they cannot be trusted with words, numbers, logos or
 
 ## Setup
 
-1. Connect the Orshot MCP server at `https://mcp.orshot.com/mcp` (OAuth in the browser, no key). Setup per client: https://orshot.com/docs/integrations/mcp-server.md. Headless or scheduled jobs use REST with `ORSHOT_API_KEY` (example below). The `orshot` skill covers both.
+1. Connect the Orshot MCP server at `https://mcp.orshot.com/full` (OAuth in the browser, no key). Setup per client: https://orshot.com/docs/integrations/mcp-server.md. Headless or scheduled jobs use REST with `ORSHOT_API_KEY` (example below). The `orshot` skill covers both.
 2. Get the brand: `orshot_get_brand_kit`. If it is empty and the user has a website, `orshot_scan_brand_website` with their URL, then use the colors, fonts and logo it finds. Ask before importing anything into their brand kit.
 3. `orshot_plan_design` with the brief, `job: "blog cover image for <the post>"`, the size and `on_brand: true`, once per template set: it returns the plan (palette, fonts, type scale) and a layout. Read `orshot_get_design_spec` topic `template-json` once per session; it is the template JSON reference, also at https://orshot.com/docs/definitions/template-json.md. Load the `orshot-design` skill for design craft beyond the style guide here.
 

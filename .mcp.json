@@ -2,7 +2,7 @@
   "mcpServers": {
     "orshot": {
       "type": "http",
-      "url": "https://mcp.orshot.com/mcp"
+      "url": "https://mcp.orshot.com/full"
     }
   }
 }
