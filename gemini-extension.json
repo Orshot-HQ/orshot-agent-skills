@@ -1,7 +1,7 @@
 {
   "name": "orshot",
-  "version": "1.2.2",
-  "description": "Automate image, PDF and video generation from templates: blog images, videos, ads, thumbnails, PDFs, carousels and social posts, through the hosted Orshot MCP server (OAuth) and one skill per use case.",
+  "version": "1.2.3",
+  "description": "Automate Videos, PDFs and Images from templates for marketing, post to social platforms, and track and grow engagement. Bundles the hosted Orshot MCP server (OAuth, no API key) and one skill per use case: blog images, videos and reels, ad creatives, YouTube thumbnails, PDFs, carousels and social posts.",
   "mcpServers": {
     "orshot": {
       "httpUrl": "https://mcp.orshot.com/full"
