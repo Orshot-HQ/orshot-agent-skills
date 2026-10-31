@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/blog-images
 license: MIT
 metadata:
   author: Orshot
-  version: "1.1.1"
+  version: "1.1.2"
   openclaw:
     emoji: "📝"
     homepage: https://orshot.com/agents/skills/blog-images
@@ -222,6 +222,14 @@ When the brand changes, apply the new colors to the Blog Cover System once (the 
 5. Small layout fixes do not need a full update. `orshot_patch_template_elements` with `layer_operations` adds, edits, moves or deletes any layer by `element_id`. Whole pages go through `orshot_update_template_design` with `page_operations`. Ids come back in the `pageMap` of the create or update result.
 6. Never put a credit line or watermark on the images.
 7. Do not create a new cover template per post. Reuse the one Blog Cover System template.
+
+## Finish the job
+
+Every run ends with a render the user has seen, before you stop or ask what next:
+
+1. Render it with `orshot_render_template` and show the output.
+2. Offer two variants in one line: another cover style, or the cover for the next post.
+3. Give the user the links for the post. To promote the post on social, offer a post draft with the cover (`orshot_publish_social_post`, `status: "draft"`).
 
 ## Safety
 

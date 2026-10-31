@@ -7,11 +7,17 @@
 #                                    spec (name, description, license, compatibility, metadata,
 #                                    allowed-tools) are dropped from the zipped copy only, because
 #                                    the uploader and skills-ref reject unknown keys. Sources stay as they are.
-#   dist/openai/orshot-<version>.zip The portable plugin for the OpenAI plugin portal
-#                                    (platform.openai.com/plugins, ChatGPT + Codex directory):
-#                                    plugin.json, mcp.json, skills/, assets, README.md, LICENSE.
-#                                    mcp.json in the zip gains the com.openai OAuth (DCR) declaration
-#                                    the portal reads; the repo copy stays schema-pure Agent Plugins 1.0.0.
+#   dist/claude-directory/orshot/    The Claude plugin directory package (claude.ai/directory/manage), as a
+#                                    folder and a zip: .claude-plugin/plugin.json, .mcp.json on /mcp,
+#                                    directory skills, README.md from directory/claude/, LICENSE, icon.
+#   plugins/orshot/                  The same Claude directory package, committed: the directory submission
+#                                    points at this folder (Plugin path). Generated; never edit by hand.
+#   dist/chatgpt/orshot-chatgpt-<v>.zip  The ChatGPT app package for the OpenAI plugin portal (existing app):
+#                                    .codex-plugin/plugin.json from directory/chatgpt/plugin.json, url-only
+#                                    .mcp.json on /mcp, directory skills, assets.
+#   Directory skills are the same sources with /full replaced by /mcp (the directory connector),
+#   <!-- directory-omit --> blocks removed (per-client install commands) and the migration page dropped.
+#   The ChatGPT package also drops <!-- chatgpt-omit --> blocks (lines its skill scan flags).
 #
 # Usage: ./scripts/build-dist.sh
 set -euo pipefail
@@ -95,22 +101,132 @@ for slug in sorted(os.listdir("skills")):
             add_bytes(zf, rel, data)
     print(f"built {os.path.relpath(zpath)}")
 
-# 2. Portable plugin zip for the OpenAI plugin portal
-manifest = json.load(open("plugin.json"))
-version = manifest["version"]
-mcp = json.load(open("mcp.json"))
-for server in mcp["mcpServers"].values():
-    server.setdefault("extensions", {})["com.openai"] = {"auth": {"type": "oauth", "client": {"mode": "dcr"}}}
-iface = manifest.get("extensions", {}).get("com.openai", {}).get("interface", {})
-assets = {p[2:] for p in (iface.get("composerIcon"), iface.get("logo")) if p}
-os.makedirs(os.path.join(DIST, "openai"))
-zpath = os.path.join(DIST, "openai", f"orshot-{version}.zip")
+# 2. Directory skills: the same sources, rewritten for app directories (Claude, ChatGPT).
+#    The connector there is https://mcp.orshot.com/mcp, so /full becomes /mcp, the per-client
+#    install commands and the migration page (competitor names) are dropped, and frontmatter is
+#    sanitized as in step 1.
+MCP_DIRECTORY = "https://mcp.orshot.com/mcp"
+OMIT = re.compile(r"\n?<!-- directory-omit -->\n.*?<!-- /directory-omit -->\n", re.S)
+DROP_FILES = {"orshot/references/migration.md"}
+# <!-- chatgpt-omit --> blocks: kept everywhere except the ChatGPT package (lines its skill scan flags,
+# for example a fetch from a mutable raw.githubusercontent.com branch). Other builds drop only the markers.
+CG_OPEN, CG_CLOSE = "<!-- chatgpt-omit -->", "<!-- /chatgpt-omit -->"
+CG_OMIT = re.compile(r"\n?<!-- chatgpt-omit -->\n.*?<!-- /chatgpt-omit -->\n", re.S)
+CG_MARK = re.compile(r"^<!-- /?chatgpt-omit -->\n", re.M)
+
+
+def chatgpt_variant(rel, data, chatgpt):
+    if not rel.endswith(".md"):
+        return data
+    text = data.decode("utf-8")
+    if text.count(CG_OPEN) != text.count(CG_CLOSE):
+        raise SystemExit(f"skills/{rel}: unbalanced chatgpt-omit markers")
+    text = CG_OMIT.sub("\n", text) if chatgpt else CG_MARK.sub("", text)
+    if "chatgpt-omit" in text:
+        raise SystemExit(f"skills/{rel}: chatgpt-omit marker left in the copy")
+    return text.encode("utf-8")
+
+
+def directory_text(text, path):
+    if text.count("<!-- directory-omit -->") != text.count("<!-- /directory-omit -->"):
+        raise SystemExit(f"{path}: unbalanced directory-omit markers")
+    text = OMIT.sub("\n", text)
+    text = text.replace("https://mcp.orshot.com/full", MCP_DIRECTORY)
+    text = re.sub(r', \\"move from [^"\\]*\\"', "", text)  # trigger phrase naming a competitor
+    text = re.sub(r", and the `orshot` skill's \[`references/migration\.md`\]\([^)]*\)", "", text)
+    for bad in ("/full", "directory-omit", "migration.md", "openclaw mcp", "claude mcp add"):
+        if bad in text:
+            raise SystemExit(f"{path}: {bad!r} left in the directory copy")
+    return text
+
+
+def directory_skills():
+    """Yield (arcname under skills/, bytes) for every directory skill file."""
+    for slug in sorted(os.listdir("skills")):
+        sdir = os.path.join("skills", slug)
+        if not os.path.isfile(os.path.join(sdir, "SKILL.md")):
+            continue
+        for f in walk(sdir):
+            rel = os.path.relpath(f, "skills")
+            if rel in DROP_FILES:
+                continue
+            data = open(f, "rb").read()
+            if f.endswith(".md"):
+                text = directory_text(data.decode("utf-8"), f)
+                if os.path.basename(f) == "SKILL.md" and os.path.dirname(rel) == slug:
+                    text, _ = sanitize_frontmatter(text, f)
+                data = text.encode("utf-8")
+            yield rel, data
+
+
+DSKILLS = list(directory_skills())
+plugin = json.load(open(".claude-plugin/plugin.json"))
+version = plugin["version"]
+
+# 2a. Claude plugin directory (claude.ai/directory/manage): one clean folder plus its zip.
+#     .claude-plugin/plugin.json, .mcp.json (/mcp), skills/, README.md (data-sent section), LICENSE, icon.
+cdir = os.path.join(DIST, "claude-directory", "orshot")
+dplugin = {**plugin, **json.load(open("directory/claude/plugin.json"))}  # directory-only overrides (description)
+claude_files = {
+    ".claude-plugin/plugin.json": (json.dumps(dplugin, indent=2, ensure_ascii=False) + "\n").encode(),
+    ".mcp.json": (json.dumps({"mcpServers": {"orshot": {"type": "http", "url": MCP_DIRECTORY}}}, indent=2) + "\n").encode(),
+    "README.md": open("directory/claude/README.md", "rb").read(),
+    "LICENSE": open("LICENSE", "rb").read(),
+    plugin["icon"][2:]: open(plugin["icon"][2:], "rb").read(),
+}
+claude_files.update({f"skills/{rel}": chatgpt_variant(rel, data, False) for rel, data in DSKILLS})
+# Slash commands (/orshot:create-reel ...): Claude only. Codex and ChatGPT have no commands.
+for f in sorted(os.listdir("commands")):
+    if f.endswith(".md"):
+        claude_files[f"commands/{f}"] = directory_text(open(os.path.join("commands", f), encoding="utf-8").read(), f"commands/{f}").encode()
+zpath = os.path.join(DIST, "claude-directory", f"orshot-claude-{version}.zip")
+os.makedirs(cdir)
 with zipfile.ZipFile(zpath, "w") as zf:
-    add_bytes(zf, "plugin.json", open("plugin.json", "rb").read())
-    add_bytes(zf, "mcp.json", (json.dumps(mcp, indent=2) + "\n").encode())
-    for name in ["README.md", "LICENSE", *sorted(assets)]:
-        add_bytes(zf, name, open(name, "rb").read())
-    for f in walk("skills"):
-        add_bytes(zf, os.path.relpath(f, ROOT), open(f, "rb").read())
-print(f"built {os.path.relpath(zpath)}")
+    for rel, data in sorted(claude_files.items()):
+        os.makedirs(os.path.dirname(os.path.join(cdir, rel)) or cdir, exist_ok=True)
+        open(os.path.join(cdir, rel), "wb").write(data)
+        add_bytes(zf, rel, data)
+# The same files, committed at plugins/orshot/: the Claude directory submission reads this folder
+# ("Plugin path: plugins/orshot"). Regenerated on every build, so never edit it by hand.
+pdir = os.path.join(ROOT, "plugins", "orshot")
+if os.path.isdir(pdir):
+    shutil.rmtree(pdir)
+for rel, data in sorted(claude_files.items()):
+    os.makedirs(os.path.dirname(os.path.join(pdir, rel)) or pdir, exist_ok=True)
+    open(os.path.join(pdir, rel), "wb").write(data)
+print(f"built {os.path.relpath(cdir)}/, {os.path.relpath(zpath)} and plugins/orshot/")
+
+# 2b. ChatGPT app package (OpenAI plugin portal, existing app). Codex layout: .codex-plugin/plugin.json
+#     from directory/chatgpt/plugin.json (name, interface, review test cases, release notes), a url-only
+#     .mcp.json (the portal rejects an auth override for this app), skills/ and the assets.
+cg = json.load(open("directory/chatgpt/plugin.json"))
+cg["skills"], cg["mcpServers"] = "./skills/", "./.mcp.json"
+iface = cg["interface"]
+LIMITS = {"displayName": 30, "shortDescription": 30, "longDescription": 4000}
+for key, limit in LIMITS.items():
+    if len(iface.get(key, "")) > limit:
+        raise SystemExit(f"directory/chatgpt/plugin.json: interface.{key} is {len(iface[key])} chars, limit {limit}")
+if len(iface.get("defaultPrompt", [])) > 3 or any(len(x) > 128 or "@" in x for x in iface.get("defaultPrompt", [])):
+    raise SystemExit("directory/chatgpt/plugin.json: defaultPrompt is at most 3 prompts of 128 chars, no @mentions")
+if len(iface.get("capabilities", [])) > 20 or any(len(x) > 120 for x in iface.get("capabilities", [])):
+    raise SystemExit("directory/chatgpt/plugin.json: capabilities is at most 20 items of 120 chars")
+tc = cg["extensions"]["com.openai"]["review"]["test_cases"]
+if len(tc["positive"]) != 5 or len(tc["negative"]) != 3:
+    raise SystemExit("directory/chatgpt/plugin.json: the portal needs exactly 5 positive and 3 negative test cases")
+assets = {p[2:] for p in (iface.get("composerIcon"), iface.get("logo"), *iface.get("screenshots", [])) if p}
+for a in assets:
+    if not a.startswith("assets/") or not os.path.isfile(a):
+        raise SystemExit(f"directory/chatgpt/plugin.json: asset {a!r} must exist under ./assets")
+    if os.path.getsize(a) > 5 * 1024 * 1024:
+        raise SystemExit(f"{a}: over 5 MiB")
+os.makedirs(os.path.join(DIST, "chatgpt"))
+zpath = os.path.join(DIST, "chatgpt", f"orshot-chatgpt-{cg['version']}.zip")
+with zipfile.ZipFile(zpath, "w") as zf:
+    add_bytes(zf, ".codex-plugin/plugin.json", (json.dumps(cg, indent=2, ensure_ascii=False) + "\n").encode())
+    add_bytes(zf, ".mcp.json", (json.dumps({"mcpServers": {"orshot": {"url": MCP_DIRECTORY}}}) + "\n").encode())
+    for a in sorted(assets):
+        add_bytes(zf, a, open(a, "rb").read())
+    for rel, data in DSKILLS:
+        add_bytes(zf, f"skills/{rel}", chatgpt_variant(rel, data, True))
+print(f"built {os.path.relpath(zpath)} ({len(DSKILLS)} skill files)")
 PY

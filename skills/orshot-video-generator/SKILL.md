@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/video-generator
 license: MIT
 metadata:
   author: Orshot
-  version: "1.1.2"
+  version: "1.2.0"
   openclaw:
     emoji: "🎬"
     homepage: https://orshot.com/agents/skills/video-generator
@@ -57,7 +57,7 @@ Videos that are not a version of a post, a carousel or an ad (a tips reel, a lau
 - "Our granola needs a product intro reel for Instagram, in Persian." (Product promo reel, §5, in any language.)
 - "Animate our new logo and brand cards into a short brand film." (Brand line-art film, §6.)
 - "Make a teacher's day video for our school with a thank-you message." (Occasion reel, §7.)
-- "Build me a faceless YouTube Shorts pipeline: every morning take the next row in my sheet and make a 30 second fact short with voiceover and captions." (Narrated short, [`references/narrated-shorts.md`](references/narrated-shorts.md).)
+- "Build me a faceless YouTube Shorts pipeline: every morning take the next row in my sheet and make a 30 second fact short with captions and my recorded voiceover." (Narrated short, [`references/narrated-shorts.md`](references/narrated-shorts.md).)
 
 ## Where the facts live
 
@@ -160,7 +160,7 @@ Read `orshot_get_design_spec` topics `film` and `film-pack` once before the firs
 - **Place the photo for the layout.** With `objectFit: "cover"`, the photo can only slide along its long side. When the subject sits low in the picture and the type goes at the bottom, make the image layer taller than the frame and move it up (a 2800 px tall layer at `y: -900` in a 1920 px frame) so the subject sits above the type.
 - **The user's own media**: `orshot_get_brand_images`, `orshot_get_brand_videos`, `orshot_get_brand_audio`, or any public URL. Upload new files with the `orshot_upload_brand_*` tools.
 - **Stock is searched blind**: results carry no image to look at, and branded products (perfume, sneakers, phones) show up with real labels. Search for unbranded close-ups and textures, and put the user's own product photo in the hero slot.
-- **Music**: `orshot_search_stock_media` has no audio. Use a track from `orshot_get_brand_audio` or a URL the user gives, as one audio clip under the whole film in `film.tracks` at volume 0.25 to 0.35, fading out at the end (`orshot_get_design_spec` topic `film-pack` §3). No track: no music.
+- **Music and sound effects**: `orshot_search_stock_media` with `type: "music"` (beds by category) or `type: "sound_effect"` (whooshes, pops, chimes) searches Orshot's own sound library. A music result carries a ready `track`: put it as one audio clip under the whole film in `film.tracks` at volume 0.25 to 0.35, fading out at the end (`orshot_get_design_spec` topic `film-pack` §3). An effect result carries a `cue` for a layer's sound. The user's own track (`orshot_get_brand_audio`) or a URL they give wins over stock.
 
 ## Step 4. Create the film in one call
 
@@ -244,6 +244,14 @@ Over MCP, post the rendered video with `orshot_publish_social_post`:
 ```
 
 Over REST you can add `publish` to the render instead; the render endpoint reads `"isDraft": true` there, not `status` ([Publish from the API](https://orshot.com/docs/publish/publish-from-api.md)). Get account ids from `orshot_list_social_accounts`. After the user approves the draft, `orshot_publish_social_draft`, or schedule it with `orshot_update_social_post`. Scheduling, best time and analytics: the `orshot-social-media-scheduler` skill.
+
+## Finish the job
+
+Every run ends with an MP4 the user has watched, before you stop or ask what next:
+
+1. Render the MP4 once (Step 6) and show it.
+2. Offer two variants in one line: another size (a 1:1 or 4:5 cut of the same film), another hook on scene 1, or the next video in the series. Only offer them: each MP4 costs 1 credit per second. Render a variant after the user says yes and you have told them the cost. A PNG still of scene 1 can show the idea first.
+3. Save it as a post draft (Step 8). That is the first point to look up accounts.
 
 ## Gotchas
 

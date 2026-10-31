@@ -263,6 +263,20 @@ for dirpath, dirnames, filenames in os.walk("."):
             warn(f"{p}: over 256 KiB, held for review by the Claude directory")
 
 # ---- Wording rules (positioning lock, copy rules) -------------------------------------------------
+# ---- directory builds: omit markers balanced, directory sources present ------------------------
+for slug in SKILLS:
+    for dirpath, _, files in os.walk(f"skills/{slug}"):
+        for fn in files:
+            if fn.endswith(".md"):
+                fp = os.path.join(dirpath, fn); txt = open(fp, encoding="utf-8").read()
+                if txt.count("<!-- directory-omit -->") != txt.count("<!-- /directory-omit -->"):
+                    err(f"{fp}: unbalanced directory-omit markers")
+for p in ("directory/chatgpt/plugin.json", "directory/claude/README.md"):
+    if not os.path.isfile(p):
+        err(f"{p}: missing (scripts/build-dist.sh reads it)")
+if os.path.isfile("directory/claude/README.md") and len(open("directory/claude/README.md").read().split()) < 40:
+    err("directory/claude/README.md: the Claude directory needs at least 40 words")
+
 banned = [("—", "em dash"), ("creative automation platform", None), ("agent-first", None), ("visual content", None)]
 for p in [*M.keys(), "README.md"]:
     t = open(p, encoding="utf-8").read().lower()
@@ -280,6 +294,11 @@ if [[ -z "${SKIP_TOOLS:-}" ]]; then
     echo; echo "claude plugin validate --strict (marketplace, then plugin with the directory profile)"
     claude plugin validate --strict . >/dev/null
     claude plugin validate --strict --profile directory .claude-plugin/plugin.json | tail -1
+    if [[ -d plugins/orshot ]]; then
+      echo "claude plugin validate --strict --profile directory plugins/orshot (the directory submission)"
+      claude plugin validate --strict --profile directory plugins/orshot | tail -1
+      grep -rq "mcp.orshot.com/full" plugins/orshot && { echo "ERROR plugins/orshot mentions /full; rebuild"; exit 1; } || true
+    fi
   fi
   if command -v clawhub >/dev/null 2>&1; then
     echo; echo "clawhub package validate"

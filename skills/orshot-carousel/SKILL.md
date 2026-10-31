@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/carousel
 license: MIT
 metadata:
   author: Orshot
-  version: "1.2.2"
+  version: "1.3.0"
   openclaw:
     emoji: "🎠"
     homepage: https://orshot.com/agents/skills/carousel
@@ -36,7 +36,7 @@ A carousel is six images with the same layout and different words. That is a tem
 
 1. Connect the Orshot MCP server at `https://mcp.orshot.com/full` (OAuth, no key): https://orshot.com/docs/integrations/mcp-server.md. Headless jobs use `ORSHOT_API_KEY` over REST. The `orshot` skill covers both.
 2. Find a carousel template: `orshot_list_studio_templates` with a search for "carousel". None? Create one (below). Already have it in Canva? The user imports it in Orshot Studio from a public share link, and each page comes in with `pageN@` keys: https://orshot.com/docs/importing-templates/import-from-canva.md.
-3. Decide where it posts: Orshot social accounts (`orshot_list_social_accounts`) or Postiz.
+3. Do not look up social accounts yet. Where it posts (Orshot social accounts or Postiz) is decided after the slides are rendered: see Post it.
 
 ## Music
 
@@ -169,6 +169,14 @@ Daily, for posts made through Orshot: `orshot_get_social_analytics` with `source
 Judge a hook after several posts, not one. Track saves and link clicks next to views: views alone often do not turn into installs or sales.
 
 Keep a short log the user can read: date, hook, views, change made.
+
+## Finish the job
+
+A saved template is not the deliverable. Every run ends with a render the user has seen, before you stop or ask what next:
+
+1. Render it with `orshot_render_template` and show the output. A carousel is shown as all of its slides.
+2. Offer two variants in one line: another layout or colour, another size (`extraSizes`), or the next post in the series.
+3. Save it as a post draft: `orshot_publish_social_post` with the render's URL as `mediaUrls` and `status: "draft"`. This is the first point to look up accounts (`orshot_list_social_accounts`). With none connected, save the draft with `platforms` instead, and tell the user to connect an account in the dashboard (https://orshot.com/docs/publish/connect-account.md). Nothing posts without the user's yes.
 
 ## Safety
 

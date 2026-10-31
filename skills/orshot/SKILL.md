@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills
 license: MIT
 metadata:
   author: Orshot
-  version: "1.6.2"
+  version: "1.6.3"
   openclaw:
     emoji: "🖼️"
     homepage: https://orshot.com/agents/skills
@@ -52,8 +52,11 @@ This skill is Orshot itself: connecting, rendering and the gotchas. A whole job 
 
 ## Connect first
 
-The hosted MCP server is the fastest route and the only one that returns inline previews and design checks.
+The hosted MCP server is the fastest route and the only one that returns inline previews and design checks. Added as a connector from an app directory (Claude, ChatGPT), the server is already connected: go straight to the account check below.
 
+**No `orshot_*` tools in your tool list?** Orshot is not connected yet. That happens when only these skills were installed, for example as the Claude plugin, which does not add the connector. Ask the user to add the Orshot connector and sign in (Claude: Customize, then Connectors or Plugins, search Orshot, Connect; ChatGPT: Apps, Orshot). A free account works. Then continue with their request. Do not switch to the REST API with a key inside a chat.
+
+<!-- directory-omit -->
 ```bash
 # OpenClaw
 openclaw mcp add orshot --url https://mcp.orshot.com/full --transport streamable-http --auth oauth
@@ -64,6 +67,7 @@ claude mcp add orshot --transport http https://mcp.orshot.com/full
 ```
 
 Other clients: https://orshot.com/docs/integrations/mcp-server.md
+<!-- /directory-omit -->
 
 Confirm with `orshot_get_account`. It returns the plan, credits and which features the plan includes (video, workflows, embed). If it reports an inactive subscription or a used-up limit, that is a billing state, not an auth error. Send the user to https://orshot.com/pricing and stop retrying.
 
@@ -159,7 +163,9 @@ Over REST, the render `publish` object reads `isDraft` and `schedule.scheduledFo
 - **Stable image URLs** for OG tags, emails and embeds: `orshot_create_dynamic_url`. OG images for a whole blog or site: `orshot-blog-images`.
 - **Brand assets**: `orshot_get_brand_kit`, `orshot_import_brand_website`.
 - **Folders and workspaces**: `orshot_list_template_folders`, `orshot_set_active_workspace`.
+<!-- directory-omit -->
 - **Coming from another tool**: `references/migration.md`.
+<!-- /directory-omit -->
 - **Recurring jobs** (n8n, Make, Zapier, Pipedream, cron, Orshot Workflows): `references/recurring-automation.md`.
 
 ## Docs map

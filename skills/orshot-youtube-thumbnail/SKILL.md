@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/youtube-thumbnail
 license: MIT
 metadata:
   author: Orshot
-  version: "1.1.0"
+  version: "1.1.1"
   openclaw:
     emoji: "📺"
     homepage: https://orshot.com/agents/skills/youtube-thumbnail
@@ -194,6 +194,14 @@ Orshot Workflows have no YouTube or RSS trigger, so this one runs in n8n:
 4. An accent word in another color stays in the headline as an inline `<span>`. An accent line in a colored box is the exception: a `<span>` with a background color stops the text from wrapping, so put a separate `headline_accent` layer over the `accent` shape. Make the accent line the biggest text, at least 1.4 times the other line.
 5. Template images must be public URLs or `stock://` refs. Never use a stock search `previewUrl`; it is a temporary link.
 6. Reuse one template per series. A new template per video spends design effort twice and breaks the series look.
+
+## Finish the job
+
+Every run ends with a render the user has seen, before you stop or ask what next:
+
+1. Render it with `orshot_render_template` and show the output.
+2. Offer two variants in one line: another face or text treatment for an A/B test (A/B variants in one call), or the next video's thumbnail.
+3. Give the user the 1280x720 file link for YouTube Studio. To announce the video on social too, offer a post draft with the thumbnail (`orshot_publish_social_post`, `status: "draft"`).
 
 ## Safety
 
