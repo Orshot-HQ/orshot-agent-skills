@@ -18,7 +18,13 @@ Skills follow the order that converts: design and render first, social accounts 
 - The blog-images skill designs from the brief instead of fetching blueprint files from GitHub
 - `orshot` Connect first: with no `orshot_*` tools, ask the user to add the Orshot connector and sign in
 
+### orshot-social-media-scheduler 1.4.0
+
+- Template first: every post starts from a template (one the user names, one in the workspace, or a new one made with the job skill), rendered and shown before any account lookup, draft or schedule
+- Photos and clips the user already has go into a template's image or video field; only render URLs are posted. The post-any-media example is gone
+
 ### orshot 1.6.3
+- Every social post starts from a template and is posted only after the user has seen its render; the draft-post example renders before it looks up accounts
 
 - Connect first: agents added from an app directory (Claude, ChatGPT) skip the install commands and go straight to the account check
 

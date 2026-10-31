@@ -8,7 +8,7 @@ Make a social post for the user with Orshot. Load the `orshot-social-media-conte
 1. Read `$ARGUMENTS` for the subject, the platform and the sizes. If no subject was given, ask for it in one short question and nothing else. On-brand by default: the brand kit, or the user's website when they give one.
 2. Defaults: Instagram feed 1080x1350. One focal point, one key message, a format from `orshot_plan_design` that fits the job (not a centered text stack), two fonts, the brand colours, real copy written for the post.
 3. Plan with `orshot_plan_design` (`job` in the user's words), create with `orshot_create_template_design` and `includeThumbnails: true`, critique, then render with `orshot_render_template`. For other sizes (a story, a LinkedIn or X size) render them in the same call and look at each one: if a size leaves an empty band, tiny text or a cropped subject, add a page laid out for that size, with the content filling the frame and the platform's safe areas clear.
-4. Show every image with its link and the sample values to replace. Offer one change round, a caption, and posting it with `/orshot:schedule-social-post`.
+4. Show every image with its link and the sample values to replace. Offer one change round, a caption, and posting it with `/orshot:schedule-social-post`. Do not look up social accounts or post before the user has seen the render.
 
 The first result is the demo, so hold it to this bar:
 - Build a new design for this brief. Reuse an existing template only when the user names it or it was made earlier in this chat.

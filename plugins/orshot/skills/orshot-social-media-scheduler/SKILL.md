@@ -4,12 +4,12 @@ description: "Social media scheduler and auto-poster with Orshot: schedule posts
 license: MIT
 metadata:
   author: Orshot
-  version: "1.3.2"
+  version: "1.4.0"
 ---
 
 # Orshot Social Media Scheduler: render, post, schedule, learn
 
-Orshot renders an image, carousel or video from a template and posts it to the user's connected accounts in the same request. It also holds drafts, schedules, edits and reports analytics, so an agent can run a content calendar without a second tool. It can post any public media URL too, so it works with images made elsewhere.
+Orshot renders an image, carousel or video from a template and posts it to the user's connected accounts in the same request. It also holds drafts, schedules, edits and reports analytics, so an agent can run a content calendar without a second tool. Every post starts from a template, the user's own photos and clips included, so the next post is a render, not a new upload.
 
 Most schedulers hold posts someone already made, so the queue runs empty on the days nobody made one. Here the post is rendered and scheduled in the same call: one template and a list of topics become a week of posts.
 
@@ -22,7 +22,7 @@ Supported platforms, pricing and per-platform limits are in the docs. Do not gue
 ## What people ask for
 
 - "Schedule this week's posts for Bloomfield Bakery on Instagram and Facebook, one a day around lunch. Show me them before anything goes out."
-- "Codex made five images for our launch. Post them to LinkedIn and X tomorrow at 9, with the link in the first comment on LinkedIn."
+- "Here are five product photos from our launch. Turn them into posts for LinkedIn and X tomorrow at 9, with the link in the first comment on LinkedIn."
 - "Auto-post a new quote card to TikTok every morning from my Google Sheet."
 - "Cross-post this announcement to every account we have connected."
 - "Which posts did best last month, and when should I post next week?"
@@ -32,7 +32,17 @@ Supported platforms, pricing and per-platform limits are in the docs. Do not gue
 
 Connect the Orshot MCP server at `https://mcp.orshot.com/mcp` (OAuth, no key). Setup per client: https://orshot.com/docs/integrations/mcp-server.md. Headless jobs (cron, n8n, a server script) call REST with `ORSHOT_API_KEY`. The `orshot` skill covers both.
 
-## Step 2: check the accounts
+## Step 2: the template first
+
+Every post starts from a template, and the template exists and is rendered before any account lookup, draft or schedule. Pick it in this order:
+
+1. The template the user names, or one made earlier in this chat.
+2. A template in the workspace that fits the post: `orshot_list_studio_templates` with a search.
+3. None fits: make one first with the job skill (`orshot-social-media-content` for posts, `orshot-carousel`, `orshot-video-generator`, `orshot-ad-creative`), render it and show the user.
+
+Media the user already has (product photos, a clip, images from another tool) goes into a template's image or video field, never straight into a post: use a template with that field or make one around it, render, then post the render. Only Orshot render URLs go in `mediaUrls`. Look up social accounts only after the user has seen the render, unless they ask about accounts.
+
+## Step 3: check the accounts
 
 `orshot_list_social_accounts` (REST: https://orshot.com/docs/api-reference/social-accounts-list.md). Note each account's numeric `id`. You publish by id, never by platform name.
 
@@ -44,9 +54,9 @@ Over REST, `include_health=true` adds a `requires_reconnect` flag per account. I
 
 **An empty list means a human has to connect accounts.** The API cannot do it. A draft or scheduled post can still be saved now with `platforms` instead of `accounts` (any plan); once an account on that platform is connected, add it with `orshot_update_social_post` and send the post. Publishing now needs an account. Send the user to the Orshot dashboard, sidebar "Social Posting" > "Accounts", where each platform connects with its own login: https://orshot.com/docs/publish/connect-account.md. It is a paid add-on and the free plan cannot connect accounts, so link https://orshot.com/docs/publish/pricing.md once. Then wait. The next `orshot_list_social_accounts` call shows the new account.
 
-## Step 3: the posting loop
+## Step 4: the posting loop
 
-1. **Decide the media.** Render from a template (`orshot_render_template`, then its URL goes in `mediaUrls`) or use media you already have. Either way the post is `orshot_publish_social_post` with `mediaUrls`. Images from Canva, Codex or an image model go in `mediaUrls` as public URLs. Orshot render URLs are already public, so no S3 bucket or Drive share link is needed.
+1. **Render.** `orshot_render_template` with the template from Step 2; its URL goes in `mediaUrls` of `orshot_publish_social_post`. Orshot render URLs are already public, so no S3 bucket or Drive share link is needed.
    Before rendering, check that every image field gets the user's own image. A field left empty keeps the template's sample picture, which can put a stranger's face over a customer's name. With no image yet, use a picture with no person in it, or a template without that field, and tell the user.
 2. **Draft first.** `orshot_publish_social_post` publishes immediately unless you pass `status: "draft"`. Pass it unless the user clearly said to post now. A draft holds no time: keep the agreed times in your summary and set `scheduledFor` only when you schedule. The result carries the post id.
 3. **Show the user** the post. `orshot_get_social_post` renders a visual card with the media, caption, accounts and status.
@@ -75,7 +85,7 @@ The image carries one idea in a few words (a name, a number, a date, a short hea
 | --- | --- |
 | list accounts | `orshot_list_social_accounts` |
 | render | `orshot_render_template` (renders only) |
-| post a render or any media URL | `orshot_publish_social_post` |
+| post a render | `orshot_publish_social_post` |
 | list or read posts | `orshot_list_social_posts`, `orshot_get_social_post` |
 | edit, send, discard a held post | `orshot_update_social_post`, `orshot_publish_social_draft`, `orshot_discard_social_post` |
 | analytics | `orshot_get_social_analytics`, `orshot_get_social_analytics_daily`, `orshot_get_social_followers`, `orshot_get_social_post_analytics` |
@@ -89,10 +99,10 @@ MCP arguments are camelCase (`mediaUrls`, `scheduledFor`, `tiktokSettings`). RES
 
 The user: "Schedule this week's posts for Bloomfield Bakery on Instagram and Facebook, one a day around lunch. Show me them first."
 
-1. `orshot_list_social_accounts`. Confirm the Instagram and Facebook accounts by username.
-2. Agree on seven topics with the user (Monday sourdough, Tuesday staff pick, and so on), and give each its post type: product, staff pick, opening hours, a customer quote.
-3. `orshot_list_studio_templates` for a template per post type. Missing ones are made first with `orshot-social-media-content`, which picks each layout from a format brands really post. Seven posts from one layout read as a repost, so the week uses at least two or three layouts. When every post is the same type, rotate two or three templates that share field names.
-4. Seven `orshot_render_template` calls, each with its template and its own `modifications`, then one `orshot_publish_social_post` per render with its URL in `mediaUrls`, `accounts`, `content` and `status: "draft"`.
+1. Agree on seven topics with the user (Monday sourdough, Tuesday staff pick, and so on), and give each its post type: product, staff pick, opening hours, a customer quote.
+2. `orshot_list_studio_templates` for a template per post type. Missing ones are made first with `orshot-social-media-content`, which picks each layout from a format brands really post. Seven posts from one layout read as a repost, so the week uses at least two or three layouts. When every post is the same type, rotate two or three templates that share field names.
+3. Seven `orshot_render_template` calls, each with its template and its own `modifications`. Show the renders.
+4. Now `orshot_list_social_accounts`: confirm the Instagram and Facebook accounts by username. Then one `orshot_publish_social_post` per render with its URL in `mediaUrls`, `accounts`, `content` and `status: "draft"`.
 5. `orshot_list_social_posts` with `status: "draft"`, then `orshot_get_social_post` for the cards. Number them 1 to 7.
 6. The user approves by number ("all but 4, and shorten 4's caption"). Make the edits with `orshot_update_social_post`. Show post 4 again before it counts as approved.
 7. `orshot_get_best_time_to_post` for each platform, because the user said "around lunch" and not an exact time. When the user names a time, use it. Pick a lunchtime slot per day and spread the posts across those slots. Then `orshot_update_social_post` with `status: "scheduled"` and `scheduledFor` for each approved post.
@@ -138,21 +148,6 @@ await fetch("https://api.orshot.com/v1/studio/render", {
 ```
 
 Read the `publish` array in the response even when the render succeeded. A failed post does not fail the render.
-
-### Post media you already have (REST)
-
-`POST /v1/social/publish` takes `status` and `scheduled_for`, unlike the render `publish` object. Fields, format rules and the response: https://orshot.com/docs/api-reference/social-publish.md.
-
-```bash
-curl -s -X POST https://api.orshot.com/v1/social/publish \
-  -H "Authorization: Bearer $ORSHOT_API_KEY" -H "Content-Type: application/json" \
-  -d '{
-    "accounts": [2],
-    "content": "Six things nobody tells you",
-    "media_urls": ["https://.../1.png", "https://.../2.png", "https://.../3.png"],
-    "status": "draft"
-  }'
-```
 
 Held posts (list, read, edit, send, discard) are under https://orshot.com/docs/api-reference/social-posts-list.md and the pages next to it. Analytics endpoints: https://orshot.com/docs/api-reference/social-analytics-list.md.
 
