@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills
 license: MIT
 metadata:
   author: Orshot
-  version: "1.6.2"
+  version: "1.6.3"
   openclaw:
     emoji: "🖼️"
     homepage: https://orshot.com/agents/skills
@@ -52,8 +52,11 @@ This skill is Orshot itself: connecting, rendering and the gotchas. A whole job 
 
 ## Connect first
 
-The hosted MCP server is the fastest route and the only one that returns inline previews and design checks.
+The hosted MCP server is the fastest route and the only one that returns inline previews and design checks. Added as a connector from an app directory (Claude, ChatGPT), the server is already connected: go straight to the account check below.
 
+**No `orshot_*` tools in your tool list?** Orshot is not connected yet. That happens when only these skills were installed, for example as the Claude plugin, which does not add the connector. Ask the user to add the Orshot connector and sign in (Claude: Customize, then Connectors or Plugins, search Orshot, Connect; ChatGPT: Apps, Orshot). A free account works. Then continue with their request. Do not switch to the REST API with a key inside a chat.
+
+<!-- directory-omit -->
 ```bash
 # OpenClaw
 openclaw mcp add orshot --url https://mcp.orshot.com/full --transport streamable-http --auth oauth
@@ -64,6 +67,7 @@ claude mcp add orshot --transport http https://mcp.orshot.com/full
 ```
 
 Other clients: https://orshot.com/docs/integrations/mcp-server.md
+<!-- /directory-omit -->
 
 Confirm with `orshot_get_account`. It returns the plan, credits and which features the plan includes (video, workflows, embed). If it reports an inactive subscription or a used-up limit, that is a billing state, not an auth error. Send the user to https://orshot.com/pricing and stop retrying.
 
@@ -81,7 +85,7 @@ Do not go on until one of the two works.
 2. **Find the template.** `orshot_list_studio_templates` (search by name or tags) or `GET /v1/studio/templates/all`. No template yet? Browse `orshot_list_library_templates`, or design one with the `orshot-design` skill.
 3. **Read its keys.** `orshot_get_studio_template_modifications` or `GET /v1/studio/templates/:id`. Never guess a key.
 4. **Render.** `orshot_render_template` or `POST /v1/studio/render`.
-5. **Deliver or post.** Show the output URL. To post it, pass the URL to `orshot_publish_social_post` (over REST, `publish` on the render also works; see Social posting).
+5. **Deliver or post.** Show the output URL. Every social post starts from a template and is posted only after the user has seen its render. To post it, pass the URL to `orshot_publish_social_post` (over REST, `publish` on the render also works; see Social posting).
 6. **Automate.** Put the call into what the user already runs. Playbook: `references/recurring-automation.md`.
 7. **Verify.** `orshot_list_workspace_logs` or `GET /v1/workspace/logs` shows the render and the `source` that made it. Show the output before calling it done.
 
@@ -145,12 +149,12 @@ Preset names and size rules: [render-from-studio-template, Smart Resize](https:/
 
 Prompt: "Render this week's quote card and put it on LinkedIn as a draft."
 
-1. `orshot_list_social_accounts`. Pick the LinkedIn account id, say `3`. An empty list means no account is connected yet; a person connects one in the dashboard ([connect-account](https://orshot.com/docs/publish/connect-account.md)), the API cannot. A draft or scheduled post can still be saved with `platforms` instead of `accounts`; once an account on that platform is connected, add it with `orshot_update_social_post` and send the post. Publishing now needs an account.
-2. `orshot_render_template` with the modifications. It returns the image URL.
+1. `orshot_render_template` with the modifications. It returns the image URL. Show it.
+2. `orshot_list_social_accounts`. Pick the LinkedIn account id, say `3`. An empty list means no account is connected yet; a person connects one in the dashboard ([connect-account](https://orshot.com/docs/publish/connect-account.md)), the API cannot. A draft or scheduled post can still be saved with `platforms` instead of `accounts`; once an account on that platform is connected, add it with `orshot_update_social_post` and send the post. Publishing now needs an account.
 3. `orshot_publish_social_post` with `mediaUrls: [that URL]`, `accounts: [3]`, `content` and `status: "draft"`. Check the result per account.
 4. After the user approves: `orshot_publish_social_draft`. To change it first: `orshot_update_social_post`.
 
-Over REST, the render `publish` object reads `isDraft` and `schedule.scheduledFor` for timing, not `status` ([publish-from-api](https://orshot.com/docs/publish/publish-from-api.md)). To post a file that already exists, use `orshot_publish_social_post` or `POST /v1/social/publish`. Scheduling, analytics and best time to post: the `orshot-social-media-scheduler` skill.
+Over REST, the render `publish` object reads `isDraft` and `schedule.scheduledFor` for timing, not `status` ([publish-from-api](https://orshot.com/docs/publish/publish-from-api.md)). A photo or clip the user already has goes into a template's image or video field first, and the render is what gets posted. Scheduling, analytics and best time to post: the `orshot-social-media-scheduler` skill.
 
 ## Other jobs
 
@@ -159,7 +163,9 @@ Over REST, the render `publish` object reads `isDraft` and `schedule.scheduledFo
 - **Stable image URLs** for OG tags, emails and embeds: `orshot_create_dynamic_url`. OG images for a whole blog or site: `orshot-blog-images`.
 - **Brand assets**: `orshot_get_brand_kit`, `orshot_import_brand_website`.
 - **Folders and workspaces**: `orshot_list_template_folders`, `orshot_set_active_workspace`.
+<!-- directory-omit -->
 - **Coming from another tool**: `references/migration.md`.
+<!-- /directory-omit -->
 - **Recurring jobs** (n8n, Make, Zapier, Pipedream, cron, Orshot Workflows): `references/recurring-automation.md`.
 
 ## Docs map

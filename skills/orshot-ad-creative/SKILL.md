@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/ad-creative
 license: MIT
 metadata:
   author: Orshot
-  version: "1.1.2"
+  version: "1.2.0"
   openclaw:
     emoji: "📣"
     homepage: https://orshot.com/agents/skills/ad-creative
@@ -98,7 +98,7 @@ Copy rules:
 1. `orshot_list_studio_templates` with search `ad`. A good one exists? Read its keys with `orshot_get_studio_template_modifications` and skip to rendering.
 2. **Plan, and pick the format.** `orshot_plan_design` with the brief, `job` (the user's words: "meta ad for the spring sale"), the main size and `on_brand: true` for brand work. It returns the ad formats advertisers run for that job (skeleton, size, fields, what makes each work) and the plan: palette, fonts, type scale. Pick the format whose fields match what changes per ad and say it in one line before you design: "DTC offer ad, offer as the headline: kicker, struck old price and new price, the open box filling the middle, a free-gift sticker on it." The format sets the skeleton, the sizes of things and the fields; the brand's colours win over the plan's accent.
 3. Read `orshot_get_design_spec` topic `template-json` once per session, and load the `orshot-design` skill if the user has not fixed a look.
-4. Find real imagery: the user's product shots from the brand kit, or `orshot_search_stock_media` with the subject in 1 to 3 words. Pick stock with no visible brand or label (many product shots show a real logo), and tell the user it is a placeholder for their own shot. Resolve a stock pick to a URL with `orshot_use_stock_media`, or put its `ref` straight into the template.
+4. Find real imagery, without holding up the design: the user's product shots from the brand kit first. None? Run one `orshot_search_stock_media` with the subject in 1 to 3 words (one search, not a hunt), take the first clean pick and go on to create. A better shot is swapped in per render through `product_image`, with no template edit. Pick stock with no visible brand or label (many product shots show a real logo), and tell the user it is a placeholder for their own shot. Resolve a stock pick to a URL with `orshot_use_stock_media`, or put its `ref` straight into the template.
 5. `orshot_create_template_design` named `Ad: <brand> <campaign type>`, `canvas_width` and `canvas_height` from the format's size, `tags: ["ad"]`, `includeThumbnails: true`. Every part in the table above is `parameterizable: true` with its `parameterId`. Text layers get `textMode: "fit"` and a `minFontSize`. A seasonal background colour needs no field: send `canvasBackgroundColor` per render.
 6. Read the thumbnail and the design checks. Fix real problems with one `orshot_update_template_design` call; small edits go through `orshot_patch_template_elements`.
 7. Render once with all target sizes in `extraSizes` and look at every variant, the strips most of all, before any campaign run.
@@ -216,6 +216,14 @@ For a short moving banner (a price that pops, a badge that pulses, 3 to 6 second
 6. A 9:16 variant made by Smart Resize keeps the feed layout's logic. Check the top 250 px as well as the bottom 380 px for text, and look for stretched stickers and empty bands.
 7. Do not make a new template per campaign. Swap the colour, offer and image fields instead.
 8. Serif faces with old-style figures (Cormorant, Playfair) make prices like "$110" hard to read. Set prices in a face with lining figures.
+
+## Finish the job
+
+A saved template is not the deliverable. Every run ends with a render the user has seen, before you stop or ask what next:
+
+1. Render it with `orshot_render_template` and show the output. One render with every target size in `extraSizes` covers the placements.
+2. Offer two variants in one line: another layout from the campaign set, or another headline or offer (see Variants for testing).
+3. An ad that also runs as an organic post: save it as a post draft: `orshot_publish_social_post` with the render's URL as `mediaUrls` and `status: "draft"`. This is the first point to look up accounts (`orshot_list_social_accounts`). With none connected, save the draft with `platforms` instead, and tell the user to connect an account in the dashboard (https://orshot.com/docs/publish/connect-account.md). Nothing posts without the user's yes.
 
 ## Safety
 

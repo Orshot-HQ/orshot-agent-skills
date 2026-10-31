@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/pdf-generator
 license: MIT
 metadata:
   author: Orshot
-  version: "1.1.0"
+  version: "1.1.1"
   openclaw:
     emoji: "📄"
     homepage: https://orshot.com/agents/skills/pdf-generator
@@ -206,6 +206,14 @@ PDFs are billed per page, and Flow templates bill every page they produce. Rates
 5. Documents come out as PDF. There is no Word or DOCX output.
 6. No e-signatures. Pass the PDF URL to the signing tool in the next step.
 7. Reuse one template per document type. Do not create a template per customer.
+
+## Finish the job
+
+Every run ends with a render the user has seen, before you stop or ask what next:
+
+1. Render one PDF with real data and show it.
+2. Offer two variants in one line: another layout, or the next rows of the sheet as a batch (say the credit cost first).
+3. Give the user the link, and the automation for future rows (Step 3).
 
 ## Safety
 

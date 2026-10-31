@@ -1,0 +1,32 @@
+{
+  "name": "orshot",
+  "displayName": "Orshot",
+  "version": "1.2.3",
+  "description": "Make videos, social posts, carousels, ads and PDFs from Orshot templates, then post and schedule them. Works with the Orshot connector (https://mcp.orshot.com/mcp): add it and sign in so the skills can design, render and post.",
+  "author": {
+    "name": "Orshot",
+    "url": "https://orshot.com"
+  },
+  "homepage": "https://orshot.com/agents/claude",
+  "repository": "https://github.com/Orshot-HQ/orshot-agent-skills",
+  "license": "MIT",
+  "keywords": [
+    "orshot",
+    "image-generation",
+    "pdf-generation",
+    "video-generation",
+    "templates",
+    "mcp",
+    "blog-images",
+    "youtube-thumbnail",
+    "ad-creative",
+    "carousel",
+    "social-media",
+    "automation"
+  ],
+  "icon": "./assets/icon.png",
+  "documentationUrl": "https://orshot.com/docs/integrations/mcp-server",
+  "supportUrl": "https://orshot.com/contact",
+  "privacyPolicyUrl": "https://orshot.com/privacy",
+  "termsOfServiceUrl": "https://orshot.com/terms"
+}

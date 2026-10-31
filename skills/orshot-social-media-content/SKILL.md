@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills/social-media-content
 license: MIT
 metadata:
   author: Orshot
-  version: "1.5.1"
+  version: "1.6.0"
   mcp-server: orshot
   openclaw:
     emoji: "🎨"
@@ -68,7 +68,8 @@ The layouts come from the post formats `orshot_plan_design` returns for the job,
    - The checks are tuned for photo posts. On a chart, table, type-only or drawn-UI format, "No imagery" and "Shapes with no job" can be wrong, a rotated edge rail can read as "cut by the edge", "Repeated copy" fires on the day names of a row table, and a fit warning can fire on fixed text. The status can stay `needs_fixes` after every real problem is fixed. Fix what is real and tell the user which checks you judged wrong and why.
    - `orshot_get_studio_template_modifications` lists the exact keys a render accepts.
 8. **Render** with real copy (`orshot_render_template`) and show the user the output. For a series, render the longest real copy the user will send as well (one more image credit), so the frame is proven before the first busy week. If an extra size from `extraSizes` reads weaker (empty bands, the picture no longer bleeds), add a page laid out for that size instead of relying on the resize.
-9. **Hand off.** Posting, scheduling and analytics are in `orshot-social-media-scheduler`. Keep the template: every future post is a render, not a redesign. For posts that should be made with no one in the chat (a new sheet row, every Monday), see the `orshot` skill's [`references/recurring-automation.md`](https://github.com/Orshot-HQ/orshot-agent-skills/blob/main/skills/orshot/references/recurring-automation.md) and https://orshot.com/workflows/images-from-sheet-to-social.
+9. **Offer two variants and save a draft.** Offer two variants in one line: another layout or colour, another size (`extraSizes`), or the next post in the series. Then save it as a post draft: `orshot_publish_social_post` with the render's URL as `mediaUrls` and `status: "draft"`. This is the first point to look up accounts (`orshot_list_social_accounts`). With none connected, save the draft with `platforms` instead, and tell the user to connect an account in the dashboard (https://orshot.com/docs/publish/connect-account.md). Nothing posts without the user's yes.
+10. **Hand off.** Scheduling and analytics are in `orshot-social-media-scheduler`. Keep the template: every future post is a render, not a redesign. For posts that should be made with no one in the chat (a new sheet row, every Monday), see the `orshot` skill's [`references/recurring-automation.md`](https://github.com/Orshot-HQ/orshot-agent-skills/blob/main/skills/orshot/references/recurring-automation.md) and https://orshot.com/workflows/images-from-sheet-to-social.
 
 ## Example: an event post that runs every week
 

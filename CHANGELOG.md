@@ -4,6 +4,60 @@ One entry per published ClawHub version. Skill versions live in each `SKILL.md` 
 
 ## Unreleased
 
+Skills follow the order that converts: design and render first, social accounts only when the post draft is saved, and every run ends with a render the user has seen, two variants offered, and a post draft saved.
+
+### Directory builds
+
+- `scripts/build-dist.sh` now builds the Claude plugin directory package (`dist/claude-directory/`) and the ChatGPT app package (`dist/chatgpt/`) from the same skills: `/full` becomes `/mcp`, the per-client install block and the migration page are left out. Manifest and README sources live in `directory/`. The old portable `dist/openai` zip is gone (the portal rejected its auth override)
+
+### Claude plugin (`plugins/orshot/`)
+
+- The Claude directory plugin is committed at `plugins/orshot/`, built by `scripts/build-dist.sh` and checked by `scripts/check.sh`. Its `.mcp.json` points at `https://mcp.orshot.com/mcp`, the same server as the Claude connector
+- Four slash commands: `/orshot:create-reel`, `/orshot:create-social-post`, `/orshot:create-carousel` and `/orshot:schedule-social-post`. Each loads its skill, builds a new design for the brief, checks it before rendering, and never posts without the user's yes
+- The README and description say the plugin works with the Orshot connector, which a plugin install does not add
+- The blog-images skill designs from the brief instead of fetching blueprint files from GitHub
+- `orshot` Connect first: with no `orshot_*` tools, ask the user to add the Orshot connector and sign in
+
+### orshot-social-media-scheduler 1.4.0
+
+- Template first: every post starts from a template (one the user names, one in the workspace, or a new one made with the job skill), rendered and shown before any account lookup, draft or schedule
+- Photos and clips the user already has go into a template's image or video field; only render URLs are posted. The post-any-media example is gone
+
+### orshot 1.6.3
+- Every social post starts from a template and is posted only after the user has seen its render; the draft-post example renders before it looks up accounts
+
+- Connect first: agents added from an app directory (Claude, ChatGPT) skip the install commands and go straight to the account check
+
+### orshot-carousel 1.3.0
+
+- Social accounts are looked up after the slides are rendered, not in setup
+- New Finish the job section: render, two variants, post draft
+
+### orshot-ad-creative 1.2.0
+
+- One stock search at most when the brand kit has no product shot, then create; better shots are swapped in per render
+- New Finish the job section: render every size, two variants, post draft for organic runs
+
+### orshot-social-media-content 1.6.0
+
+- Step 9 offers two variants and saves a post draft before handing off to the scheduler
+
+### orshot-video-generator 1.2.0
+
+- Music and sound effects come from the stock sound library (`orshot_search_stock_media` type `music` or `sound_effect`)
+- The narrated-short example uses the user's recorded voiceover
+- New Finish the job section: MP4, two variants, post draft
+
+### orshot-design 1.3.1
+
+- Sound: stock music and effects on every client; generated narration only when the speech tool is in the tool list
+
+### orshot-youtube-thumbnail 1.1.1, orshot-blog-images 1.1.2, orshot-pdf-generator 1.1.1
+
+- New Finish the job section: render, two variants, hand over the file
+
+## 1.2.3
+
 Setup now points to `https://mcp.orshot.com/full`, the hosted Orshot server with every tool. The Claude and ChatGPT directory connectors keep working as before.
 
 ### orshot plugin 1.2.3

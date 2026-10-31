@@ -9,7 +9,7 @@ How to use one:
 3. Replace `{{LOGO_URL}}` and `{{PRODUCT_IMAGE_URL}}`, and swap the accent colors (SKILL.md, Step 2).
 4. Put the edited page objects in `pages_data` for `orshot_create_template_design`.
 
-Not installed locally? Fetch them from `https://raw.githubusercontent.com/Orshot-HQ/orshot-agent-skills/main/skills/orshot-blog-images/references/blueprints/<name>.json`.
+No blueprint files available? Design the page from the brief instead: call `orshot_plan_design` with the job (a blog cover or an in-article image) and build it with `orshot_create_template_design`, keeping the sizes above.
 
 ## cover-prompt-card
 

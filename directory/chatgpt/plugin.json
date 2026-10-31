@@ -1,0 +1,103 @@
+{
+  "name": "app-6a79affedd808191b69f2e62014b8235",
+  "version": "3.4.0",
+  "description": "AI videos and social posts from on-brand Orshot designs: create, render, post and schedule from ChatGPT.",
+  "author": {
+    "name": "Orshot",
+    "email": "hi@orshot.com",
+    "url": "https://orshot.com"
+  },
+  "homepage": "https://orshot.com",
+  "license": "MIT",
+  "interface": {
+    "displayName": "Orshot",
+    "shortDescription": "AI Videos & Social Posting",
+    "longDescription": "Create videos and social posts in ChatGPT, keep them on brand, and schedule them to your social accounts. Describe the Reel, TikTok, carousel or ad you need and ChatGPT designs it in your Orshot workspace, shows you a preview, and posts or schedules it. Orshot is an API for automated image, PDF and video generation from templates, so every design is reusable: ask for the next post and only the content changes.\n\nVideos and social posting:\n- Reels, TikToks, YouTube Shorts and video ads with animation, music, sound effects and captions, saved as MP4\n- Posting and scheduling to Instagram, TikTok, LinkedIn, Facebook, YouTube, X, Threads, Pinterest, Bluesky and more\n- Social analytics: reach, engagement, followers and your best time to post\n- One design in every social size in one step\n\nAI inside your designs:\n- AI images, AI video clips and AI voiceovers generated as parts of a design, next to your own text, logo and footage\n- Free stock photos, videos and music, or your own files from the chat\n\nImages and PDFs too:\n- Instagram posts, LinkedIn carousels, ads, YouTube thumbnails, flyers and posters\n- Certificates, invoices and multi-page PDFs, one for every row of a spreadsheet\n- Automation: posts and PDFs generated on a schedule or a trigger, from Google Sheets, webhooks and more\n\nOn brand by default: your colors, fonts, logo and images come from your brand kit or your website. Everything happens in your own Orshot workspace, connected through OAuth.\n\nLimitations: posting needs a social account connected in Orshot, and video length and AI generation limits depend on your Orshot workspace.",
+    "developerName": "Orshot",
+    "category": "Creativity",
+    "capabilities": [
+      "Create videos",
+      "Create social posts and carousels",
+      "Post and schedule to social accounts",
+      "Generate AI images, video clips and voiceovers in designs",
+      "Create images and PDFs"
+    ],
+    "websiteURL": "https://orshot.com",
+    "supportURL": "https://orshot.com/contact",
+    "privacyPolicyURL": "https://orshot.com/privacy",
+    "termsOfServiceURL": "https://orshot.com/terms",
+    "defaultPrompt": [
+      "Make a 15-second Instagram Reel for my bakery's weekend sale and schedule it for Friday 9am",
+      "Turn my latest blog post into a 5-slide Instagram carousel and schedule it for Monday",
+      "Create a 20-second promo video for our app with music and captions, in vertical and square"
+    ],
+    "logo": "./assets/icon.png",
+    "composerIcon": "./assets/icon.png",
+    "screenshots": [
+      "./assets/screenshots/final/chatgpt/chatgpt-1.png",
+      "./assets/screenshots/final/chatgpt/chatgpt-2.png",
+      "./assets/screenshots/final/chatgpt/chatgpt-3.png",
+      "./assets/screenshots/final/chatgpt/chatgpt-4.png",
+      "./assets/screenshots/final/chatgpt/chatgpt-5.png"
+    ]
+  },
+  "extensions": {
+    "com.openai": {
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "List the studio templates in the active workspace.",
+              "prompt": "List my Orshot studio templates so I can choose one to render.",
+              "tools_triggered": "orshot_list_studio_templates",
+              "expected_behavior": "Returns the workspace's templates with their names and IDs, including Basic Quote Template (16320)."
+            },
+            {
+              "description": "Render a template with custom text.",
+              "prompt": "Render Orshot template 16320 as a PNG with the quote 'Launch week starts Monday' and the author 'Orshot Team'.",
+              "tools_triggered": "orshot_render_template",
+              "expected_behavior": "Renders template 16320 with the quote_text and author fields set, and shows the hosted image with a link to open it."
+            },
+            {
+              "description": "Render a template, then save an Instagram post as a held draft without publishing.",
+              "prompt": "Render Orshot template 16320 with the quote 'Launch week starts Monday', then save an Instagram post with that image and the caption 'Launch week starts Monday' as a draft. Do not publish it.",
+              "tools_triggered": "orshot_render_template, orshot_publish_social_post",
+              "expected_behavior": "Renders the image, then saves a draft Instagram post for the connected account with that image and caption. Nothing is published; the reply says the draft is held in Orshot."
+            },
+            {
+              "description": "Add a tagged brand color and list the brand colors.",
+              "prompt": "Add #FF5733 to my Orshot brand colors tagged 'accent', then list my brand colors.",
+              "tools_triggered": "orshot_add_brand_color, orshot_get_brand_colors",
+              "expected_behavior": "Adds #FF5733 with the tag accent to the brand kit, then lists the brand colors including the new one."
+            },
+            {
+              "description": "Resize one design to an Instagram Story size in the same render.",
+              "prompt": "Render Orshot template 16320 with the quote 'Launch week starts Monday' and also give me a 1080x1920 Instagram Story version.",
+              "tools_triggered": "orshot_render_template",
+              "expected_behavior": "Renders the original size and a 1080x1920 version in one call, and shows both images."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Do not trigger for calendar requests.",
+              "prompt": "What meetings do I have tomorrow morning?"
+            },
+            {
+              "description": "Do not trigger for code editing requests.",
+              "prompt": "Refactor my React component and open a pull request."
+            },
+            {
+              "description": "Do not trigger for travel planning.",
+              "prompt": "Find me a hotel in Berlin for next weekend."
+            }
+          ]
+        },
+        "demo_recording_url": "https://orshot.com/chatgpt/orshot-chatgpt-plugin-demo.mp4",
+        "commerce": false
+      },
+      "publication": {
+        "release_notes": "Listing refresh: new subtitle (AI Videos & Social Posting), description, starter prompts, and new screenshots for Reels, UGC video ads, posting and scheduling, analytics, and editing and resizing. Adds the full set of Orshot skills (design, video, carousels, ads, blog images, thumbnails, PDFs, social content and scheduling). Each skill now ends a run with a rendered result and a saved post draft, and offers variants."
+      }
+    }
+  }
+}

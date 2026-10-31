@@ -5,7 +5,7 @@ homepage: https://orshot.com/agents/skills
 license: MIT
 metadata:
   author: Orshot
-  version: "1.3.0"
+  version: "1.3.1"
   mcp-server: orshot
   openclaw:
     emoji: "🎨"
@@ -65,7 +65,7 @@ Making video look designed, not generated:
 - **Ambient motion stays subtle and slow:** 6 to 10 s cycles against a 0.5 s enter. If the viewer can name the motion, it is too strong, unless it is a deliberate accent. Looping ambients need linear easing or the loop seam shows.
 - **Every word gets read.** A viewer reads at about 2.5 words a second (0.4 s per word) from when a block starts entering, blocks one after another in entrance order, then the scene holds about 1 s before the cut; the last arrival in a scene holds 2 s or more, and line draws take 2 to 3 s. Too long? Cut words, never speed up the motion. The film checks ("Cut too soon", "Dead stretch") measure this.
 - **One cut family per video,** 0.9 to 1.2 s per cut, chosen by what the cut means (`orshot_get_design_spec` topic `film-pack`). A different transition per cut is the clearest tell of an auto-generated edit. A video over 8 s or with more than one scene is a film: the `orshot-video-generator` skill.
-- **Sound.** A voice track at full volume plus a quiet music or ambient bed (about 0.08 to 0.18 volume) sounds produced. That is 2 tracks on a page, and the number of tracks per page depends on the plan (video-options.md), so a render over the limit fails. Budget narration at about 2.5 words per second with 1 s of headroom. Burn in captions over speech, with a thicker stroke over busy footage (presets: adding-subtitles.md). On Claude clients the server does not offer generated narration or sound effects; use brand audio or uploaded files.
+- **Sound.** A voice track at full volume plus a quiet music or ambient bed (about 0.08 to 0.18 volume) sounds produced. That is 2 tracks on a page, and the number of tracks per page depends on the plan (video-options.md), so a render over the limit fails. Budget narration at about 2.5 words per second with 1 s of headroom. Burn in captions over speech, with a thicker stroke over busy footage (presets: adding-subtitles.md). Music beds and sound effects come from `orshot_search_stock_media` (`type: "music"` or `"sound_effect"`). Generated narration only when `orshot_get_audio_authoring_options` is in your tool list; otherwise use the user's recorded voice (`orshot_get_brand_audio`, an upload) or skip narration.
 - **Check the layout with a still, not a video.** The motion preview from `includeThumbnails` is free. Before a paid mp4, render one page as a PNG to check composition.
 
 ## Examples
