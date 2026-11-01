@@ -80,7 +80,7 @@ This skill is the flow and the taste. Field shapes, allowed values and limits ar
 
 A chart or screenshot from a post keeps its own aspect ratio. A 9:16 film resizes well to 1:1 and 4:5 with `size`; 16:9 needs its own template.
 
-**Video needs a plan with video rendering.** The Free plan renders no video format, GIF included ([Video on Free Plan](https://orshot.com/docs/error-reference.md)). `orshot_get_account` shows whether video is on the plan. On a plan without it, the create and update results still link a free animated preview, so the user sees the motion before upgrading.
+**Video length follows the plan.** The Free plan renders videos up to 30 seconds, GIF included; a longer video needs a paid plan ([Video Duration Exceeds Plan](https://orshot.com/docs/error-reference.md)). `orshot_get_account` shows whether video is on the plan. On a plan without it, the create and update results still link a free animated preview, so the user sees the motion before upgrading.
 
 ## The look: full, layered, always moving
 
