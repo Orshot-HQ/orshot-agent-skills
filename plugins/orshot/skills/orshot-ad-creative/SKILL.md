@@ -186,7 +186,7 @@ For every feed:
 
 For a short moving banner (a price that pops, a badge that pulses, 3 to 6 seconds), the same render tool takes `format: "gif"` or `"mp4"`. A video ad over 6 seconds, or with footage, voiceover or more than one scene, is a film: load `orshot-video-generator` alongside this skill and use them as a pair. This skill sets the offer, the hook, the product photo, the sizes and the CTA, and designs the static end card. The video skill builds the scenes that lead to it (the "Video ad" format from `orshot_plan_design`).
 
-- GIF and MP4 need a plan with video rendering. The Free plan renders neither. Check `orshot_get_account` first.
+- GIF and MP4 need a plan with video rendering. The Free plan renders videos up to 30 seconds; longer ones need a paid plan. Check `orshot_get_account` first.
 - Add motion to the template (enter animations, `showAt`, `motion`; see [Template JSON](https://orshot.com/docs/definitions/template-json.md)). Frame 0 must already show the product and the offer.
 - Check the layout with a still first: `format: "png"` with `responseType: "base64"` costs one image credit and shows the first frame. Then render the motion once.
 - `videoOptions` sets `duration` and `fps` ([video options](https://orshot.com/docs/video-generation/video-options.md)). A lower fps makes a smaller GIF. GIF has no audio. Animated output is billed per second.
