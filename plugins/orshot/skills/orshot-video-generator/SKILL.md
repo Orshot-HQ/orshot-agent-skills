@@ -115,7 +115,7 @@ A scene can run up to 12 s (a tool description that says 2 to 8 s is out of date
 
 ## Setup
 
-1. Connect the hosted MCP server `https://mcp.orshot.com/mcp` (OAuth in the browser, no key). Client steps: https://orshot.com/docs/integrations/mcp-server.md. Scheduled jobs use REST with `ORSHOT_API_KEY` (Workspace Settings > API Keys).
+1. Connect the hosted MCP server `https://mcp.orshot.com/mcp` (OAuth in the browser, no key). Client steps: https://orshot.com/docs/integrations/mcp-server.md. Scheduled jobs use REST with an Orshot API key (Workspace Settings > API Keys).
 2. `orshot_get_account`: confirm the workspace and that video rendering is included.
 3. `orshot_get_brand_kit` for on-brand work: colors, fonts, logo, brand videos and brand audio.
 4. Look for an existing template first: `orshot_list_studio_templates` with a search like "reel" or "film". Reuse it if it fits; then a new video is only Step 6.
@@ -204,7 +204,7 @@ For a recurring video (a listing reel per new listing, a weekly numbers video), 
 
 ```bash
 curl -s -X POST https://api.orshot.com/v1/studio/render \
-  -H "Authorization: Bearer $ORSHOT_API_KEY" -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your-orshot-api-key>" -H "Content-Type: application/json" \
   -d '{
     "templateId": 123,
     "modifications": {

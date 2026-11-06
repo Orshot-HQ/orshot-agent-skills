@@ -271,6 +271,16 @@ for slug in SKILLS:
                 fp = os.path.join(dirpath, fn); txt = open(fp, encoding="utf-8").read()
                 if txt.count("<!-- directory-omit -->") != txt.count("<!-- /directory-omit -->"):
                     err(f"{fp}: unbalanced directory-omit markers")
+                if txt.count("<!-- claude-omit -->") != txt.count("<!-- /claude-omit -->"):
+                    err(f"{fp}: unbalanced claude-omit markers")
+# The Claude directory holds a plugin that reads a credential from the user's machine.
+for dirpath, _, files in os.walk("plugins/orshot"):
+    for fn in files:
+        if fn.endswith((".md", ".json")):
+            fp = os.path.join(dirpath, fn); txt = open(fp, encoding="utf-8").read()
+            for bad in ("ORSHOT_API_KEY", "process.env", "os.environ", "getenv("):
+                if bad in txt:
+                    err(f"{fp}: reads a local credential ({bad}); rebuild with scripts/build-dist.sh")
 for p in ("directory/chatgpt/plugin.json", "directory/claude/README.md"):
     if not os.path.isfile(p):
         err(f"{p}: missing (scripts/build-dist.sh reads it)")

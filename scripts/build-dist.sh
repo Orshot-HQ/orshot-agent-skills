@@ -18,6 +18,9 @@
 #   Directory skills are the same sources with /full replaced by /mcp (the directory connector),
 #   <!-- directory-omit --> blocks removed (per-client install commands) and the migration page dropped.
 #   The ChatGPT package also drops <!-- chatgpt-omit --> blocks (lines its skill scan flags).
+#   The Claude plugin drops <!-- claude-omit --> blocks and reads no credential from the user's machine:
+#   $ORSHOT_API_KEY and process.env.ORSHOT_API_KEY in REST examples become a <your-orshot-api-key>
+#   placeholder (the directory's policy check holds plugins that read a local credential).
 #
 # Usage: ./scripts/build-dist.sh
 set -euo pipefail
@@ -78,6 +81,45 @@ def sanitize_frontmatter(text, path):
     return "---\n" + "\n".join(kept) + "\n---\n" + text[m.end():], dropped
 
 
+# <!-- claude-omit --> blocks: dropped from the Claude plugin only; every other build drops only the markers.
+CL_OPEN, CL_CLOSE = "<!-- claude-omit -->", "<!-- /claude-omit -->"
+CL_OMIT = re.compile(r"\n?<!-- claude-omit -->\n.*?<!-- /claude-omit -->\n", re.S)
+CL_MARK = re.compile(r"^<!-- /?claude-omit -->\n", re.M)
+# The Claude directory holds a plugin that reads a credential from the user's machine. REST examples
+# there show a placeholder instead; the source skills (OpenClaw, Claude Code) keep reading the env var.
+KEY_PLACEHOLDER = "<your-orshot-api-key>"
+CL_KEY_SUBS = [
+    ("`Bearer ${process.env.ORSHOT_API_KEY}`", f'"Bearer {KEY_PLACEHOLDER}"'),
+    ("$ORSHOT_API_KEY", KEY_PLACEHOLDER),
+    ("`ORSHOT_API_KEY`", "an Orshot API key"),
+]
+CL_FORBIDDEN = ("ORSHOT_API_KEY", "process.env", "os.environ", "getenv(", "claude-omit")
+
+
+def strip_claude_markers(rel, data):
+    if not rel.endswith(".md"):
+        return data
+    text = data.decode("utf-8")
+    if text.count(CL_OPEN) != text.count(CL_CLOSE):
+        raise SystemExit(f"{rel}: unbalanced claude-omit markers")
+    return CL_MARK.sub("", text).encode("utf-8")
+
+
+def claude_variant(rel, data):
+    if not rel.endswith(".md"):
+        return data
+    text = data.decode("utf-8")
+    if text.count(CL_OPEN) != text.count(CL_CLOSE):
+        raise SystemExit(f"{rel}: unbalanced claude-omit markers")
+    text = CL_OMIT.sub("\n", text)
+    for old, new in CL_KEY_SUBS:
+        text = text.replace(old, new)
+    for bad in CL_FORBIDDEN:
+        if bad in text:
+            raise SystemExit(f"{rel}: {bad!r} left in the Claude plugin copy")
+    return text.encode("utf-8")
+
+
 if os.path.isdir(DIST):
     shutil.rmtree(DIST)
 
@@ -98,7 +140,7 @@ for slug in sorted(os.listdir("skills")):
                 data = text.encode("utf-8")
                 if dropped:
                     print(f"  {slug}: dropped frontmatter keys {dropped} in the zip copy")
-            add_bytes(zf, rel, data)
+            add_bytes(zf, rel, strip_claude_markers(rel, data))
     print(f"built {os.path.relpath(zpath)}")
 
 # 2. Directory skills: the same sources, rewritten for app directories (Claude, ChatGPT).
@@ -174,11 +216,13 @@ claude_files = {
     "LICENSE": open("LICENSE", "rb").read(),
     plugin["icon"][2:]: open(plugin["icon"][2:], "rb").read(),
 }
-claude_files.update({f"skills/{rel}": chatgpt_variant(rel, data, False) for rel, data in DSKILLS})
+claude_files.update({f"skills/{rel}": claude_variant(rel, chatgpt_variant(rel, data, False)) for rel, data in DSKILLS})
 # Slash commands (/orshot:create-reel ...): Claude only. Codex and ChatGPT have no commands.
 for f in sorted(os.listdir("commands")):
     if f.endswith(".md"):
-        claude_files[f"commands/{f}"] = directory_text(open(os.path.join("commands", f), encoding="utf-8").read(), f"commands/{f}").encode()
+        text = directory_text(open(os.path.join("commands", f), encoding="utf-8").read(), f"commands/{f}")
+        claude_files[f"commands/{f}"] = claude_variant(f, text.encode())
+claude_files["README.md"] = claude_variant("README.md", claude_files["README.md"])
 zpath = os.path.join(DIST, "claude-directory", f"orshot-claude-{version}.zip")
 os.makedirs(cdir)
 with zipfile.ZipFile(zpath, "w") as zf:
@@ -227,6 +271,6 @@ with zipfile.ZipFile(zpath, "w") as zf:
     for a in sorted(assets):
         add_bytes(zf, a, open(a, "rb").read())
     for rel, data in DSKILLS:
-        add_bytes(zf, f"skills/{rel}", chatgpt_variant(rel, data, True))
+        add_bytes(zf, f"skills/{rel}", strip_claude_markers(rel, chatgpt_variant(rel, data, True)))
 print(f"built {os.path.relpath(zpath)} ({len(DSKILLS)} skill files)")
 PY
