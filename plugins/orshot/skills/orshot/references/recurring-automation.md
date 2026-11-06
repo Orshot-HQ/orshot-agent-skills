@@ -47,7 +47,7 @@ Then the call to drop in:
 
 ```http
 POST https://api.orshot.com/v1/studio/render
-Authorization: Bearer $ORSHOT_API_KEY
+Authorization: Bearer <your-orshot-api-key>
 Content-Type: application/json
 
 {

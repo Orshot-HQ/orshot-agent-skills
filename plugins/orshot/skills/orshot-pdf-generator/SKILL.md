@@ -94,7 +94,7 @@ Over MCP: `orshot_render_template` with `format: "pdf"`. Over REST: `POST https:
 
 ```bash
 curl -s -X POST https://api.orshot.com/v1/studio/render \
-  -H "Authorization: Bearer $ORSHOT_API_KEY" -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your-orshot-api-key>" -H "Content-Type: application/json" \
   -d '{
     "templateId": 123,
     "modifications": {

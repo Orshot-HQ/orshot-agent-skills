@@ -17,6 +17,7 @@ Skills follow the order that converts: design and render first, social accounts 
 - The README and description say the plugin works with the Orshot connector, which a plugin install does not add
 - The blog-images skill designs from the brief instead of fetching blueprint files from GitHub
 - `orshot` Connect first: with no `orshot_*` tools, ask the user to add the Orshot connector and sign in
+- The plugin reads no credential from the user's machine. REST examples show a `<your-orshot-api-key>` placeholder instead of `$ORSHOT_API_KEY` or `process.env.ORSHOT_API_KEY`, and the `orshot` skill's headless key check (`<!-- claude-omit -->`) is left out. The directory's policy check held v1.2.3 for these reads. Source skills, the Claude.ai zips and the ChatGPT package are unchanged, and `scripts/check.sh` fails if a key read shows up in `plugins/orshot`
 
 ### orshot-social-media-scheduler 1.4.0
 

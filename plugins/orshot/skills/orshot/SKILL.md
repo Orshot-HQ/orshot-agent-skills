@@ -47,13 +47,6 @@ The hosted MCP server is the fastest route and the only one that returns inline 
 
 Confirm with `orshot_get_account`. It returns the plan, credits and which features the plan includes (video, workflows, embed). If it reports an inactive subscription or a used-up limit, that is a billing state, not an auth error. Send the user to https://orshot.com/pricing and stop retrying.
 
-**Headless fallback: REST with an API key.** Use it only when the agent cannot run MCP (a cron job, a server script, n8n). Read the key from the environment.
-
-```bash
-curl -s https://api.orshot.com/v1/me -H "Authorization: Bearer $ORSHOT_API_KEY"
-```
-
-Do not go on until one of the two works.
 
 ## Core workflow
 
@@ -110,7 +103,7 @@ The same render over REST:
 ```js
 await fetch("https://api.orshot.com/v1/studio/render", {
   method: "POST",
-  headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.ORSHOT_API_KEY}` },
+  headers: { "Content-Type": "application/json", Authorization: "Bearer <your-orshot-api-key>" },
   body: JSON.stringify({
     templateId: 123,
     modifications: { title: "We just shipped" },

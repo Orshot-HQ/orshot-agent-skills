@@ -30,7 +30,7 @@ Supported platforms, pricing and per-platform limits are in the docs. Do not gue
 
 ## Step 1: connect
 
-Connect the Orshot MCP server at `https://mcp.orshot.com/mcp` (OAuth, no key). Setup per client: https://orshot.com/docs/integrations/mcp-server.md. Headless jobs (cron, n8n, a server script) call REST with `ORSHOT_API_KEY`. The `orshot` skill covers both.
+Connect the Orshot MCP server at `https://mcp.orshot.com/mcp` (OAuth, no key). Setup per client: https://orshot.com/docs/integrations/mcp-server.md. Headless jobs (cron, n8n, a server script) call REST with an Orshot API key. The `orshot` skill covers both.
 
 ## Step 2: the template first
 
@@ -131,7 +131,7 @@ The render `publish` object reads `isDraft` and `schedule.scheduledFor`. It igno
 ```js
 await fetch("https://api.orshot.com/v1/studio/render", {
   method: "POST",
-  headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.ORSHOT_API_KEY}` },
+  headers: { "Content-Type": "application/json", Authorization: "Bearer <your-orshot-api-key>" },
   body: JSON.stringify({
     templateId: 123,
     modifications: { headline: "Ship day", stat: "2,000 renders" },

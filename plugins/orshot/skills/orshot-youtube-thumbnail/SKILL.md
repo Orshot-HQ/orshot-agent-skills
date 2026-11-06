@@ -145,7 +145,7 @@ The template has dynamic fields, so any job can render it. A common setup: a she
 
 ```bash
 curl -s -X POST https://api.orshot.com/v1/studio/render \
-  -H "Authorization: Bearer $ORSHOT_API_KEY" -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your-orshot-api-key>" -H "Content-Type: application/json" \
   -d '{
     "templateId": 123,
     "modifications": {

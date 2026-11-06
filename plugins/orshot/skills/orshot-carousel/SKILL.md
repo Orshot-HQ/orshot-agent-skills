@@ -22,7 +22,7 @@ A carousel is six images with the same layout and different words. That is a tem
 
 ## Setup
 
-1. Connect the Orshot MCP server at `https://mcp.orshot.com/mcp` (OAuth, no key): https://orshot.com/docs/integrations/mcp-server.md. Headless jobs use `ORSHOT_API_KEY` over REST. The `orshot` skill covers both.
+1. Connect the Orshot MCP server at `https://mcp.orshot.com/mcp` (OAuth, no key): https://orshot.com/docs/integrations/mcp-server.md. Headless jobs use an Orshot API key over REST. The `orshot` skill covers both.
 2. Find a carousel template: `orshot_list_studio_templates` with a search for "carousel". None? Create one (below). Already have it in Canva? The user imports it in Orshot Studio from a public share link, and each page comes in with `pageN@` keys: https://orshot.com/docs/importing-templates/import-from-canva.md.
 3. Do not look up social accounts yet. Where it posts (Orshot social accounts or Postiz) is decided after the slides are rendered: see Post it.
 
@@ -73,7 +73,7 @@ REST body (https://orshot.com/docs/api-reference/render-from-studio-template.md)
 
 ```bash
 curl -s -X POST https://api.orshot.com/v1/studio/render \
-  -H "Authorization: Bearer $ORSHOT_API_KEY" -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your-orshot-api-key>" -H "Content-Type: application/json" \
   -d '{
     "templateId": 123,
     "modifications": {
