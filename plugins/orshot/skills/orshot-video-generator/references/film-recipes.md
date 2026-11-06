@@ -26,20 +26,27 @@ A video post format, returned by `orshot_plan_design` with the job and `duration
 
 A video post format, returned by `orshot_plan_design` with the job and `duration_seconds` (real estate: status word, rooms, proof numbers, contact).
 
-## 4. Launch teaser
+## 4. Launch teaser and feature launch
 
-A new app, feature or product launch. 9:16 or 16:9, 18 to 30 s.
+A new app, feature or product launch, shown with the product itself. 16:9 or 9:16, 20 to 34 s. Stock photos or footage make a feature film look like stock: every feature scene is a real screenshot of the product.
 
 | Scene | Length | What happens |
 |---|---|---|
-| Problem | 3 to 3.5 s | The pain in one line, acted out: a messy inbox, a spreadsheet, a red number. |
-| The product | 4 s | App screen pull-back: the screen starts filling the frame and settles into a device or card over about 1.2 s; its UI lands 0.3 s later. |
-| One per feature, 2 to 3 | 4 s each | A real screenshot or recording, one line of 6 words or fewer, one action on it (a fingertip tap with a press, a toggle, a counter). |
-| End card | 3 s | Logo, the promise, the URL. The logo is a `match` from the last scene so it travels into place. |
+| Hook | 3.5 to 4 s | The whole product screen as a card that rises and settles, the promise in one line above it by 0.4 s. The feature's result happens on it: a light sweep crosses the area the feature changes, before on the left of the edge, after on the right. |
+| One per feature, 3 to 4 | 4.5 to 5.5 s each | A close-up crop of the screen as a card on one side, a 3 to 5 word headline on the other. A drawn pointer clicks the control, the screen changes on the click, and a short label lands with each change ("Brighten", "Lift shadows"). |
+| Proof | 5 s | How it is used for real: the API or settings panel with the line that matters boxed, and two or three real outputs fanning in, each labelled with the value that made it. |
+| Second story (optional) | 4 to 5 s each | Anything the launch also ships, given its own time: a fan of finished examples, then one up close with arrows to what makes it good. |
+| End card | 3 s | Logo, the promise, the URL. |
 
-- Cuts: `whip` for energy between features, `match` or `grow` into the end card.
-- Screenshots, recordings and the logo come from the user. No screenshot yet? `orshot_render_library_template` with `templateId: "website-screenshot"` captures a page.
-- Per render: lines and screens per feature, so the same template serves the next launch.
+- **Screens.** Retina (2x) captures from the user, or `orshot_render_library_template` with `templateId: "website-screenshot"` for a public page. Ask for one capture per state the scene shows (before, each step, after), taken in one session so panels and popovers sit in the same place in every capture. A crop of the same region from each capture makes the close-up.
+- **What is on screen.** Show the product doing a real job: a real document, design or record in it, with real copy, not an empty canvas or a bare photo. Show the whole layout once (the hook), then crop.
+- **Moving screenshots.** The captures of one scene are stacked in one group; the group slides in and pushes in slowly (1.0 to 1.045) for the whole scene, and each later capture crossfades in on its click (0.15 to 0.3 s). The pointer and its click rings are in the same group so they move with the screen.
+- **Grounds.** A dark or light ground with a soft glow behind the card, a faint dot grid or pattern, and one drawn motif tied to the feature that draws in (a tone curve for colour, a timeline for scheduling, a chart line for analytics). Never a flat colour alone.
+- **Type.** A display face with character for headlines (Bricolage Grotesque, Space Grotesk, Instrument Sans) and one accent word per headline in a serif italic (Instrument Serif). Not Inter for display.
+- **Cuts.** `push` between scenes with the direction varied, `colorFlood` or `match` into the end card. One family for the film.
+- **Per render:** headlines, labels and screens per feature, so the same template serves the next launch.
+
+The worked example in [`examples/feature-launch-film.md`](examples/feature-launch-film.md) shows every scene of a 32 s feature launch with its timings.
 
 ## 5. Product promo reel
 

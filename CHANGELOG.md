@@ -6,6 +6,11 @@ One entry per published ClawHub version. Skill versions live in each `SKILL.md` 
 
 Skills follow the order that converts: design and render first, social accounts only when the post draft is saved, and every run ends with a render the user has seen, two variants offered, and a post draft saved.
 
+### Video generator 1.3.0
+
+- Feature launch films: a worked example (`references/examples/feature-launch-film.md`, Orshot's colour grading film) and a rebuilt launch recipe in `film-recipes.md`: real product screenshots, a pointer that clicks, proof with real outputs, end card.
+- Sound effects: search with the motion (`fits`), its `duration` and the film's `style`. One sound per action for the whole film, every time the action plays (every press clicks); effects only on the prominent moments; one sound per moment, a build into a reveal is one designed sound.
+
 ### Directory builds
 
 - `scripts/build-dist.sh` now builds the Claude plugin directory package (`dist/claude-directory/`) and the ChatGPT app package (`dist/chatgpt/`) from the same skills: `/full` becomes `/mcp`, the per-client install block and the migration page are left out. Manifest and README sources live in `directory/`. The old portable `dist/openai` zip is gone (the portal rejected its auth override)
